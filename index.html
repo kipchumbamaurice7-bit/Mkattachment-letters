@@ -5,7 +5,7 @@
 <style>
 :root{--bg:#eef2f6;--card:#fff;--ink:#12304f;--mut:#566b80;--ac:#1d5fa6;--acd:#154a85;--soft:#e4eefa;--bd:#c7d3e0;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff}
 @media (prefers-color-scheme:dark){:root{--bg:#0e1722;--card:#16222f;--ink:#e6eef7;--mut:#9db0c3;--ac:#6fb0f5;--acd:#8cc2fa;--soft:#1c3250;--bd:#2f4358;--in:#101b27;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#0b1420}}
-@font-face{font-family:"CoverFont";src:url(assets/cover_font.ttf) format("truetype")}
+@font-face{font-family:"CoverFont";src:url(cover_font.ttf) format("truetype")}
 *,*:before,*:after{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
@@ -93,7 +93,7 @@ footer{margin-top:22px;color:var(--mut);font-size:13px}
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg><span>Download attachment letter</span></button></div>
 <div class="pvh" id="pvh">Letter preview</div>
 <div class="pv" id="pv"><div id="sc"><div id="L">
-<img class="h" src="assets/letterhead.png" alt="Rift Valley National Polytechnic letterhead">
+<img class="h" src="letterhead.png" alt="Rift Valley National Polytechnic letterhead">
 <div class="r"><span>ISO 9001:2015 QUALITY MANAGEMENT SYSTEM</span><span>RVNP/QMS/ELEC/ILO18/VOL2</span></div>
 <div class="ln"><b>DATE:</b><span class="fd" style="max-width:330px"></span></div>
 <div class="ln"><b>TO:</b><span class="fd"></span></div>
@@ -107,9 +107,9 @@ footer{margin-top:22px;color:var(--mut);font-size:13px}
 <p class="j" id="pol">The Rift Valley National Polytechnic Liaison centre has arranged for the group personal accident policy number <b id="pnum"></b> from <b id="pins"></b>.</p>
 <p class="j">Your participation in this exercise will be of great service not only to the training and the zone but to the nations as a whole.</p>
 <p class="d">Yours faithfully,</p>
-<div class="sg"><img src="assets/signature.png" alt="ILO stamp and signature"><div style="padding-top:34px"><b>B.K. CHERUIYOT</b><br>HOD-ILO<br>CELL NO 0721-842868</div></div>
+<div class="sg"><img src="signature.png" alt="ILO stamp and signature"><div style="padding-top:34px"><b>B.K. CHERUIYOT</b><br>HOD-ILO<br>CELL NO 0721-842868</div></div>
 <p class="d" style="font-style:italic;font-size:13px;margin:4px 0 0">All correspondences should be made to the HOD INDUSTRIAL LIAISON OFFICER (RVNP)<br>PO BOX 7182-20100 NAKURU</p>
-<img class="ft" src="assets/iso.png" alt="ISO 9001:2015 certified institution">
+<img class="ft" src="iso.png" alt="ISO 9001:2015 certified institution">
 </div></div></div>
 </section>
 
@@ -138,7 +138,7 @@ footer{margin-top:22px;color:var(--mut);font-size:13px}
 /* course key: [course title, % of coursework covered, units] -- loaded from the admin site */
 var C={};
 var SETTINGS={policyNumber:"",insurer:"",policyStart:"2000-01-01",policyEnd:"2000-01-01",issueDate:"2000-01-01"};
-var COVER_BG="assets/cover_bg.jpg";
+var COVER_BG="cover_bg.jpg";
 function api(path,opt){return fetch("/api/"+path,opt).then(function(r){return r.json()})}
 (function(){api("courses").then(function(d){var sel=document.getElementById("co");
  (d.courses||[]).forEach(function(c){C[c.key]=[c.title,c.percent,c.units];var o=document.createElement("option");o.value=c.key;o.textContent=c.title;sel.appendChild(o)});
