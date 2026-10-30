@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RVNP Industrial Attachment Portal</title>
+<style>
+:root{--bg:#eef2f6;--card:#fff;--ink:#12304f;--mut:#566b80;--ac:#1d5fa6;--acd:#154a85;--soft:#e4eefa;--bd:#c7d3e0;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1722;--card:#16222f;--ink:#e6eef7;--mut:#9db0c3;--ac:#6fb0f5;--acd:#8cc2fa;--soft:#1c3250;--bd:#2f4358;--in:#101b27;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#0b1420}}
+@font-face{font-family:"CoverFont";src:url(assets/cover_font.ttf) format("truetype")}
+*,*:before,*:after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 16px 48px}
+header{margin-bottom:22px}
+h1{font-size:28px;line-height:1.2;margin:0 0 6px;font-weight:700;letter-spacing:-.01em}
+header p{margin:0;color:var(--mut);max-width:60ch}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:620px){.tiles{grid-template-columns:1fr}h1{font-size:24px}}
+.tile{display:flex;gap:14px;align-items:center;text-align:left;width:100%;padding:18px;background:var(--card);color:var(--ink);border:2px solid var(--bd);border-radius:14px;cursor:pointer;font:inherit;transition:border-color .15s,background .15s}
+.tile:hover{border-color:var(--ac)}
+.tile[aria-selected="true"]{border-color:var(--ac);background:var(--soft)}
+.tile .ic{flex:none;width:56px;height:56px;border-radius:12px;display:grid;place-items:center;background:var(--soft);color:var(--ac)}
+.tile[aria-selected="true"] .ic{background:var(--ac);color:var(--on)}
+.tile .ic svg{width:30px;height:30px}
+.tile b{display:block;font-size:17px;margin-bottom:2px}
+.tile span.d{display:block;color:var(--mut);font-size:14px;line-height:1.35}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:22px}
+.panel[hidden]{display:none}
+.panel h2{font-size:19px;margin:0 0 4px}
+.panel .lead{margin:0 0 18px;color:var(--mut);font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+input,select{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--in);color:var(--ink);font:inherit}
+select{appearance:auto}
+.hint{font-size:13px;color:var(--mut);margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border:0;border-radius:10px;background:var(--ac);color:var(--on);font-weight:600;font-size:16px;font-family:inherit;cursor:pointer}
+.btn:hover{background:var(--acd)}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn svg{width:20px;height:20px}
+.msg{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:15px}
+.msg:empty{display:none}
+.msg.err{background:var(--erb);color:var(--er)}
+.msg.ok{background:var(--okb);color:var(--ok)}
+.msg.info{background:var(--soft);color:var(--ink)}
+.actions{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pvh{margin:22px 0 8px;font-weight:600;font-size:14px;color:var(--mut)}
+.pv{overflow:hidden;border:1px solid var(--bd);border-radius:10px;background:#97BFEB}
+footer{margin-top:22px;color:var(--mut);font-size:13px}
+/* letter (A4 at 794x1123) */
+#L{width:794px;height:1123px;background:#97BFEB;color:#000;font:14.67px/1.42 Arial,Helvetica,sans-serif;position:relative;transform-origin:top left;padding:20px 76px 0}
+#L .h{display:block;margin:0 auto 8px;width:640px}#L .ft{position:absolute;bottom:26px;left:232px;width:330px}
+#L .r{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;margin:8px 0 14px}
+#L .d{margin:0 0 8px}#L .j{text-align:justify;margin:0 0 8px}
+#L .ln{display:flex;align-items:flex-end;gap:6px;margin:0 0 9px}
+#L .fd{flex:1;border-bottom:1.5px dotted #000;min-height:20px;padding:0 4px;font-weight:400}
+#L .sg{position:relative;margin-top:6px;height:92px}#L .sg img{position:absolute;left:92px;top:-2px;width:205px}
+#L .sg div{position:relative}
+</style></head><body>
+<div class="wrap">
+<header>
+<h1>Industrial Attachment Portal</h1>
+<p>The Rift Valley National Polytechnic, Electrical Department. Download your attachment letter and your insurance cover.</p>
+</header>
+
+<div class="tiles" role="tablist" aria-label="Choose a document">
+<button class="tile" id="tl-letter" role="tab" aria-selected="true" aria-controls="p-letter" type="button">
+<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></span>
+<span><b>Attachment letter</b><span class="d">Pick your course and download your letter.</span></span></button>
+<button class="tile" id="tl-ins" role="tab" aria-selected="false" aria-controls="p-ins" type="button">
+<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg></span>
+<span><b>Insurance cover</b><span class="d">Download your personal accident cover.</span></span></button>
+</div>
+
+<section class="panel" id="p-letter" role="tabpanel" aria-labelledby="tl-letter">
+<h2>Attachment letter</h2>
+<p class="lead">Fill in your details exactly as you want them on the letter.</p>
+<div class="grid">
+<div class="full"><label for="co">Course</label>
+<select id="co"><option value="">Select your course</option></select></div>
+<div class="full"><label for="pr">Period of attachment</label>
+<select id="pr"><option value="">Select the period</option></select></div>
+<div class="full"><label for="ln">Full name</label><input id="ln" autocomplete="name" placeholder="e.g. KABIRU ELIUD GATHUTHI"></div>
+<div class="full"><label for="la">Admission number</label><input id="la" autocomplete="off" placeholder="e.g. EIL4/26J/306761">
+<div class="hint">Enter your full admission number, as on your student ID.</div></div>
+<div><label for="lt">Telephone number</label><input id="lt" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XX XXX XXX"></div>
+<div><label for="le">Email address</label><input id="le" type="email" autocomplete="email" placeholder="you@example.com"></div>
+</div>
+<div class="msg" id="lm" role="status"></div>
+<div class="actions"><button class="btn" id="ld" type="button">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg><span>Download attachment letter</span></button></div>
+<div class="pvh" id="pvh">Letter preview</div>
+<div class="pv" id="pv"><div id="sc"><div id="L">
+<img class="h" src="assets/letterhead.png" alt="Rift Valley National Polytechnic letterhead">
+<div class="r"><span>ISO 9001:2015 QUALITY MANAGEMENT SYSTEM</span><span>RVNP/QMS/ELEC/ILO18/VOL2</span></div>
+<div class="ln"><b>DATE:</b><span class="fd" style="max-width:330px"></span></div>
+<div class="ln"><b>TO:</b><span class="fd"></span></div>
+<p class="d"><b><u>RE: REQUEST FOR INDUSTRIAL ATTACHMENT</u></b></p>
+<p class="d">Dear Sir/Madam,</p>
+<div class="ln"><b>Name:</b><span class="fd" id="pn" style="flex:1.5"></span><b>Adm No.:</b><span class="fd" id="pa"></span></div>
+<div class="ln"><b>Tel No.:</b><span class="fd" id="pt"></span><b>Email address:</b><span class="fd" id="pe" style="flex:1.4"></span></div>
+<p class="j">The above-named student is a Bonafide trainee of The Rift Valley National Polytechnic undertaking <b id="pc"></b></p>
+<p class="j">So far, he/she has covered <span id="pp"></span>% of his/her coursework and has acquired skills in the following units: <b id="pu"></b></p>
+<p class="j">To supplement the college tuition, the course demands that a trainee gets field practical exposure in a related firm like yours for a period of four (4) months. It is in this respect that we kindly request you to assist in attaching him/her for the period <b id="pd"></b>.</p>
+<p class="j" id="pol">The Rift Valley National Polytechnic Liaison centre has arranged for the group personal accident policy number <b id="pnum"></b> from <b id="pins"></b>.</p>
+<p class="j">Your participation in this exercise will be of great service not only to the training and the zone but to the nations as a whole.</p>
+<p class="d">Yours faithfully,</p>
+<div class="sg"><img src="assets/signature.png" alt="ILO stamp and signature"><div style="padding-top:34px"><b>B.K. CHERUIYOT</b><br>HOD-ILO<br>CELL NO 0721-842868</div></div>
+<p class="d" style="font-style:italic;font-size:13px;margin:4px 0 0">All correspondences should be made to the HOD INDUSTRIAL LIAISON OFFICER (RVNP)<br>PO BOX 7182-20100 NAKURU</p>
+<img class="ft" src="assets/iso.png" alt="ISO 9001:2015 certified institution">
+</div></div></div>
+</section>
+
+<section class="panel" id="p-ins" role="tabpanel" aria-labelledby="tl-ins" hidden>
+<h2>Insurance cover</h2>
+<p class="lead">Enter your name and admission number exactly as they appear on your insurance cover.</p>
+<div class="grid">
+<div class="full"><label for="in">Full name</label><input id="in" autocomplete="name" placeholder="e.g. KABIRU ELIUD GATHUTHI"></div>
+<div class="full"><label for="ia">Admission number</label><input id="ia" autocomplete="off" placeholder="e.g. EIL4/26J/306761"></div>
+</div>
+<div class="msg" id="im" role="status"></div>
+<div class="actions">
+<button class="btn" id="if" type="button"><span>Find my cover</span></button>
+<button class="btn" id="id" type="button" hidden>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg><span>Download insurance cover</span></button>
+</div>
+</section>
+
+<footer>Group personal accident cover. Problems with your details? See the Industrial Liaison Office.</footer>
+</div>
+
+<form name="attachment-log" data-netlify="true" hidden><input name="document"><input name="insurance"><input name="name"><input name="admission"><input name="course"><input name="tel"><input name="email"></form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* course key: [course title, % of coursework covered, units] -- loaded from the admin site */
+var C={};
+var SETTINGS={policyNumber:"",insurer:"",policyStart:"2000-01-01",policyEnd:"2000-01-01",issueDate:"2000-01-01"};
+var COVER_BG="assets/cover_bg.jpg";
+function api(path,opt){return fetch("/api/"+path,opt).then(function(r){return r.json()})}
+(function(){api("courses").then(function(d){var sel=document.getElementById("co");
+ (d.courses||[]).forEach(function(c){C[c.key]=[c.title,c.percent,c.units];var o=document.createElement("option");o.value=c.key;o.textContent=c.title;sel.appendChild(o)});
+ render()}).catch(function(){var m=document.getElementById("lm");m.className="msg err";m.textContent="Could not load the course list. Check your connection and refresh the page."})})();
+var $=function(i){return document.getElementById(i)},te=new TextEncoder();
+function list(a){return a.length<2?a.join("")+".":a.length===2?a[0]+" and "+a[1]+".":a.slice(0,-1).join(", ")+", and "+a[a.length-1]+"."}
+function cleanName(n){return n.toUpperCase().split(/\s+/).filter(Boolean).join(" ")}
+function cleanAdm(a){return a.toUpperCase().replace(/\s+/g,"")}
+/* asks the server whether this student has a cover on file; returns their record or false */
+async function inList(name,adm){
+ try{var d=await api("lookup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:name,adm:adm})});
+  if(!d.found)return false;SETTINGS=d.settings;return d.record}catch(x){return false}}
+function ord(n){var s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
+var MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function fmtDate(iso){var p=iso.split("-");return{d:+p[2],m:MON[+p[1]-1],y:p[0]}}
+function dmy(iso){var p=iso.split("-");return p[2]+"/"+p[1]+"/"+p[0]}
+/* attachment periods: every four-month block that has not ended yet, this year and the next three */
+(function(){var now=new Date(),y0=now.getFullYear(),sel=$("pr"),blocks=[[0,3],[4,7],[8,11]];
+ for(var y=y0;y<=y0+3;y++)blocks.forEach(function(b){
+  if(new Date(y,b[1]+1,0,23,59)<now)return;
+  var t=MON[b[0]].toUpperCase()+" to "+MON[b[1]].toUpperCase()+" "+y,o=document.createElement("option");o.value=t;o.textContent=t;sel.appendChild(o)})})();
+function save(bl,fn){var u=URL.createObjectURL(bl),k=document.createElement("a");k.href=u;k.download=fn;document.body.appendChild(k);k.click();k.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)}
+function say(id,cls,t){var m=$(id);m.className="msg"+(cls?" "+cls:"");m.textContent=t||""}
+function busy(b,on,t){b.disabled=on;b.querySelector("span").textContent=on?"Preparing\u2026":t}
+function log(doc,ins,nm,ad,co,tl,em){try{var d=new URLSearchParams({"form-name":"attachment-log",document:doc,insurance:ins,name:nm,admission:ad,course:co,tel:tl,email:em});fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:d.toString()}).catch(function(){})}catch(x){}}
+
+/* tabs */
+function tab(w){var l=w==="l";$("tl-letter").setAttribute("aria-selected",l);$("tl-ins").setAttribute("aria-selected",!l);$("p-letter").hidden=!l;$("p-ins").hidden=l;if(l)fit()}
+$("tl-letter").onclick=function(){tab("l")};$("tl-ins").onclick=function(){tab("i")};
+
+/* ---------- attachment letter ---------- */
+var insured=false,seq=0;
+function fit(){var pv=$("pv"),w=pv.clientWidth,s=Math.min(1,w/794);$("L").style.transform="scale("+s+")";$("sc").style.width="794px";pv.style.height=(1123*s)+"px"}
+window.addEventListener("resize",fit);
+function render(){
+ var t=C[$("co").value];
+ $("pn").textContent=cleanName($("ln").value);$("pa").textContent=cleanAdm($("la").value);
+ $("pt").textContent=$("lt").value.trim();$("pe").textContent=$("le").value.trim();
+ if(t){$("pc").textContent=t[0]+".";$("pp").textContent=t[1];$("pu").textContent=list(t[2])}
+ else{$("pc").textContent="";$("pp").textContent="";$("pu").textContent=""}
+ $("pd").textContent=$("pr").value;$("pnum").textContent=SETTINGS.policyNumber;$("pins").textContent=SETTINGS.insurer;
+ $("pol").style.display=insured?"":"none";fit();
+}
+var timer;
+function check(){
+ clearTimeout(timer);
+ timer=setTimeout(async function(){
+  var n=$("ln").value.trim(),a=$("la").value.trim(),my=++seq;
+  if(n.length<3||a.length<6){insured=false;render();return}
+  var r=await inList(n,a);if(my!==seq)return;
+  insured=!!r;render();
+ },450);
+}
+["co","pr","ln","la","lt","le"].forEach(function(i){$(i).addEventListener("input",function(){render();if(i==="ln"||i==="la")check()});$(i).addEventListener("change",render)});
+render();
+$("ld").addEventListener("click",async function(){
+ var c=$("co").value,n=cleanName($("ln").value),a=cleanAdm($("la").value),t=$("lt").value.replace(/[\s-]/g,""),e=$("le").value.trim();
+ say("lm","");
+ if(!c){say("lm","err","Select your course.");return}
+ if(!$("pr").value){say("lm","err","Select the period of attachment.");return}
+ if(n.length<3){say("lm","err","Enter your full name.");return}
+ if(a.length<6){say("lm","err","Enter your full admission number.");return}
+ if(!t||!/^(\+?254|0)?\d{9,10}$/.test(t)){say("lm","err","Enter a valid telephone number.");return}
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){say("lm","err","Enter a valid email address.");return}
+ if(!window.html2canvas||!window.jspdf){say("lm","err","The PDF tools did not load. Check your internet connection and try again.");return}
+ var b=this;busy(b,true);
+ try{
+  var r=await inList(n,a);insured=!!r;render();
+  var h=document.createElement("div");h.style.cssText="position:fixed;left:-10000px;top:0";
+  var cl=$("L").cloneNode(true);cl.removeAttribute("id");cl.style.transform="none";h.appendChild(cl);document.body.appendChild(h);
+  var cv=await html2canvas(cl,{scale:2,useCORS:true,backgroundColor:"#97BFEB",width:794,height:1123});document.body.removeChild(h);
+  var pd=new window.jspdf.jsPDF({unit:"mm",format:"a4"});pd.addImage(cv.toDataURL("image/jpeg",0.92),"JPEG",0,0,210,297);
+  save(pd.output("blob"),"Attachment_Letter_"+a.replace(/[^A-Za-z0-9]+/g,"_")+".pdf");
+  log("attachment letter",insured?"cover on file":"no cover on file",n,a,C[c][0]+" / "+$("pr").value,t,e);
+  say("lm","ok",insured?"Your letter has downloaded. It includes your insurance policy details. You can also download your insurance cover from the Insurance cover tab.":"Your letter has downloaded.");
+ }catch(x){say("lm","err","Could not create the letter. Please try again.")}
+ busy(b,false,"Download attachment letter");
+});
+
+/* ---------- insurance cover ---------- */
+var INS=null;
+function loadImg(src){return new Promise(function(ok,no){var i=new Image();i.onload=function(){ok(i)};i.onerror=no;i.src=src})}
+/* draws the First Assurance cover: fixed layout image + this student's details */
+async function makeCover(rec){
+ await document.fonts.load('11px CoverFont');
+ var S=3,W=595.32,H=841.92,img=await loadImg(COVER_BG),cv=document.createElement("canvas");
+ cv.width=Math.round(W*S);cv.height=Math.round(H*S);
+ var x=cv.getContext("2d");x.drawImage(img,0,0,cv.width,cv.height);x.scale(S,S);
+ x.fillStyle="#000";x.textBaseline="alphabetic";x.font="11px CoverFont";
+ var d=fmtDate(SETTINGS.issueDate),px=56.64,sf=ord(d.d).replace(/^\d+/,"");
+ x.fillText(String(d.d),px,107.4);px+=x.measureText(String(d.d)).width;
+ x.font="7px CoverFont";x.fillText(sf,px,103.5);px+=x.measureText(sf).width;
+ x.font="11px CoverFont";x.fillText(" "+d.m+","+d.y,px,107.4);
+ var vx=186.3;
+ x.fillText(rec.n.toUpperCase(),vx,246.0);
+ x.fillText(SETTINGS.policyNumber,vx,267.9);
+ x.fillText(rec.a,vx,289.9);
+ x.fillText(rec.c,vx,338.9);
+ x.fillText(dmy(SETTINGS.policyStart)+"-"+dmy(SETTINGS.policyEnd),vx,360.8);
+ var pd=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
+ pd.addImage(cv.toDataURL("image/jpeg",0.93),"JPEG",0,0,210,297);
+ return pd.output("blob");
+}
+$("if").addEventListener("click",async function(){
+ var n=$("in").value.trim(),a=$("ia").value.trim();INS=null;$("id").hidden=true;say("im","");
+ if(n.length<3||a.length<6){say("im","err","Enter your full name and full admission number.");return}
+  var b=this;busy(b,true);
+ var r=false;try{r=await inList(n,a)}catch(x){}
+ busy(b,false,"Find my cover");
+ if(!r){say("im","err","No insurance cover found for these details. Check that your name and admission number match your cover. If they do, your cover has not been added yet. Please see the Industrial Liaison Office.");return}
+ INS={r:r};
+ say("im","ok","Cover found for "+r.n.toUpperCase()+".");$("id").hidden=false;
+});
+["in","ia"].forEach(function(i){$(i).addEventListener("input",function(){INS=null;$("id").hidden=true;say("im","")})});
+$("id").addEventListener("click",async function(){
+ if(!INS)return;var b=this;busy(b,true);
+ try{
+  if(!window.jspdf)throw 0;
+  save(await makeCover(INS.r),"Insurance_Cover_"+INS.r.a.replace(/[^A-Za-z0-9]+/g,"_")+".pdf");
+  log("insurance cover","cover on file",INS.r.n,INS.r.a,INS.r.c,"","");
+ }catch(x){say("im","err","Could not create the insurance cover. Check your connection and try again.")}
+ busy(b,false,"Download insurance cover");
+});
+window.addEventListener("load",fit);
+</script>
+</body></html>

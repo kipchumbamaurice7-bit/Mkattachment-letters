@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>RVNP Portal Admin</title>
+<style>
+:root{--bg:#eef2f6;--card:#fff;--ink:#12304f;--mut:#566b80;--ac:#1d5fa6;--acd:#154a85;--soft:#e4eefa;--bd:#c7d3e0;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1722;--card:#16222f;--ink:#e6eef7;--mut:#9db0c3;--ac:#6fb0f5;--acd:#8cc2fa;--soft:#1c3250;--bd:#2f4358;--in:#101b27;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#0b1420}}
+*,*:before,*:after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:0 0 4px}h3{font-size:16px;margin:0 0 8px}
+.lead{color:var(--mut);margin:0 0 16px;font-size:15px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.tabs{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:11px 18px;border:2px solid var(--bd);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.tab[aria-selected="true"]{border-color:var(--ac);background:var(--soft)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
+input,select,textarea{width:100%;min-height:44px;padding:9px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--in);color:var(--ink);font:inherit}
+textarea{min-height:150px;resize:vertical;line-height:1.4}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 18px;border:0;border-radius:10px;background:var(--ac);color:var(--on);font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--acd)}.btn:disabled{opacity:.6;cursor:wait}
+.btn.sec{background:var(--soft);color:var(--ink);border:1px solid var(--bd)}
+.btn.del{background:var(--erb);color:var(--er);min-height:34px;padding:4px 12px;font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.msg{margin-top:12px;padding:10px 13px;border-radius:9px;font-size:15px}.msg:empty{display:none}
+.msg.err{background:var(--erb);color:var(--er)}.msg.ok{background:var(--okb);color:var(--ok)}.msg.info{background:var(--soft)}
+.hint{font-size:13px;color:var(--mut);margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--card)}
+.scroll{max-height:420px;overflow:auto;border:1px solid var(--bd);border-radius:10px;margin-top:10px}
+.course{border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px;background:var(--bg)}
+.radio{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}.radio label{font-weight:400;display:flex;gap:6px;align-items:center;margin:0}.radio input{width:auto;min-height:0}
+.badge{display:inline-block;background:var(--soft);padding:2px 10px;border-radius:99px;font-size:13px;font-weight:600}
+</style></head><body>
+<div class="wrap">
+
+<section id="login" class="card" style="max-width:420px;margin:60px auto">
+<h1>Portal admin</h1>
+<p class="lead">RVNP Industrial Attachment Portal</p>
+<label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
+<div class="row"><button class="btn" id="go">Sign in</button></div>
+<div class="msg" id="lg"></div>
+</section>
+
+<div id="app" hidden>
+<div class="top">
+<div><h1>Portal admin</h1><p class="lead" style="margin:0">Changes here show on the student link straight away. No rebuilding or re-uploading.</p></div>
+<div class="row" style="margin:0"><a class="btn sec" href="/" target="_blank" rel="noopener">Open student page</a><button class="btn sec" id="out">Sign out</button></div>
+</div>
+<div class="card">
+<h2>Student link</h2>
+<p class="lead">Share this link with students. It opens the attachment letter and insurance cover page.</p>
+<input id="sl" readonly onclick="this.select()">
+<div class="row"><button class="btn" id="cp">Copy link</button><a class="btn sec" id="wa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
+<div class="msg" id="ml"></div>
+</div>
+
+
+<div class="tabs" role="tablist">
+<button class="tab" id="t-ins" role="tab" aria-selected="true">Insurance covers</button>
+<button class="tab" id="t-let" role="tab" aria-selected="false">Attachment letters</button>
+</div>
+
+<!-- INSURANCE -->
+<div id="s-ins">
+<div class="card">
+<h2>Policy details</h2>
+<p class="lead">Printed on every insurance cover and on the letters of students who have a cover.</p>
+<div class="grid">
+<div><label for="pn">Policy number</label><input id="pn"></div>
+<div><label for="pi">Insurer</label><input id="pi"></div>
+<div><label for="ps">Policy start date</label><input id="ps" type="date"></div>
+<div><label for="pe">Policy end date</label><input id="pe" type="date"></div>
+<div><label for="pd">Cover issue date</label><input id="pd" type="date"></div>
+</div>
+<div class="row"><button class="btn" id="sp">Save policy details</button></div>
+<div class="msg" id="mp"></div>
+</div>
+
+<div class="card">
+<h2>Upload students with insurance</h2>
+<p class="lead">Upload your Excel (.xlsx) or CSV list. Columns: <b>Class code</b>, <b>Student name</b>, <b>Admission number</b>. Your current database file works as it is. A student can download a cover only if they are on this list.</p>
+<input id="file" type="file" accept=".xlsx,.xls,.csv">
+<div class="radio">
+<label><input type="radio" name="mode" value="merge" checked> Add new students and update existing ones</label>
+<label><input type="radio" name="mode" value="replace"> Replace the whole list with this file</label>
+</div>
+<div class="row"><button class="btn" id="up" disabled>Upload list</button></div>
+<div class="msg" id="mu"></div>
+</div>
+
+<div class="card">
+<h2>Students with a cover <span class="badge" id="cnt">0</span></h2>
+<h3 style="margin-top:14px">Add one student</h3>
+<div class="grid" style="grid-template-columns:1fr 2fr 2fr auto;align-items:end">
+<div><label for="ac">Class code</label><input id="ac" placeholder="DEET-25-J-RS2"></div>
+<div><label for="an">Student name</label><input id="an"></div>
+<div><label for="aa">Admission number</label><input id="aa"></div>
+<div><button class="btn" id="add">Add</button></div>
+</div>
+<div class="msg" id="ma"></div>
+<div class="row"><input id="q" placeholder="Search name, admission number or class" style="max-width:340px"><button class="btn sec" id="csv">Download list (CSV)</button></div>
+<div class="scroll"><table><thead><tr><th>Class</th><th>Name</th><th>Admission no.</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+</div>
+
+<!-- LETTERS -->
+<div id="s-let" hidden>
+<div class="card">
+<h2>Courses on the attachment letter</h2>
+<p class="lead">Each course below appears in the student's course list. The letter text, layout, signature and stamp stay exactly as they are; only the course title, the percentage covered and the list of units change. Attachment periods (e.g. JANUARY to APRIL 2027) are generated automatically.</p>
+<div id="courses"></div>
+<div class="row"><button class="btn sec" id="addc">+ Add a course</button><button class="btn" id="sc">Save courses</button></div>
+<div class="msg" id="mc"></div>
+</div>
+</div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+var $=function(i){return document.getElementById(i)},TOKEN=sessionStorage.getItem("rvnp_admin"),D=null,ROWS=null;
+function say(id,cls,t){var m=$(id);m.className="msg"+(cls?" "+cls:"");m.textContent=t||""}
+async function call(method,path,body){
+ var r=await fetch("/api/"+path,{method:method,headers:{"Content-Type":"application/json",Authorization:"Bearer "+(TOKEN||"")},body:body?JSON.stringify(body):undefined});
+ var d=await r.json().catch(function(){return{error:"Unexpected response"}});
+ if(r.status===401&&path!=="login"){signOut();throw new Error("Please sign in again.")}
+ if(!r.ok)throw new Error(d.error||"Something went wrong");return d}
+function signOut(){TOKEN=null;sessionStorage.removeItem("rvnp_admin");$("app").hidden=true;$("login").hidden=false}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+/* login */
+async function login(){
+ say("lg","");$("go").disabled=true;
+ try{var d=await call("POST","login",{password:$("pw").value});TOKEN=d.token;sessionStorage.setItem("rvnp_admin",TOKEN);await start()}
+ catch(e){say("lg","err",e.message)}$("go").disabled=false}
+$("go").onclick=login;$("pw").addEventListener("keydown",function(e){if(e.key==="Enter")login()});
+$("out").onclick=signOut;
+
+async function start(){
+ D=await call("GET","admin/data");$("login").hidden=true;$("app").hidden=false;
+ var s=D.settings;$("pn").value=s.policyNumber;$("pi").value=s.insurer;$("ps").value=s.policyStart;$("pe").value=s.policyEnd;$("pd").value=s.issueDate;
+ drawStudents();drawCourses()}
+if(TOKEN)start().catch(function(){signOut()});
+
+/* tabs */
+function tab(w){var i=w==="i";$("t-ins").setAttribute("aria-selected",i);$("t-let").setAttribute("aria-selected",!i);$("s-ins").hidden=!i;$("s-let").hidden=i}
+$("t-ins").onclick=function(){tab("i")};$("t-let").onclick=function(){tab("l")};
+
+/* policy */
+$("sp").onclick=async function(){say("mp","");try{
+ var d=await call("PUT","admin/settings",{policyNumber:$("pn").value,insurer:$("pi").value,policyStart:$("ps").value,policyEnd:$("pe").value,issueDate:$("pd").value});
+ D.settings=d.settings;say("mp","ok","Saved. New covers and letters use these details immediately.")}catch(e){say("mp","err",e.message)}};
+
+/* students */
+function drawStudents(){
+ var q=$("q").value.trim().toUpperCase(),list=D.students.slice().sort(function(a,b){return (a.c+a.n).localeCompare(b.c+b.n)});
+ $("cnt").textContent=D.students.length;
+ var shown=list.filter(function(r){return !q||(r.n+" "+r.a+" "+r.c).toUpperCase().indexOf(q)>=0}).slice(0,500);
+ $("tb").innerHTML=shown.map(function(r){return "<tr><td>"+esc(r.c)+"</td><td>"+esc(r.n)+"</td><td>"+esc(r.a)+"</td><td><button class=\"btn del\" data-id=\""+r.id+"\">Remove</button></td></tr>"}).join("")||"<tr><td colspan=4>No students.</td></tr>"}
+$("q").oninput=drawStudents;
+$("tb").onclick=async function(e){var id=e.target.getAttribute("data-id");if(!id)return;
+ var r=D.students.find(function(x){return x.id===id});if(!confirm("Remove "+r.n+" ("+r.a+")? They will no longer be able to download a cover."))return;
+ try{await call("DELETE","admin/students/"+id);D.students=D.students.filter(function(x){return x.id!==id});drawStudents()}catch(x){say("ma","err",x.message)}};
+$("add").onclick=async function(){say("ma","");try{
+ var d=await call("POST","admin/students",{mode:"merge",rows:[{c:$("ac").value,n:$("an").value,a:$("aa").value}]});
+ if(d.skipped)throw new Error("Enter the student name and admission number.");
+ D=await call("GET","admin/data");drawStudents();say("ma","ok","Student added.");$("ac").value=$("an").value=$("aa").value=""}catch(e){say("ma","err",e.message)}};
+$("csv").onclick=function(){var l=["Class code,Student name,Admission number"].concat(D.students.map(function(r){return [r.c,r.n,r.a].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(",")}));
+ var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([l.join("\n")],{type:"text/csv"}));a.download="students_with_cover.csv";a.click()};
+
+/* file upload (Excel / CSV) */
+function pick(o,names){var k=Object.keys(o).find(function(x){return names.indexOf(x.toLowerCase().replace(/[^a-z]/g,""))>=0});return k?String(o[k]).trim():""}
+$("file").onchange=async function(){
+ ROWS=null;$("up").disabled=true;say("mu","");var f=this.files[0];if(!f)return;
+ if(!window.XLSX){say("mu","err","The spreadsheet reader did not load. Check your connection and try again.");return}
+ try{var wb=XLSX.read(await f.arrayBuffer(),{type:"array"});
+  var sh=wb.Sheets["Students"]||wb.Sheets[wb.SheetNames[0]];
+  var raw=XLSX.utils.sheet_to_json(sh,{defval:"",raw:false});
+  ROWS=raw.map(function(o){return{c:pick(o,["classcode","class"]),n:pick(o,["studentname","name","fullname"]),a:pick(o,["admissionnumber","admissionno","admno","admission"])}}).filter(function(r){return r.n&&r.a});
+  if(!ROWS.length){ROWS=null;say("mu","err","No students found. Check the column names: Class code, Student name, Admission number.");return}
+  say("mu","info","Found "+ROWS.length+" students in the file. Click Upload list to save them.");$("up").disabled=false
+ }catch(e){say("mu","err","Could not read that file.")}};
+$("up").onclick=async function(){if(!ROWS)return;
+ var mode=document.querySelector("input[name=mode]:checked").value;
+ if(mode==="replace"&&!confirm("Replace the whole list with this file? Students not in the file will lose access to their cover."))return;
+ this.disabled=true;try{var d=await call("POST","admin/students",{mode:mode,rows:ROWS});
+  D=await call("GET","admin/data");drawStudents();ROWS=null;$("file").value="";
+  say("mu","ok","Done. Added "+d.added+", updated "+d.updated+(d.skipped?", skipped "+d.skipped+" incomplete rows":"")+". "+d.total+" students now have a cover.")}
+ catch(e){say("mu","err",e.message);this.disabled=false}};
+
+/* courses */
+function drawCourses(){
+ $("courses").innerHTML=D.courses.map(function(c,i){return '<div class="course" data-i="'+i+'"><div class="grid">'+
+  '<div class="full"><label>Course title</label><input class="ct" value="'+esc(c.title)+'"></div>'+
+  '<div><label>Coursework covered so far (%)</label><input class="cp" type="number" min="0" max="100" value="'+esc(c.percent)+'"></div><div></div>'+
+  '<div class="full"><label>Units covered (one per line)</label><textarea class="cu">'+esc(c.units.join("\n"))+'</textarea>'+
+  '<div class="hint">Appears on the letter as: "...has acquired skills in the following units: ..."</div></div></div>'+
+  '<div class="row"><button class="btn del" data-rm="'+i+'">Remove this course</button></div></div>'}).join("")}
+function readCourses(){return Array.prototype.map.call(document.querySelectorAll(".course"),function(el){var i=+el.getAttribute("data-i"),old=D.courses[i]||{};
+ return{key:old.key||"",title:el.querySelector(".ct").value,percent:el.querySelector(".cp").value,units:el.querySelector(".cu").value.split("\n")}})}
+$("addc").onclick=function(){D.courses=readCourses();D.courses.push({key:"",title:"",percent:100,units:[]});drawCourses()};
+$("courses").onclick=function(e){var i=e.target.getAttribute("data-rm");if(i===null)return;
+ if(!confirm("Remove this course from the student list?"))return;D.courses=readCourses();D.courses.splice(+i,1);drawCourses()};
+$("sc").onclick=async function(){say("mc","");try{
+ var d=await call("PUT","admin/courses",{courses:readCourses()});D.courses=d.courses;drawCourses();say("mc","ok","Saved. Students see the updated course list now.")}catch(e){say("mc","err",e.message)}};
+
+/* share link */
+(function(){var u=location.origin+"/";$("sl").value=u;
+ $("wa").href="https://wa.me/?text="+encodeURIComponent("Download your industrial attachment letter and insurance cover here: "+u);
+ $("cp").onclick=function(){var done=function(){say("ml","ok","Link copied.")};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done,function(){$("sl").select();document.execCommand("copy");done()});
+  else{$("sl").select();document.execCommand("copy");done()}}})();
+</script>
+</body></html>
