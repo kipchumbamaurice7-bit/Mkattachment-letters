@@ -152,7 +152,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <h2>Student marks</h2>
 <p class="lead">See and download the marks of the students in your department, class by class. Classes where some students have no marks yet are shown clearly. Your approved department account is used automatically. Choose a class to view its marks, edit the whole class, or search by student name/admission number.</p>
 <div id="mkgate"><p class="hint">Your approved department account is used automatically.</p><div class="actions"><button class="btn" id="mgo" type="button">Open marks</button></div></div>
-<div id="mkbox"></div>
+<div id="mkbox"></div><div id="v2box" style="margin-top:14px"></div>
 </section>
 <div class="actions" style="justify-content:center"><button class="btn sec" id="signout" type="button">Sign out</button></div><footer>Your submission goes to the Industrial Liaison Office for approval. It does not change student letters until approved.</footer>
 </div>
@@ -235,8 +235,8 @@ $("irf").onclick=loadIR; loadIR();
  var mk=null;
  $("mgo").onclick=function(){
   $("mkgate").hidden=true;
-  mk=RVMarks.mount($("mkbox"),{role:"rep",headers:function(){return{"Authorization":"Bearer "+USER_TOKEN}},onAuthFail:function(){location.replace("/auth.html?role=staff")}})
+  mk=RVMarks.mount($("mkbox"),{role:"rep",headers:function(){return{"Authorization":"Bearer "+USER_TOKEN}},onAuthFail:function(){location.replace("/auth.html?role=staff")}});RVV2.mount($("v2box"),{role:"rep",headers:function(){return{"Authorization":"Bearer "+USER_TOKEN}},onAuthFail:function(){location.replace("/auth.html?role=staff")}})
  }})();
 $("signout").onclick=function(){sessionStorage.removeItem("rvnp_user");sessionStorage.removeItem("rvnp_user_role");location.href="/auth.html?role=staff"};
-</script><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="/marks.js"></script><script src="/pwa.js" defer></script>
+</script><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="/marks.js"></script><script src="/portal-v2.js"></script><script src="/pwa.js" defer></script>
 </body></html>

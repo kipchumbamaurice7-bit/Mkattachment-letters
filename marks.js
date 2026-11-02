@@ -1,7 +1,7 @@
 /* RVNP marks panel: view, upload (admin/HOD) and download marks per class, per department, or everything.
    RVMarks.mount(el, {headers:fn, role:"admin"|"hod"|"rep", dept:"", onAuthFail:fn}) */
 (function () {
-  var NOTE = "Not yet submitted";
+  var NOTE = "Pending";
   function esc(v) { return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function stats(g) {
     var n = g.students.length, got = g.students.filter(function (s) { return s.m != null; });
@@ -18,28 +18,28 @@
   function sumRows(classes) {
     return classes.map(function (g) { var s = stats(g); return [g.dept, g.c, s.n, s.got, s.miss, s.rate / 100, s.avg == null ? "" : s.avg / 100, s.hi == null ? "" : s.hi / 100, s.lo == null ? "" : s.lo / 100]; });
   }
-  var SUMHEAD = ["Department", "Class", "Students in database", "Marks received", "Marks missing", "% of class with marks", "Average %", "Highest %", "Lowest %"];
+  var SUMHEAD = ["Department", "Class", "Placed students", "Marks received", "Marks missing", "% of class with marks", "Average %", "Highest %", "Lowest %"];
   function pctFmt(ws, cols, from, to) {
     for (var r = from; r <= to; r++) cols.forEach(function (c) { var a = XLSX.utils.encode_cell({ r: r, c: c }); if (ws[a] && typeof ws[a].v === "number") ws[a].z = "0.0%"; });
   }
   function classSheet(g) {
     var s = stats(g), rows = [
       ["Class", g.c], ["Department", g.dept],
-      ["Students in database", s.n], ["Marks received", s.got + " of " + s.n + " (" + s.rate + "%)"], ["Marks missing", s.miss],
+      ["Placed students", s.n], ["Marks received", s.got + " of " + s.n + " (" + s.rate + "%)"], ["Marks missing", s.miss],
       ["Class average %", s.avg == null ? "" : s.avg / 100], [],
-      ["No.", "Student name", "Admission number", "Marks", "Out of", "Percentage", "Status"]];
-    g.students.forEach(function (x, i) { rows.push([i + 1, x.n, x.a, x.m == null ? "" : x.m, x.o == null ? "" : x.o, x.pct == null ? "" : x.pct / 100, x.m == null ? NOTE.toUpperCase() : "Marked"]); });
+      ["No.", "Student name", "Admission number", "Class", "Course", "Score (out of 100)", "Date recorded", "Status"]];
+    g.students.forEach(function (x, i) { rows.push([i + 1, x.n, x.a, g.c, x.course || "", x.m == null ? "" : x.m, x.u ? new Date(x.u).toLocaleDateString("en-GB") : "", x.m == null ? NOTE.toUpperCase() : "Marked"]); });
     var ws = XLSX.utils.aoa_to_sheet(rows);
-    ws["!cols"] = [{ wch: 20 }, { wch: 34 }, { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 22 }];
-    pctFmt(ws, [5], 5, rows.length); ws["B6"] && (ws["B6"].z = "0.0%");
+    ws["!cols"] = [{ wch: 8 }, { wch: 34 }, { wch: 20 }, { wch: 16 }, { wch: 30 }, { wch: 16 }, { wch: 14 }, { wch: 22 }];
+    ws["B6"] && (ws["B6"].z = "0.0%");
     return ws;
   }
   function flatSheet(classes) {
-    var rows = [["Department", "Class", "Student name", "Admission number", "Marks", "Out of", "Percentage", "Status"]];
-    classes.forEach(function (g) { g.students.forEach(function (x) { rows.push([g.dept, g.c, x.n, x.a, x.m == null ? "" : x.m, x.o == null ? "" : x.o, x.pct == null ? "" : x.pct / 100, x.m == null ? NOTE.toUpperCase() : "Marked"]); }); });
+    var rows = [["Department", "Class", "Course", "Student name", "Admission number", "Score (out of 100)", "Date recorded", "Status"]];
+    classes.forEach(function (g) { g.students.forEach(function (x) { rows.push([g.dept, g.c, x.course || "", x.n, x.a, x.m == null ? "" : x.m, x.u ? new Date(x.u).toLocaleDateString("en-GB") : "", x.m == null ? NOTE.toUpperCase() : "Marked"]); }); });
     var ws = XLSX.utils.aoa_to_sheet(rows);
-    ws["!cols"] = [{ wch: 36 }, { wch: 18 }, { wch: 34 }, { wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 12 }, { wch: 22 }];
-    pctFmt(ws, [6], 1, rows.length); return ws;
+    ws["!cols"] = [{ wch: 36 }, { wch: 16 }, { wch: 30 }, { wch: 34 }, { wch: 20 }, { wch: 16 }, { wch: 14 }, { wch: 22 }];
+    return ws;
   }
   function workbook(classes, flat) {
     var wb = XLSX.utils.book_new(), used = { summary: 1, "all students": 1 };
@@ -134,11 +134,11 @@
           cl.map(function (g) { return '<option value="' + esc(g.c) + '">' + esc(g.c) + "</option>"; }).join("") + "</select></div></div>";
       }
       var t = cl.reduce(function (a, g) { var s = stats(g); a.n += s.n; a.got += s.got; return a; }, { n: 0, got: 0 });
-      h += '<p style="margin:14px 0 6px;font-size:17px"><b>' + t.got + "</b> of <b>" + t.n + "</b> students have marks" + (t.n ? " (" + Math.round(t.got / t.n * 100) + "%)" : "") + "</p>";
+      h += '<p style="margin:14px 0 6px;font-size:17px"><b>' + t.got + "</b> of <b>" + t.n + "</b> placed students have marks" + (t.n ? " (" + Math.round(t.got / t.n * 100) + "%)" : "") + "</p>";
       h += '<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr style="text-align:left;color:var(--mut)"><th style="padding:6px">Class</th>' + (canAll ? '<th style="padding:6px">Department</th>' : "") + '<th style="padding:6px">With marks</th><th style="padding:6px">Missing</th><th style="padding:6px">Average</th>' + (canAll ? '<th></th>' : "") + "</tr></thead><tbody>";
       cl.forEach(function (g) {
         var s = stats(g), w = Math.round(s.rate);
-        h += '<tr style="border-top:1px solid var(--bd)"><td style="padding:8px 6px"><b>' + esc(g.c) + "</b></td>" + (canAll ? '<td style="padding:8px 6px">' + esc(g.dept) + "</td>" : "") +
+        h += '<tr style="border-top:1px solid var(--bd)"><td style="padding:8px 6px"><b>' + esc(g.c) + "</b>" + (g.locked ? ' <span style="font-size:12px;color:var(--mut)">&#128274; locked</span>' : "") + "</td>" + (canAll ? '<td style="padding:8px 6px">' + esc(g.dept) + "</td>" : "") +
           '<td style="padding:8px 6px;min-width:150px"><b>' + s.got + " of " + s.n + "</b> (" + w + '%)<div style="height:6px;background:var(--soft);border-radius:4px;margin-top:4px"><div style="height:6px;width:' + w + '%;background:' + (w === 100 ? "var(--ok)" : "var(--or)") + ';border-radius:4px"></div></div></td>' +
           '<td style="padding:8px 6px;color:' + (s.miss ? "var(--ord)" : "var(--ok)") + '"><b>' + s.miss + "</b></td><td style=\"padding:8px 6px\">" + (s.avg == null ? "-" : s.avg + "%") + "</td>" +
           (canAll ? '<td style="padding:8px 6px"><button class="btn sec" style="min-height:34px;padding:4px 10px;font-size:13px" data-set="' + esc(g.c) + '">Change</button></td>' : "") + "</tr>";
@@ -147,9 +147,10 @@
       h += "</tbody></table></div>";
       h += '<div class="actions"><button class="btn" data-dl="sel">Download selected class</button><button class="btn" data-dl="all">Download ' + (canAll && !dept ? "everything" : "whole department") + '</button>' +
         (canAll ? '<button class="btn sec" data-dl="bulk">Bulk download (one list)</button>' : "") + '<button class="btn sec" data-rf>Refresh</button></div>';
-      h += '<div class="hint">Every class sheet lists all students in the database. Students without marks are marked "' + NOTE.toUpperCase() + '". All attachment marks are recorded out of 100.</div>';
-      if (role === "rep") h += '<div class="reqbox"><b>Upload marks</b><div class="hint" style="margin-bottom:8px">Excel or CSV with columns: <b>Admission number</b>, <b>Marks</b> (marks must be between 0 and 100). Students are matched by admission number' + (role === "rep" ? ". You can only upload marks for students in your own department." : ".") + ' Uploading again updates marks already saved.</div><input type="file" data-f accept=".xlsx,.xls,.csv"></div>';
+      h += '<div class="hint">Every class sheet lists the placed students. Students without marks are marked "' + NOTE.toUpperCase() + '". All attachment marks are recorded out of 100.</div>';
+      if (role === "rep") h += '<div class="reqbox"><b>Upload marks</b><div class="hint" style="margin-bottom:8px">Excel or CSV with columns: <b>Admission number</b>, <b>Marks</b> (marks must be between 0 and 100). Students are matched by admission number' + (role === "rep" ? ". You can only upload marks for students in your own department." : ".") + ' You can upload again or edit until you press Lock all marks for the class.</div><input type="file" data-f accept=".xlsx,.xls,.csv"></div>';
       if (role === "rep") h += '<div class="reqbox"><b>Enter or edit marks</b><div class="hint" style="margin-bottom:8px">Search for one student by name or admission number, or edit a whole class. Clear a box to remove a mark.</div><label>Search a student</label><div style="display:flex;gap:8px"><input data-eq placeholder="Name or admission number" autocomplete="off"><button class="btn" data-es0 style="flex:none">Search</button></div><div class="actions"><button class="btn sec" data-ed>Edit whole class (choose it in the Class box above)</button></div><div data-edbox style="margin-top:12px"></div></div>';
+      if (role === "rep") h += '<div class="reqbox"><b>Lock marks</b><div class="hint">Marks you enter stay saved and you can keep editing them. When a class is finished, choose it in the Class box above and press <b>Lock all marks</b>. <b>Once locked, there is no more editing.</b> Only the HOD or Deputy HOD can unlock it.</div><div class="actions"><button class="btn" data-lk>Lock all marks for the selected class</button></div></div>';
       h += '<div class="reqbox"><button class="btn" data-ms type="button" style="width:100%;justify-content:flex-start;gap:14px;padding:14px 18px;background:linear-gradient(135deg,var(--or),var(--ord))"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h8M11 10v10"/></svg><span style="text-align:left"><b style="display:block;font-size:17px">Standard marksheets</b><span style="font-weight:400;font-size:13px">Upload your marksheet, then transfer the marks into it</span></span></button><div data-msbox hidden style="margin-top:14px"></div></div>';
       if (canAll) {
         h += '<div class="reqbox" data-cdbox hidden><b data-cdt></b><div class="grid" style="margin-top:8px"><div class="full"><select data-cd><option value="">Work it out from placements</option>' + D.departments.filter(function (d) { return d !== "Not yet assigned"; }).map(function (d) { return "<option>" + esc(d) + "</option>"; }).join("") + '</select></div></div><div class="actions"><button class="btn" data-cds>Save department</button></div></div>';
@@ -184,25 +185,33 @@
       };
       function editor(list, title) {
         var box = body.querySelector("[data-edbox]");
-        if (!list.length) { box.innerHTML = '<div class="hint">No students found.</div>'; return; }
-        var h = '<b>' + esc(title) + '</b><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr style="text-align:left;color:var(--mut)"><th style="padding:6px">Student</th><th style="padding:6px">Marks</th><th style="padding:6px">Out of</th></tr></thead><tbody>';
+        if (!list.length) { box.innerHTML = '<div class="hint">No placed students found.</div>'; return; }
+        var h = '<b>' + esc(title) + '</b><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr style="text-align:left;color:var(--mut)"><th style="padding:6px">Student</th><th style="padding:6px">Score (0-100)</th></tr></thead><tbody>';
         list.forEach(function (it, i) {
           var x = it.x;
-          h += '<tr style="border-top:1px solid var(--bd)"><td style="padding:6px"><b>' + esc(x.n) + '</b><br><span style="color:var(--mut);font-size:12px">' + esc(x.a) + " &middot; " + esc(it.c) + '</span></td><td style="padding:6px"><input data-em="' + i + '" type="number" inputmode="decimal" min="0" step="any" value="' + (x.m == null ? "" : x.m) + '" style="width:90px;min-height:38px"></td><td style="padding:6px"><input data-eo="' + i + '" type="number" inputmode="decimal" min="1" step="any" value="' + (x.o == null ? "" : x.o) + '" placeholder="100" style="width:80px;min-height:38px"></td></tr>';
+          h += '<tr style="border-top:1px solid var(--bd)"><td style="padding:6px"><b>' + esc(x.n) + '</b><br><span style="color:var(--mut);font-size:12px">' + esc(x.a) + " &middot; " + esc(it.c) + (x.course ? " &middot; " + esc(x.course) : "") + '</span></td><td style="padding:6px">' +
+            (x.lk ? "<b>" + x.m + '</b> <span style="font-size:12px;color:var(--mut)">&#128274; locked</span>' : '<input data-em="' + i + '" type="number" inputmode="decimal" min="0" max="100" step="any" value="' + (x.m == null ? "" : x.m) + '" style="width:90px;min-height:38px">') + "</td></tr>";
         });
-        box.innerHTML = h + '</tbody></table></div><div class="actions"><button class="btn" data-es>Save changes</button></div>';
+        box.innerHTML = h + '</tbody></table></div><div class="actions"><button class="btn" data-es>Save marks</button></div><div class="hint">Saved marks stay editable until you press Lock all marks for the class.</div>';
         box.scrollIntoView({ behavior: "smooth", block: "start" });
         box.querySelector("[data-es]").onclick = async function () {
           var rows = [];
           list.forEach(function (it, i) {
-            var x = it.x, mv = box.querySelector('[data-em="' + i + '"]').value.trim(), ov = box.querySelector('[data-eo="' + i + '"]').value.trim();
-            var oldm = x.m == null ? "" : String(x.m), oldo = x.o == null ? "" : String(x.o);
-            if (mv !== oldm || (mv !== "" && ov !== oldo)) rows.push({ a: x.a, m: mv, o: ov, clear: true });
+            var inp = box.querySelector('[data-em="' + i + '"]'); if (!inp) return;
+            var mv = inp.value.trim(), oldm = it.x.m == null ? "" : String(it.x.m);
+            if (mv !== oldm) rows.push({ a: it.x.a, m: mv, clear: true });
           });
           if (!rows.length) return say("info", "No changes to save.");
-          try { say("", "Saving..."); var res = await call("POST", "marks/upload", { rows: rows }); D = res; var q = (body.querySelector("[data-eq]") || {}).value; render(); say(res.invalidCount ? "err" : "ok", "Saved " + res.saved + " marks" + (res.cleared ? ", removed " + res.cleared : "") + "." + (res.invalidCount ? " " + res.invalidCount + " were not saved: marks must be a number not above the total." : "")); } catch (e) { fail(e); }
+          try { say("", "Saving..."); var res = await call("POST", "marks/upload", { rows: rows }); D = res; render(); say(res.invalidCount || res.lockedCount ? "err" : "ok", "Saved " + res.saved + " marks." + (res.lockedCount ? " " + res.lockedCount + " were already locked and not changed (ask the HOD to unlock)." : "") + (res.invalidCount ? " " + res.invalidCount + " not saved: a mark must be a number from 0 to 100." : "") + (res.lockedCount ? " " + res.lockedCount + " already locked." : "")); } catch (e) { fail(e); }
         };
       }
+      var lk = body.querySelector("[data-lk]");
+      if (lk) lk.onclick = async function () {
+        var cv = (body.querySelector("[data-c]") || {}).value; if (!cv) return say("err", "Choose a class in the Class box first.");
+        var g = inScope().filter(function (x) { return x.c === cv; })[0], pend = g ? g.students.filter(function (x) { return x.m == null; }).length : 0;
+        if (!confirm("Lock all marks for " + cv + "?\n\n" + (pend ? pend + " student(s) still have no mark and cannot be entered after locking.\n\n" : "") + "Once locked, NO MORE EDITING. Only the HOD or Deputy HOD can unlock it.")) return;
+        try { say("", "Locking..."); D = await call("POST", "marks/lockclass", { c: cv }); render(); say("ok", "Marks for " + cv + " are locked."); } catch (e) { fail(e); }
+      };
       var edBtn = body.querySelector("[data-ed]") || {}; edBtn.onclick = function () {
         var cv = (body.querySelector("[data-c]") || {}).value;
         if (!cv) return say("err", "Choose a class in the Class box first, or search for a student below.");
@@ -286,7 +295,7 @@
           if (!rows.length) throw new Error("The file has no rows.");
           say("", "Uploading...");
           var res = await call("POST", "marks/upload", { rows: rows }); D = res; render();
-          say(res.invalidCount || res.unmatchedCount || res.otherDeptCount ? "info" : "ok", "Saved " + res.saved + " marks." + (res.unmatchedCount ? " " + res.unmatchedCount + " admission numbers were not in the database (" + res.unmatched.slice(0, 5).join(", ") + (res.unmatchedCount > 5 ? "..." : "") + ")." : "") + (res.otherDeptCount ? " " + res.otherDeptCount + " students are not in your department and were skipped." : "") + (res.invalidCount ? " " + res.invalidCount + " rows had marks above the total or not a number." : ""));
+          say(res.invalidCount || res.unmatchedCount || res.otherDeptCount ? "info" : "ok", "Saved " + res.saved + " marks." + (res.lockedCount ? " " + res.lockedCount + " were already locked and not changed (ask the HOD to unlock)." : "") + (res.unmatchedCount ? " " + res.unmatchedCount + " admission numbers were not found among placed students (" + res.unmatched.slice(0, 5).join(", ") + (res.unmatchedCount > 5 ? "..." : "") + ")." : "") + (res.otherDeptCount ? " " + res.otherDeptCount + " students are not in your department and were skipped." : "") + (res.invalidCount ? " " + res.invalidCount + " rows had marks above the total or not a number." : ""));
         } catch (e) { fail(e); }
       };
     }

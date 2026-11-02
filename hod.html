@@ -139,7 +139,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <section class="panel" style="margin-top:18px">
 <h2>Marks</h2>
 <p class="lead">Marks for all departments. Download one class, a whole department (sorted per class), or everything.</p>
-<div id="mkbox"></div>
+<div id="mkbox"></div><div id="v2box" style="margin-top:14px"></div>
 </section>
 
 <section class="panel" style="margin-top:18px">
@@ -181,7 +181,7 @@ function say(id,c,t){var m=$(id);m.className="msg"+(c?" "+c:"");m.textContent=t|
 function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 async function api(method,path,body){var r=await fetch("/api/"+path,{method:method,headers:{"Content-Type":"application/json","Authorization":"Bearer "+USER_TOKEN},body:body?JSON.stringify(body):undefined});
  var d=await r.json().catch(function(){return{}});if(!r.ok){var e=new Error(d.error||"Something went wrong.");e.status=r.status;throw e}return d}
-async function open_(){try{D=await api("GET","hod/data");$("gate").hidden=true;$("app").hidden=false;SEL={};setFilters(true);draw();if(!window.MKP)window.MKP=RVMarks.mount($("mkbox"),{role:"hod",headers:function(){return{"Authorization":"Bearer "+USER_TOKEN}},onAuthFail:function(){location.replace("/auth.html?role=staff")}})}
+async function open_(){try{D=await api("GET","hod/data");$("gate").hidden=true;$("app").hidden=false;SEL={};setFilters(true);draw();if(!window.MKP){window.MKP=RVMarks.mount($("mkbox"),{role:"hod",headers:function(){return{"Authorization":"Bearer "+USER_TOKEN}},onAuthFail:function(){location.replace("/auth.html?role=staff")}});RVV2.mount($("v2box"),{role:"hod",headers:function(){return{"Authorization":"Bearer "+USER_TOKEN}},onAuthFail:function(){location.replace("/auth.html?role=staff")},onChange:function(){window.MKP.reload()}})}}
  catch(e){if(e.status===401){sessionStorage.removeItem("rvnp_user");sessionStorage.removeItem("rvnp_user_role");location.replace("/auth.html?role=staff")}else say("gm","err",e.message)}}
 open_();
 function tname(id){var t=D.trainers.find(function(x){return x.id===id});return t?t.name:""}
@@ -256,4 +256,4 @@ $("rx").onclick=function(){if(!D.placements.length){say("rm","err","Nothing to d
  add("Summary",sum);add("All responses",[RHEAD].concat(P.map(rrow)));
  Object.keys(by).sort().forEach(function(d){add(d,[RHEAD].concat(by[d].map(rrow)))});
  XLSX.writeFile(wb,"RVNP_placement_responses.xlsx")};
-</script><script src="/marks.js"></script><script src="/pwa.js" defer></script></body></html>
+</script><script src="/marks.js"></script><script src="/portal-v2.js"></script><script src="/pwa.js" defer></script></body></html>

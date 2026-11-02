@@ -1,5 +1,29 @@
 # RVNP Industrial Attachment Portal
 
+## Version 2: current rules (these replace anything older below)
+
+- **One mark per student, out of 100.** Entered by the ILO Rep from the trainer's paper sheet Blank = Pending. Only placed students are assessed. The date a mark is saved is recorded automatically and shown on the marksheets.
+- **Marks stay saved and editable by the ILO Rep until the Rep presses "Lock all marks" for a class.** The Rep sees a warning: once locked, no more editing. After that only the HOD or Deputy HOD can unlock one student's mark or the whole class (Marks tab, "Unlock a mark and audit log"), and must give a reason. Every save, lock and unlock goes to the audit log (old value, new value, who, when), readable by the HOD, Deputy and Admin. A mark corrected after a single unlock locks again when saved.
+- **Marks progress graph** (percentage of placed students with a mark) per department, per course and per class, on screen and as a PDF (print window, "Save as PDF", with the RVNP letterhead). Reps see only their own department.
+- **Memos.** The HOD, Deputy or Admin send a memo. Reps reply (with an optional file up to 1 MB). A sent reply is read-only; a correction is a follow-up reply. HOD, Deputy and Admin see all replies and "Responded: X of Y departments" with the names of departments that have not replied. A rep sees only their own replies.
+- **Attachment start and end dates** are entered by the ILO Rep (or HOD / Deputy) from the trainer's paper feedback.
+- **Registration (students)** now requires next of kin (name, relationship, phone), an emergency contact (name, phone) and a ticked privacy notice. HOD, Deputy, Admin and the department's Rep can search these (Marks tab, "Next of kin and emergency contacts").
+- **Insurance** stays Admin-managed (default and named policies). Students do not type insurance details.
+- **Security.** PINs are 6 to 12 digits. Five wrong sign-ins lock that account for 15 minutes. A registered admission number cannot be registered again (this used to let anyone reset another student's PIN). A student who forgets the PIN is reset by the Rep, HOD, Deputy or Admin ("Reset a student's PIN").
+- **Old students** who registered before this update can register once more (same admission number) to add next of kin and consent. After that the number is locked.
+- **Not yet placed** students simply stay "Not yet placed"; there is no separate status.
+- **Forgot PIN by email (everyone).** Staff and students now enter an email at registration. "Forgot your PIN?" on the sign-in page emails a one-time link (valid 30 minutes) to set a new PIN; a reset also clears any sign-in lockout and is written to the audit log. One email per account. The link is only sent if the email is registered, and the page gives the same answer either way. **Setup:** create a free account at resend.com, then in Netlify add environment variables `RESEND_API_KEY`, `MAIL_FROM` (an address on a domain you verified at Resend) and optionally `SITE_URL`, then redeploy. Without them no email is sent. Accounts made before this update have no email: the Rep, HOD, Deputy or Admin still resets their PIN. Changed: `api.mjs`, `auth.html`, `sw.js`.
+- **Yearly cover renewal.** When a student presses "Download insurance cover" and their cover has expired, the portal moves them to the newest valid policy (their class's policy, else the default) and downloads the new cover. The old dates are kept in the student's history. **Each intake the Admin must load the new policy first** (default policy dates, or a named policy given to the class); until then the student sees "the new year's policy has not been loaded yet". The attachment letter follows the same policy number.
+- **Dropouts.** In the ILO page, "Dropouts" lets the Rep send a removal request (admission number and reason, own department only). The HOD or Deputy approves or rejects it (Admin cannot). On approval the student cannot sign in, disappears from the cover list, marks lists and register, and a copy of their records is kept inside the request. Marks already saved stay in the store. All steps go to the audit log. There is no "restore" button yet.
+- **Stamps and NITA forms are per year (this replaces the next two notes).** Admin uploads each stamp and each NITA form with the month and year printed on it (for example October 2026). A student picking January to April 2027 gets the October 2026 stamp and NITA form; May to August 2027 the February 2027 ones; September to December 2027 the June 2027 ones. Upload new ones every year; old ones can be removed.
+- **Letter stamps (three semesters).** Admin page, "Letter stamps": upload the October, February and June stamp images (PNG/JPG, 2 MB each). The attachment letter picks its stamp from the period the student selects: January to April uses October, May to August uses February, September to December uses June. A missing stamp falls back to `signature.png`. Changed: `api.mjs`, `admin.html`, `student.html`.
+- **NITA forms by period.** Admin page, "NITA form" card: upload three NITA forms (October, February, June stamp). The student page sends the one matching the period selected (January to April: October, May to August: February, September to December: June); the student must select a period first. The old single NITA form is used only if a period's own form is missing. Changed: `api.mjs`, `admin.html`, `student.html`.
+- **Courses (2025 brochure).** The course list now follows the RVNP 2025 courses brochure, including a Short Courses department. On the first load after deploying, missing courses are added and old seeded courses that are not in the new list and have no units are removed. Courses that already have units are kept. The brochure page that lists Electrical and Electronics courses 61 to 65 was not in the PDF, so the existing Electrical courses were kept. Add more courses any time on the admin page (Attachment letters tab, + Add a course).
+- Files added: `portal-v2.js`. Changed: `api.mjs`, `marks.js`, `auth.html`, `ilo.html`, `hod.html`, `admin.html`, `sw.js`.
+- Limits to know: marks are still kept as one saved list. The server re-reads it just before each save, which makes overwrites between two reps very unlikely but not impossible at the same instant. Memo attachments are limited to about 1 MB.
+
+---
+
 Students download their attachment letter and personal accident insurance cover.
 The admin manages courses, insurance policy details, student lists and cover requests.
 
@@ -30,7 +54,7 @@ The portal includes a unified responsive visual theme using RVNP navy, green and
 1. Unzip the portal ZIP. Open the folder and check that all project files (including `portal-theme.css`) are directly inside, not nested in another folder.
 2. Sign in at github.com (free account).
 3. Tap **+**, then **New repository**. Use any name (for example `rvnp-attachment-portal`), choose **Private**, then **Create repository**.
-4. Tap **uploading an existing file**, then **choose your files**. Select all 10 files (not the folder, not the zip). On a phone, turn on **Desktop site** in your browser first. Upload in batches if needed.
+4. Tap **uploading an existing file**, then **choose your files**. Select all the project files (not the folder, not the zip). On a phone, turn on **Desktop site** in your browser first. Upload in batches if needed.
 5. Check that all project files are listed, then tap **Commit changes**.
 
 To update later: open the repository, **Add file**, then **Upload files**. Files with the same name replace the old ones.
@@ -60,7 +84,7 @@ To update later: open the repository, **Add file**, then **Upload files**. Files
 ## Students and insurance covers
 
 - Students type 3 or more letters of their name or admission number and pick themselves from the suggestions to download their cover.
-- Anyone who types 3 letters can see matching students' names, admission numbers and classes. Upload only students who should be findable this way.
+- Students must be signed in, and can only look up their own cover.
 - Students not on the list can send a request with full name, class, course and admission number.
 
 ## Departments and courses
@@ -150,14 +174,14 @@ If you ever change sw.js, change the `VERSION` line at the top of it so phones r
 ## Placements and trainers
 
 1. **Students** open the **Attachment placement** card on the portal (or `your-site/placement.html`) once they have a place. They enter name, admission number, department, course, two phone numbers, the organization with a description of where it is (road and landmark, "near ..."), their supervisor at the organization, and the town. Submitting again with the same name and admission number corrects the entry.
-2. **Admin page, Placements tab:** (the HOD access code is no longer used; HODs sign in with their approved account)  Old text: set the **HOD access code** (at least 6 characters), copy the **HOD link** (`your-site/hod.html`) and send it, with the code, to the ILO HOD / deputy HOD. The tab also shows how many students are placed and assigned, per department and per trainer, and downloads everything as Excel (summary, all placements with the trainer, one sheet per department).
-3. **The HOD** opens the link, types the code, and:
+2. **Admin page, Placements tab:** (HODs sign in with their approved account; there is no HOD access code). The tab also shows how many students are placed and assigned, per department and per trainer, and downloads everything as Excel (summary, all placements with the trainer, one sheet per department).
+3. **The HOD / Deputy HOD** signs in with an approved account and:
    - adds trainers (name and phone number),
    - filters students by department, town, or "waiting for a trainer", ticks the students (or **Select all shown**), chooses a trainer and presses **Assign**,
    - sees how many students each trainer has, and can open or remove a trainer. Removing a trainer sends their students back to "waiting".
    - downloads an Excel file with one sheet per trainer.
 4. **Students see their trainer:** on the same placement page, under **Find my trainer**, they type their name or admission number and see their trainer's name and phone number (tap to call) as soon as one is assigned.
-The HOD code protects students' phone numbers. Share it only with the HOD and deputy HOD, and change it from the Placements tab if it leaks.
+
 
 ## Troubleshooting
 
@@ -182,12 +206,12 @@ Green and white theme with orange accents (title underline, counters, selected t
 | Who | See | Download | Upload marks |
 |---|---|---|---|
 | ILO representative | Only their own department | One class, or the whole department | Yes, own department only |
-| HOD / deputy HOD (approved account) | All departments | One class, a department, or everything | Yes |
-| Admin | All departments | One class, a department, or everything | Yes |
+| HOD / deputy HOD (approved account) | All departments | One class, a department, or everything | No (can unlock a mark) |
+| Admin | All departments | One class, a department, or everything | No (can read the audit log) |
 
 **Setting it up (admin page, Marks tab)**
 1. **Accounts**: staff register on the sign-in page; approve them in the admin page, Accounts tab. An ILO representative only ever sees the department on their own account.
-2. **Upload marks**: Excel or CSV with columns **Admission number**, **Marks**, and optionally **Out of** (default 100). Students are matched by admission number. Uploading again updates marks already saved. Rows that do not match anyone, or have marks above the total, are reported and skipped.
+2. **Upload marks**: Excel or CSV with columns **Admission number**, **Marks**, and (always out of 100). Students are matched by admission number. Uploading again updates marks already saved. Rows that do not match anyone, or have marks above the total, are reported and skipped.
 3. **Class to department**: the system works out each class's department from the placements its students filled in. A class with no placements shows "Not yet assigned". Press **Change** next to the class to set its department.
 
 **Downloads (Excel)**
@@ -196,7 +220,7 @@ Green and white theme with orange accents (title underline, counters, selected t
 - The **Summary** sheet has one line per class: students, marks received, marks missing, % of class with marks, average, highest and lowest percentage.
 - Whole department: Summary plus one sheet per class, sorted by class. Bulk download adds an **All students** sheet with everyone in one list.
 
-**ILO representatives can upload and edit.** On the ILO page, after opening their department with its code, a rep can upload an Excel/CSV of marks, or choose a class and press **Edit marks of selected class** to change a mark or clear it. Students from other departments are skipped and reported, so a rep can never change another department's marks.
+**ILO representatives can upload and edit.** On the ILO page, after opening their department with its code, a rep can upload an Excel/CSV of marks, or choose a class and press **Edit whole class** to enter marks. Saved marks are locked. Students from other departments are skipped and reported, so a rep can never change another department's marks.
 
 **Entering marks:** in the Marks panel, use **Search a student** (name or admission number) to find one student and type their mark, or choose a class and press **Edit whole class** to enter marks for everyone in it. Searches only cover the rep's own department.
 

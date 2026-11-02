@@ -204,8 +204,15 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div class="msg" id="mc"></div>
 </div>
 <div class="card">
+<h2>Letter stamps (three semesters)</h2>
+<p class="lead">The stamps carry a year, so upload new ones every year. Add each stamp with the month and year printed on it. The letter picks the right one from the period the student selects: <b>January to April 2027</b> uses the <b>October 2026</b> stamp, <b>May to August 2027</b> the <b>February 2027</b> stamp, <b>September to December 2027</b> the <b>June 2027</b> stamp. PNG or JPG, up to 2 MB. If the stamp for a period is missing, the old signature image is used.</p>
+<div id="stl"></div>
+<div class="msg" id="stm"></div>
+</div>
+<div class="card">
 <h2>NITA form</h2>
-<p class="lead">Upload the NITA form (PDF, Word or image, up to 4 MB). Students then see a <b>NITA form</b> download button on the student page.</p>
+<p class="lead">Upload the NITA forms every year, one for each stamp (same month and year as the letter stamp). The student gets the form matching the period they select. PDF, Word or image, up to 4 MB each. The single form below is used only when a period's own form is missing.</p>
+<div id="ntl"></div><div class="msg" id="ntm"></div>
 <div class="hint" id="nitas" style="margin-bottom:8px"></div>
 <input id="nf" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
 <div class="row"><button class="btn" id="nup">Upload NITA form</button><button class="btn del" id="ndel" hidden>Remove it</button></div>
@@ -336,7 +343,7 @@ async function start(){
 if(TOKEN)start().catch(function(){signOut()});
 
 /* tabs */
-var MK=null;function tab(w){["a","i","r","l","o","g","m","k"].forEach(function(k){var id={a:"ac",i:"ins",r:"req",l:"let",o:"ilo",g:"reg",m:"pm",k:"mk"}[k];$("t-"+id).setAttribute("aria-selected",k===w);$("s-"+id).hidden=k!==w});if(w==="a")loadAccounts();if(w==="g"&&!REG)loadReg();if(w==="m"&&!PM)loadPm();if(w==="k"&&!MK)MK=RVMarks.mount($("mkbox"),{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut})}
+var MK=null;function tab(w){["a","i","r","l","o","g","m","k"].forEach(function(k){var id={a:"ac",i:"ins",r:"req",l:"let",o:"ilo",g:"reg",m:"pm",k:"mk"}[k];$("t-"+id).setAttribute("aria-selected",k===w);$("s-"+id).hidden=k!==w});if(w==="a")loadAccounts();if(w==="g"&&!REG)loadReg();if(w==="m"&&!PM)loadPm();if(w==="k"&&!MK){MK=RVMarks.mount($("mkbox"),{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut});var v2=document.createElement("div");v2.style.marginTop="14px";$("mkbox").parentNode.appendChild(v2);RVV2.mount(v2,{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut})}}
 $("t-ac").onclick=function(){tab("a")};$("t-ins").onclick=function(){tab("i")};$("t-req").onclick=function(){tab("r")};$("t-let").onclick=function(){tab("l")};$("t-ilo").onclick=function(){tab("o")};$("t-reg").onclick=function(){tab("g")};$("t-pm").onclick=function(){tab("m")};$("t-mk").onclick=function(){tab("k")};
 
 /* accounts */
@@ -506,7 +513,22 @@ $("sc").onclick=async function(){say("mc","");try{syncVisible();
  var d=await call("PUT","admin/courses",{courses:D.courses});D.courses=d.courses;drawCourses();say("mc","ok","Saved. Students see the updated course list now.")}catch(e){say("mc","err",e.message)}};
 
 /* NITA form */
-function drawNita(){var n=D.nita;$("nitas").textContent=n?"Current form: "+n.name+" (students can download it now).":"No NITA form uploaded yet.";$("ndel").hidden=!n}
+
+var STM=[["oct","October"],["feb","February"],["jun","June"]];
+var GRP={stamps:{api:"admin/stamps",el:"stl",msg:"stm",acc:".png,.jpg,.jpeg",max:2,lbl:"letter stamp"},nitas:{api:"admin/nitas",el:"ntl",msg:"ntm",acc:".pdf,.doc,.docx,.jpg,.jpeg,.png",max:4,lbl:"NITA form"}};
+function keyLabel(k){var m=k.slice(0,3),y=+k.slice(3),x=STM.filter(function(z){return z[0]===m})[0];return x[1]+" "+y+" stamp (attachment "+(m==="oct"?"January to April "+(y+1):m==="feb"?"May to August "+y:"September to December "+y)+")"}
+function drawGroup(g){var c=GRP[g],S=D[g]||{},el=$(c.el);if(!el)return;var yr=new Date().getFullYear(),ys="",i;for(i=yr-1;i<=yr+3;i++)ys+="<option>"+i+"</option>";
+ var rows=Object.keys(S).sort(function(a,b){return a.slice(3)-b.slice(3)||a.localeCompare(b)}).map(function(k){return '<div class="hint" style="margin:6px 0"><b>'+keyLabel(k)+'</b>: '+S[k].name+' <button class="btn del" data-g="'+g+'" data-rm="'+k+'">Remove</button></div>'}).join("")||'<div class="hint">Nothing uploaded yet.</div>';
+ el.innerHTML=rows+'<div style="margin-top:10px;padding:10px;border:1px solid var(--bd);border-radius:10px"><b>Add a '+c.lbl+'</b><div class="grid"><div><label>Month on the stamp</label><select data-gm="'+g+'"><option value="oct">October</option><option value="feb">February</option><option value="jun">June</option></select></div><div><label>Year on the stamp</label><select data-gy="'+g+'">'+ys+'</select></div></div><input type="file" accept="'+c.acc+'" data-gf="'+g+'"> <button class="btn" data-gu="'+g+'">Upload</button></div>'}
+function drawStamps(){drawGroup("stamps")}function drawNitas(){drawGroup("nitas")}
+document.addEventListener("click",function(ev){var t=ev.target;if(!t.getAttribute)return;var g=t.getAttribute("data-gu")||t.getAttribute("data-g");if(!g)return;var c=GRP[g];say(c.msg,"");
+ var rm=t.getAttribute("data-rm");
+ if(rm){call("POST",c.api,{key:rm,remove:true}).then(function(d){D[g]=d[g];drawGroup(g);say(c.msg,"ok","Removed.")}).catch(function(e){say(c.msg,"err",e.message)});return}
+ var f=document.querySelector('[data-gf="'+g+'"]').files[0],key=document.querySelector('[data-gm="'+g+'"]').value+document.querySelector('[data-gy="'+g+'"]').value;
+ if(!f){say(c.msg,"err","Choose the file first.");return}
+ if(f.size>c.max*1024*1024){say(c.msg,"err","The file is larger than "+c.max+" MB.");return}
+ var r=new FileReader();r.onload=function(){call("POST",c.api,{key:key,name:f.name,type:f.type,data:String(r.result).split(",")[1]}).then(function(d){D[g]=d[g];drawGroup(g);say(c.msg,"ok","Uploaded: "+keyLabel(key))}).catch(function(e){say(c.msg,"err",e.message)})};r.readAsDataURL(f)});
+function drawNita(){drawStamps();drawNitas();var n=D.nita;$("nitas").textContent=n?"Current form: "+n.name+" (students can download it now).":"No NITA form uploaded yet.";$("ndel").hidden=!n}
 $("nup").onclick=function(){say("mn","");var f=$("nf").files[0];if(!f){say("mn","err","Choose the NITA form file first.");return}
  if(f.size>4*1024*1024){say("mn","err","The file is larger than 4 MB. Compress it and try again.");return}
  var b=this;b.disabled=true;var r=new FileReader();
@@ -619,5 +641,5 @@ $("pmxl").onclick=function(){if(!PM||!PM.placements.length){say("pmm","err","Not
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done,function(){$("sl").select();document.execCommand("copy");done()});
   else{$("sl").select();document.execCommand("copy");done()}}})();
 </script>
-<script src="/marks.js"></script><script src="/pwa.js" defer></script>
+<script src="/marks.js"></script><script src="/portal-v2.js"></script><script src="/pwa.js" defer></script>
 </body></html>

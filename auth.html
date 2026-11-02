@@ -25,6 +25,20 @@ a{color:#17803f;font-weight:600}
 <div class="full"><label>PIN</label><input id="pin" type="password" inputmode="numeric" autocomplete="current-password"></div>
 </div>
 <button class="primary" id="loginBtn">Sign in</button><div class="msg" id="msg"></div>
+<p style="margin-top:10px"><a href="#" id="forgotLink">Forgot your PIN?</a></p>
+</section>
+<section class="card" id="forgotBox" hidden>
+<h2>Reset your PIN</h2><p class="hint">Enter the email you used when you registered. We will send you a link to set a new PIN.</p>
+<div class="full"><label>Email address</label><input id="fEmail" type="email" autocomplete="email"></div>
+<button class="primary" id="fBtn">Send reset link</button><div class="msg" id="fMsg"></div>
+<p style="margin-top:10px"><a href="#" id="fBack">Back to sign in</a></p>
+<p class="hint">No email on your account (registered before this update)? Ask your ILO Representative, HOD or Deputy HOD to reset your PIN.</p>
+</section>
+<section class="card" id="resetBox" hidden>
+<h2>Set a new PIN</h2>
+<div class="full"><label>New PIN</label><input id="rPin" type="password" inputmode="numeric" autocomplete="new-password"><div class="hint">6-12 digits.</div></div>
+<div class="full"><label>Repeat PIN</label><input id="rPin2" type="password" inputmode="numeric" autocomplete="new-password"></div>
+<button class="primary" id="rBtn">Save new PIN</button><div class="msg" id="rMsg"></div>
 </section>
 <section class="card" id="regBox" hidden>
 <h2 id="regTitle">Create account</h2><p class="hint" id="regHint"></p>
@@ -35,7 +49,8 @@ a{color:#17803f;font-weight:600}
 <div class="full"><label>Full name</label><input id="name"></div>
 <div><label>ID number</label><input id="idno"></div><div><label>PF number</label><input id="pf"></div>
 <div class="full"><label>Phone number</label><input id="phone" type="tel"></div>
-<div class="full"><label>Create PIN</label><input id="regPin" type="password" inputmode="numeric" autocomplete="new-password"><div class="hint">4–12 digits. Keep it private.</div></div>
+<div class="full"><label>Email address</label><input id="semail" type="email" autocomplete="email"><div class="hint">Used only to send you a PIN reset link.</div></div>
+<div class="full"><label>Create PIN</label><input id="regPin" type="password" inputmode="numeric" autocomplete="new-password"><div class="hint">6–12 digits. Keep it private.</div></div>
 </div>
 </div>
 <div id="studentForm" hidden>
@@ -44,7 +59,13 @@ a{color:#17803f;font-weight:600}
 <div><label>Admission number</label><input id="sa" placeholder="EPL6/24S/404930" autocapitalize="characters"><div class="hint">Type it as on your ID, e.g. <b>EPL6/24S/404930</b></div></div><div><label>Class</label><input id="sc"></div>
 <div class="full"><label>Department</label><select id="sdept"><option value="">Select department</option></select></div>
 <div class="full"><label>Phone number</label><input id="st" type="tel"></div>
-<div class="full"><label>Create PIN</label><input id="sp" type="password" inputmode="numeric" autocomplete="new-password"><div class="hint">4–12 digits. You will use this PIN to access the student portal.</div></div>
+<div class="full"><label>Email address</label><input id="stemail" type="email" autocomplete="email"><div class="hint">Used only to send you a PIN reset link.</div></div>
+<div class="full"><label>Next of kin (full name)</label><input id="nokn" autocomplete="off"></div>
+<div><label>Relationship to you</label><input id="nokr" placeholder="e.g. Mother"></div><div><label>Next of kin phone</label><input id="nokt" type="tel"></div>
+<div class="full"><label>Emergency contact (full name)</label><input id="emn" autocomplete="off"></div>
+<div class="full"><label>Emergency contact phone</label><input id="emt" type="tel"><div class="hint">Someone we can call quickly if you are hurt or ill on attachment. This can be a different person from your next of kin.</div></div>
+<div class="full"><div class="hint" style="max-height:130px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:8px"><b>Privacy notice.</b> RVNP collects your name, admission number, class, phone number, next of kin, emergency contact, attachment placement and marks. We use them to run industrial attachment, assign your trainer, arrange your insurance cover and reach your family in an emergency. Only authorised RVNP staff (ILO representatives, the HOD and Deputy HOD, and the administrator) can see them. Your details are kept only as long as needed for these purposes and are handled under the Data Protection Act, 2019. You may ask the Industrial Liaison Office to show you or correct your details.</div><label style="display:flex;gap:8px;align-items:flex-start;margin-top:8px"><input type="checkbox" id="consent" style="width:auto;min-height:0;margin-top:3px"> <span>I have read the privacy notice and agree that RVNP may use my details for these purposes.</span></label></div>
+<div class="full"><label>Create PIN</label><input id="sp" type="password" inputmode="numeric" autocomplete="new-password"><div class="hint">6–12 digits. You will use this PIN to access the student portal.</div></div>
 </div>
 </div>
 <button class="primary" id="regBtn">Submit registration</button><div class="msg" id="regMsg"></div>
@@ -74,7 +95,15 @@ $("role").onchange=()=>{$("deptWrap").hidden=$("role").value!=="rep"};
 async function send(path,body){let r=await fetch("/api/"+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),d=await r.json().catch(()=>({error:"The server is not answering (code "+r.status+"). Please tell the ILO office."}));if(!r.ok)throw Error(d.error||"Something went wrong.");return d}
 $("loginBtn").onclick=async()=>{let b=$("loginBtn");$("msg").className="msg";$("msg").textContent="";b.disabled=true;try{let d=await send("auth/login",{role:mode==="staff"?"staff":"student",identifier:$("identifier").value,pin:$("pin").value});sessionStorage.setItem("rvnp_user",d.token);if(d.role==="student")localStorage.setItem("rvnp_student",d.token);sessionStorage.setItem("rvnp_user_role",d.role);location.href=d.role==="student"?"/student.html":d.role==="rep"?"/ilo.html":"/hod.html"}catch(e){$("msg").className="msg err";$("msg").textContent=e.message}b.disabled=false};
 $("regBtn").onclick=async()=>{let b=$("regBtn");$("regMsg").className="msg";$("regMsg").textContent="";b.disabled=true;try{
- if(mode==="staff"){let d=await send("auth/register-staff",{role:$("role").value,dept:$("dept").value,name:$("name").value,idno:$("idno").value,pf:$("pf").value,phone:$("phone").value,pin:$("regPin").value});$("regMsg").className="msg ok";$("regMsg").textContent=d.message;show("login")}
- else {let d=await send("auth/register-student",{name:$("sn").value,adm:$("sa").value,cls:$("sc").value,dept:$("sdept").value,phone:$("st").value,pin:$("sp").value});$("regMsg").className="msg ok";$("regMsg").textContent=d.updated?"Your account was updated. You can now sign in.":"Registration complete. You can now sign in.";show("login")}
+ if(mode==="staff"){let d=await send("auth/register-staff",{role:$("role").value,dept:$("dept").value,name:$("name").value,idno:$("idno").value,pf:$("pf").value,phone:$("phone").value,email:$("semail").value,pin:$("regPin").value});$("regMsg").className="msg ok";$("regMsg").textContent=d.message;show("login")}
+ else {let d=await send("auth/register-student",{name:$("sn").value,adm:$("sa").value,cls:$("sc").value,dept:$("sdept").value,phone:$("st").value,email:$("stemail").value,pin:$("sp").value,nokName:$("nokn").value,nokRel:$("nokr").value,nokTel:$("nokt").value,emName:$("emn").value,emTel:$("emt").value,consent:$("consent").checked});$("regMsg").className="msg ok";$("regMsg").textContent=d.updated?"Your account was updated. You can now sign in.":"Registration complete. You can now sign in.";show("login")}
 }catch(e){$("regMsg").className="msg err";$("regMsg").textContent=e.message}b.disabled=false};
+
+const resetTok=q.get("reset");
+function showOnly(id){["loginBox","regBox","forgotBox","resetBox"].forEach(x=>$(x).hidden=x!==id);$("tabs").hidden=id==="forgotBox"||id==="resetBox"}
+$("forgotLink").onclick=e=>{e.preventDefault();showOnly("forgotBox")};
+$("fBack").onclick=e=>{e.preventDefault();showOnly("loginBox")};
+$("fBtn").onclick=async()=>{let b=$("fBtn");$("fMsg").className="msg";$("fMsg").textContent="";b.disabled=true;try{let d=await send("auth/forgot",{email:$("fEmail").value});$("fMsg").className="msg ok";$("fMsg").textContent=d.message}catch(e){$("fMsg").className="msg err";$("fMsg").textContent=e.message}b.disabled=false};
+$("rBtn").onclick=async()=>{let b=$("rBtn");$("rMsg").className="msg";$("rMsg").textContent="";if($("rPin").value!==$("rPin2").value){$("rMsg").className="msg err";$("rMsg").textContent="The two PINs do not match.";return}b.disabled=true;try{let d=await send("auth/reset",{token:resetTok,pin:$("rPin").value});$("rMsg").className="msg ok";$("rMsg").textContent=d.message;history.replaceState(null,"",location.pathname);setTimeout(()=>showOnly("loginBox"),1500)}catch(e){$("rMsg").className="msg err";$("rMsg").textContent=e.message}b.disabled=false};
+if(resetTok)showOnly("resetBox");
 </script><script src="/pwa.js" defer></script></body></html>

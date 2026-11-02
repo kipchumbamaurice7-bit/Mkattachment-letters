@@ -85,6 +85,23 @@ const USER_TOKEN_TTL = 12 * 3600 * 1000;
 function accountId(role, identifier) {
   return createHash("sha256").update(String(role) + "|" + String(identifier).toUpperCase().replace(/[^A-Z0-9]/g, "")).digest("hex").slice(0, 32);
 }
+
+/* ----- email (forgot-PIN links). Needs RESEND_API_KEY; optional MAIL_FROM and SITE_URL ----- */
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
+async function sendMail(to, subject, text) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return false;
+  try {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: process.env.MAIL_FROM || "RVNP Portal <onboarding@resend.dev>", to: [to], subject, text }),
+    });
+    return r.ok;
+  } catch { return false; }
+}
+const tokHash = (t) => createHash("sha256").update("rvnp-reset|" + t).digest("hex");
+
 function pinHash(pin, salt) {
   return pbkdf2Sync(String(pin), Buffer.from(salt, "hex"), 120000, 32, "sha256").toString("hex");
 }
@@ -118,18 +135,19 @@ const iloHash = (c) => createHash("sha256").update("rvnp-ilo|" + String(c)).dige
 const digits = (v) => String(v || "").replace(/[^\d+]/g, "").slice(0, 16);
 
 /* ---------- validation ---------- */
-/* departments and courses, from the RVNP 2026-2027 brochure (units are added later by the ILO representatives) */
+/* departments and courses, from the RVNP courses brochure (2025) (units are added later by the ILO representatives) */
 const OTHER = "Other courses";
 const CATALOG = {
-  "Agriculture and Environmental Studies": [["General Agriculture & Extension",[5,6]],["Agripreneurship Technology",[6]],["Horticulture Farm Technology",[5,6]],["Environmental Technology",[5,6]],["Aquaculture",[6]],["Animal Production",[5,6]],["Animal Health and Production",[5,6]],["General Agriculture",[4]],["Livestock Food Production",[5]],["Sheep Shearing",[3]]],
-  "Agricultural and Mechanical Engineering": [["Agricultural Engineering",[6]],["Agriculture Machinery & Equipment",[4]],["Automotive Engineering",[6]],["Automotive Technology",[5,6]],["Welding & Fabrication",[4,5]],["Mechanical Production Technology",[5,6]]],
-  "Building and Civil Engineering": [["Masonry",[4]],["Building Technology",[5,6]],["Carpentry & Joinery",[4,5]],["Land Surveying",[5,6]],["Architectural Draftsman",[5]],["Architecture",[6]],["Civil Engineering",[6]],["Quantity Surveying",[6]],["Water Engineering Technology",[6]],["Plumbing",[4,5]],["Road Construction",[5]]],
-  "Business Studies": [["Accountancy plus Quickbooks",[6]],["Banking & Finance plus Quickbooks",[6]],["Business Mgt with ICT",[5,6]],["Cooperative Mgt with ICT",[5,6]],["Human Resource Mgt with ICT",[5,6]],["Office Administration (Secretarial) with ICT",[5,6]],["Supply Chain Mgt with ICT",[5,6]],["Store Keeping Mgt with ICT",[5]],["Road Transport Mgt with ICT",[5,6]],["Project Mgt with ICT",[5,6]],["Investment Mgt with ICT",[6]],["Procurement with ICT",[5]]],
-  "Electrical and Electronics Engineering": [["Electrical Installation Technology",[4]],["Solar PV System Installation Technology",[4]],["Electrical Engineering Technology",[5,6]],["Telecommunication Engineering Technology",[6]],["Instrumentation & Control Technology",[5,6]]],
-  "Health and Applied Sciences": [["Science Laboratory",[5,6]],["Applied Biology",[6]],["Medical Engineering",[6]],["Food Technology",[5,6]],["Petroleum & Geoscience",[5,6]],["Health Records & IT",[5,6]],["Community Health",[5,6]],["Analytical Chemistry",[6]],["Nutrition & Dietetics",[5,6]],["Geophysical Exploration Technology",[5,6]],["Medical Lab",[6]],["Geology Technology",[6]]],
-  "Hospitality and Tourism": [["Baking Technology",[5,6]],["Fashion Design",[4,5]],["Fashion Design Mgt",[6]],["Food & Beverage Production (Culinary Arts)",[4,5]],["Food & Beverage Management",[6]],["Hair Dressing",[4,5]],["Beauty Therapy",[4,5]],["Tourism & Travel Mgt",[6]],["Tour Guide Operations",[4,5]],["Catering & Accommodation Operations",[5]],["Catering & Accommodation Mgt",[6]],["Cosmetology",[4,5,6]]],
-  "Information Communication Technology": [["Library & Information Service",[5]],["Library & Information Management",[6]],["Computer Science",[6]],["ICT Technician",[5,6]],["Software Developer",[5,6]],["Network System Administrator",[5]],["Network System Technician",[6]]],
-  "Liberal Studies": [["Counselling Psychology",[5,6]],["Social Work & Community Development",[5,6]],["Criminal Justice Mgt",[5,6]],["Kenya Sign Language",[4]],["Child Care & Protection",[5,6]]],
+  "Agriculture and Environmental Studies": [["Agricultural Extension",[5,6]],["Dairy Management",[5]],["Horticulture Production",[5,6]],["Sustainable Agriculture",[5,6]],["Aquaculture",[6]]],
+  "Agricultural and Mechanical Engineering": [["Agricultural Engineering",[5,6]],["Agriculture Machinery & Equipment",[4,5,6]],["Automotive Technology",[5]],["Welding & Fabrication",[4]],["Mechanical Production Technology",[5]],["Mechanical Technology",[6]],["Automotive Engineering",[6]]],
+  "Building and Civil Engineering": [["Building Technology",[5,6]],["Carpentry & Joinery",[4,5]],["Water Technology",[6]],["Land Surveying",[5,6]],["Architectural Draftsman",[5]],["Architecture",[6]],["Civil Engineering",[6]],["Quantity Surveying",[6]],["Waste Water & Sanitation Engineering",[6]],["Water Engineering",[6]],["Plumbing",[5,6]]],
+  "Business Studies": [["Accountancy plus Quickbooks",[6]],["Banking & Finance plus Quickbooks",[6]],["Business Mgt with ICT",[5,6]],["Cooperative Mgt with ICT",[5,6]],["Human Resource Mgt with ICT",[5,6]],["Office Administration (Secretarial) with ICT",[5,6]],["Supply Chain Mgt with ICT",[5,6]],["Store Keeping Mgt with ICT",[5]],["Road Transport Mgt with ICT",[5,6]],["Project Mgt with ICT",[5,6]],["Investment Mgt with ICT",[6]]],
+  "Electrical and Electronics Engineering": [["Electronics Engineering",[5,6]],["Electrical Engineering (Power Option)",[6]],["Electrical Installation Technology",[4]],["Solar PV System Installation Technology",[4]],["Electrical Engineering Technology",[5,6]],["Telecommunication Engineering Technology",[6]],["Instrumentation & Control Technology",[5,6]]],
+  "Health and Applied Sciences": [["Nutrition & Dietetics",[5,6]],["Science Laboratory",[5,6]],["Applied Biology",[6]],["Analytical Chemistry",[6]],["Medical Engineering",[6]],["Food Technology",[6]],["Health Records & IT",[5,6]]],
+  "Hospitality and Tourism": [["Baking Technology",[5,6]],["Fashion Design",[4,5]],["Fashion Design Mgt",[6]],["Food & Beverage Production (Culinary Arts)",[4,5]],["Food & Beverage Sales and Service Manager",[6]],["Hair Dressing",[4,5]],["Beauty Therapy",[4,5]],["House Keeping & Accommodation",[5,6]],["Tourism & Travel Mgt",[5,6]],["Tour Guide Operations",[5]],["Catering & Accommodation Mgt",[5,6]],["Catering & Accommodation",[6]],["Tourism Management",[5,6]]],
+  "Information Communication Technology": [["Library & Information Science",[5,6]],["Computer Science",[6]],["ICT Technician",[5,6]]],
+  "Liberal Studies": [["Counselling Psychology",[5,6]],["Social Work & Community Development",[5,6]]],
+  "Short Courses": [["Driving Instructor Training Course",[0]],["Driving",[0]],["International Computer Driving License (ICDL)",[0]],["Computer Packages",[0]],["Computer Repair & Maintenance",[0]]],
 };
 const DEPTS = Object.keys(CATALOG), ELEC = "Electrical and Electronics Engineering";
 const normT = (t) => String(t).toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -137,7 +155,7 @@ function catalogList() {
   const out = []; let d = 0;
   for (const [dept, items] of Object.entries(CATALOG)) {
     d++; let n = 0;
-    for (const [name, levels] of items) for (const l of levels) { n++; out.push({ key: "D" + d + "-" + n, dept, title: name.toUpperCase().replace(/\s+/g, " ") + " LEVEL " + l, percent: 0, units: [] }); }
+    for (const [name, levels] of items) for (const l of levels) { n++; out.push({ key: "D" + d + "-" + n, dept, title: name.toUpperCase().replace(/\s+/g, " ") + (l ? " LEVEL " + l : ""), percent: 0, units: [] }); }
   }
   return out;
 }
@@ -151,6 +169,17 @@ async function loadCourses(s) {
     for (const x of c) if (!x.dept) x.dept = /ELECTR|TELECOM|INSTRUMENT/.test(x.title) ? ELEC : OTHER;
     for (const k of cat) if (!have.has(normT(k.title))) c.push(k);
     await s.setJSON("courses", c); await s.setJSON("seeded", true);
+  }
+  /* one-time update to the 2025 course list: adds missing courses, drops old seeded courses that are not in it and have no units yet */
+  if (!(await getJSON(s, "catalog2025", false))) {
+    c = (c || DEFAULT_COURSES).map((x) => ({ ...x }));
+    const cat = catalogList(), want = new Set(cat.map((k) => normT(k.title))), have = new Map(c.map((x) => [normT(x.title), x])), keys = new Set(c.map((x) => x.key));
+    for (const k of cat) {
+      const m = have.get(normT(k.title)); if (m) { if (!m.dept) m.dept = k.dept; continue; }
+      let key = k.key; while (keys.has(key)) key += "x"; keys.add(key); c.push({ ...k, key });
+    }
+    c = c.filter((x) => want.has(normT(x.title)) || (x.units && x.units.length) || !/^D\d+-\d+/.test(String(x.key || "")));
+    await s.setJSON("courses", c); await s.setJSON("catalog2025", true);
   }
   return c || DEFAULT_COURSES;
 }
@@ -223,6 +252,16 @@ function cleanCourses(list) {
   });
 }
 
+async function audit(s, e) {
+  const a = await getJSON(s, "audit", []); a.push({ t: Date.now(), ...e });
+  await s.setJSON("audit", a.slice(-5000));
+}
+async function staff(req, s) {
+  const tok = (req.headers.get("authorization") || "").replace(/^Bearer /, "");
+  const isAdmin = !!tok && validToken(tok), acct = isAdmin ? null : await currentAccount(req, s);
+  const role = isAdmin ? "admin" : acct && acct.role !== "student" ? acct.role : "";
+  return { acct, isAdmin, role, isHod: isAdmin || role === "hod" || role === "deputy", repDept: role === "rep" ? acct.dept : "", who: isAdmin ? "Administrator" : acct ? acct.name : "" };
+}
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 const fail = (msg, status = 400) => json({ error: msg }, status);
@@ -250,13 +289,16 @@ export default async (req) => {
       if(idno.length<4) throw new Bad("Enter a valid ID number.");
       if(phone.replace(/\D/g,"").length<9) throw new Bad("Enter a valid phone number.");
       if(pf.length<2) throw new Bad("Enter your PF number.");
+      const email=clean(body.email,200).toLowerCase();
+      if(!EMAIL_RE.test(email)) throw new Bad("Enter a valid email address. It is used to reset your PIN if you forget it.");
       if(role==="rep" && !DEPTS.includes(dept) && dept!==OTHER) throw new Bad("Choose your department.");
-      if(pin.length<4 || pin.length>12 || !/^\d+$/.test(pin)) throw new Bad("Use a 4-12 digit PIN.");
+      if(pin.length<6 || pin.length>12 || !/^\d+$/.test(pin)) throw new Bad("Use a 6-12 digit PIN.");
       const all=await getJSON(s,"accounts",{});
       if(Object.values(all).some(a=>a.idno===idno || a.pf===pf)) throw new Bad("An account with that ID or PF number already exists.");
       const id="A"+Date.now().toString(36)+randomBytes(3).toString("hex");
       const salt=randomBytes(16).toString("hex");
-      all[id]={id,role,name,idno,phone,pf,dept:role==="rep"?dept:"",salt,pinHash:pinHash(pin,salt),status:"pending",createdAt:Date.now()};
+      if(Object.values(all).some(x=>x.email===email&&x.id!==id)) throw new Bad("That email is already used by another account.");
+      all[id]={id,role,name,idno,phone,pf,email,dept:role==="rep"?dept:"",salt,pinHash:pinHash(pin,salt),status:"pending",createdAt:Date.now()};
       await s.setJSON("accounts",all);
       return json({ok:true,status:"pending",message:"Registration submitted. The administrator must approve your account before you can log in."});
     }
@@ -268,12 +310,23 @@ export default async (req) => {
       if(cls.length<2) throw new Bad("Enter your class.");
       if(!DEPTS.includes(dept) && dept !== OTHER) throw new Bad("Choose your department.");
       if(phone.replace(/\D/g,"").length<9) throw new Bad("Enter a valid phone number.");
-      if(pin.length<4 || pin.length>12 || !/^\d+$/.test(pin)) throw new Bad("Use a 4-12 digit PIN.");
+      if(pin.length<6 || pin.length>12 || !/^\d+$/.test(pin)) throw new Bad("Use a 6-12 digit PIN.");
+      const nokN=clean(body.nokName,100), nokR=clean(body.nokRel,40), nokT=digits(body.nokTel), emN=clean(body.emName,100), emT=digits(body.emTel);
+      if(nokN.length<3) throw new Bad("Enter your next of kin's full name.");
+      if(nokR.length<3) throw new Bad("Enter your next of kin's relationship to you.");
+      if(nokT.replace(/\D/g,"").length<9) throw new Bad("Enter your next of kin's phone number.");
+      if(emN.length<3) throw new Bad("Enter an emergency contact's name.");
+      if(emT.replace(/\D/g,"").length<9) throw new Bad("Enter an emergency contact's phone number.");
+      if(body.consent!==true) throw new Bad("You must accept the privacy notice to register.");
+      const email=clean(body.email,200).toLowerCase();
+      if(!EMAIL_RE.test(email)) throw new Bad("Enter a valid email address. It is used to reset your PIN if you forget it.");
       const all=await getJSON(s,"accounts",{});
       const old=Object.values(all).find(a=>a.role==="student" && a.adm===adm);
+      if(old && old.consentAt) throw new Bad("This admission number is already registered. Sign in, or ask your ILO Representative or the HOD to reset your PIN.");
       const id=old?old.id:"S"+Date.now().toString(36)+randomBytes(3).toString("hex");
       const salt=randomBytes(16).toString("hex");
-      all[id]={id,role:"student",name,adm,cls,dept,phone,salt,pinHash:pinHash(pin,salt),status:"approved",createdAt:old?.createdAt||Date.now(),updatedAt:Date.now()};
+      if(Object.values(all).some(x=>x.email===email&&x.id!==id)) throw new Bad("That email is already used by another account.");
+      all[id]={id,role:"student",name,adm,cls,dept,phone,email,salt,pinHash:pinHash(pin,salt),status:"approved",nokName:nokN,nokRel:nokR,nokTel:nokT,emName:emN,emTel:emT,consentAt:Date.now(),createdAt:old?.createdAt||Date.now(),updatedAt:Date.now()};
       await s.setJSON("accounts",all);
       const reg=await getJSON(s,"register",{});
       const rid=sid(name,adm);
@@ -281,15 +334,52 @@ export default async (req) => {
       await s.setJSON("register",reg);
       return json({ok:true,updated:!!old});
     }
+    /* ----- forgot PIN: emailed one-time link (30 minutes), same answer whether or not the email is known ----- */
+    if (method === "POST" && path === "auth/forgot") {
+      const email = clean(body.email, 200).toLowerCase();
+      const generic = { ok: true, message: "If that email is registered, a reset link has been sent. Check your inbox and spam folder. The link works for 30 minutes." };
+      if (!EMAIL_RE.test(email)) return json(generic);
+      const all = await getJSON(s, "accounts", {}), a = Object.values(all).find((x) => x.email === email);
+      const toks = await getJSON(s, "resettokens", {}), now = Date.now();
+      for (const k of Object.keys(toks)) if (toks[k].exp < now) delete toks[k];
+      if (a && !Object.values(toks).some((t) => t.acc === a.id && t.made > now - 120000)) {
+        const tok = randomBytes(24).toString("hex");
+        toks[tokHash(tok)] = { acc: a.id, exp: now + 30 * 60000, made: now };
+        await s.setJSON("resettokens", toks);
+        const base = (process.env.SITE_URL || new URL(req.url).origin).replace(/\/$/, "");
+        await sendMail(email, "RVNP Portal: reset your PIN", "Hello " + a.name + ",\n\nOpen this link to set a new PIN (valid for 30 minutes, works once):\n" + base + "/auth.html?reset=" + tok + "\n\nIf you did not ask for this, ignore this email. Your PIN stays the same.\n\nRVNP Industrial Liaison Office");
+      } else await s.setJSON("resettokens", toks);
+      return json(generic);
+    }
+    if (method === "POST" && path === "auth/reset") {
+      const tok = clean(body.token, 100), pin = String(body.pin || "");
+      if (pin.length < 6 || pin.length > 12 || !/^\d+$/.test(pin)) throw new Bad("Use a 6-12 digit PIN.");
+      const toks = await getJSON(s, "resettokens", {}), h = tokHash(tok), t = toks[h];
+      if (!t || t.exp < Date.now()) throw new Bad("This reset link is invalid or has expired. Ask for a new one.");
+      const all = await getJSON(s, "accounts", {}), a = all[t.acc];
+      if (!a) throw new Bad("This reset link is invalid or has expired. Ask for a new one.");
+      const salt = randomBytes(16).toString("hex"); a.salt = salt; a.pinHash = pinHash(pin, salt);
+      await s.setJSON("accounts", all);
+      delete toks[h]; await s.setJSON("resettokens", toks);
+      const lf = await getJSON(s, "loginfail", {});
+      for (const idf of [a.adm, a.idno, a.pf]) if (idf) for (const r of ["student", "staff", a.role]) delete lf[createHash("sha256").update(r + "|" + idf).digest("hex").slice(0, 24)];
+      await s.setJSON("loginfail", lf);
+      await audit(s, { type: "pin-reset-email", adm: a.adm || a.idno, by: "self (email link)", role: a.role });
+      return json({ ok: true, message: "PIN changed. You can sign in now." });
+    }
+
     if (method === "POST" && path === "auth/login") {
       const role=clean(body.role,20).toLowerCase(), identifier=clean(body.identifier,80).toUpperCase().replace(/\s+/g,""), pin=String(body.pin||"");
+      const lfKey=createHash("sha256").update(role+"|"+identifier).digest("hex").slice(0,24), lf=await getJSON(s,"loginfail",{});
+      if(lf[lfKey] && lf[lfKey].until>Date.now()) return fail("Too many wrong attempts. Try again in "+Math.ceil((lf[lfKey].until-Date.now())/60000)+" minutes.",429);
       const all=await getJSON(s,"accounts",{});
       const a=Object.values(all).find(x=>
         role==="staff"
           ? x.role!=="student" && (x.idno===identifier || x.pf===identifier)
           : x.role===role && ((role==="student"&&x.adm===identifier) || role!=="student"&&(x.idno===identifier||x.pf===identifier))
       );
-      if(!a || !a.salt || pinHash(pin,a.salt)!==a.pinHash) { await new Promise(r=>setTimeout(r,500)); return fail("Wrong login details.",401); }
+      if(!a || !a.salt || pinHash(pin,a.salt)!==a.pinHash) { await new Promise(r=>setTimeout(r,500)); const e=lf[lfKey]||{n:0}; e.n++; if(e.n>=5){e.until=Date.now()+15*60000;e.n=0;} lf[lfKey]=e; await s.setJSON("loginfail",lf); return fail("Wrong login details.",401); }
+      if(lf[lfKey]){ delete lf[lfKey]; await s.setJSON("loginfail",lf); }
       if(a.status!=="approved") return fail(a.status==="pending"?"Your account is waiting for administrator approval.":"Your account is not active.",403);
       return json({token:makeAccountToken(a),role:a.role,name:a.name,dept:a.dept||"",id:a.id});
     }
@@ -301,12 +391,20 @@ export default async (req) => {
     }
     if (method === "GET" && path === "courses") {
       const courses = await loadCourses(s);
-      return json({ courses, departments: deptList(courses), nita: await getJSON(s, "nitameta", null) });
+      return json({ courses, departments: deptList(courses), nita: await getJSON(s, "nitameta", null), nitas: await getJSON(s, "nitasmeta", {}) });
+    }
+    if (method === "GET" && path === "stamp") {
+      const k = clean(url.searchParams.get("k"), 10), f = /^(oct|feb|jun)\d{4}$/.test(k) ? await getJSON(s, "stamp_" + k, null) : null;
+      if (!f || !f.data) return fail("No stamp uploaded.", 404);
+      return new Response(Buffer.from(f.data, "base64"), { headers: { "Content-Type": f.type || "image/png", "Cache-Control": "no-cache" } });
     }
     if (method === "GET" && path === "nita") {
-      const f = await getJSON(s, "nitafile", null), m = await getJSON(s, "nitameta", null);
+      const nk = clean(url.searchParams.get("k"), 10);
+      let f, m;
+      if (/^(oct|feb|jun)\d{4}$/.test(nk)) { f = await getJSON(s, "nitaf_" + nk, null); m = (await getJSON(s, "nitasmeta", {}))[nk]; }
+      if (!f || !f.data || !m) { f = await getJSON(s, "nitafile", null); m = await getJSON(s, "nitameta", null); }
       if (!f || !m) return fail("The NITA form has not been uploaded yet.", 404);
-      return new Response(Buffer.from(f.data, "base64"), { headers: { "Content-Type": m.type || "application/octet-stream", "Content-Disposition": 'attachment; filename="' + m.name.replace(/[^A-Za-z0-9._ -]/g, "_") + '"', "Cache-Control": "no-store" } });
+      return new Response(Buffer.from(f.data, "base64"), { headers: { "X-Filename": m.name.replace(/[^A-Za-z0-9._ -]/g, "_"), "Content-Type": m.type || "application/octet-stream", "Content-Disposition": 'attachment; filename="' + m.name.replace(/[^A-Za-z0-9._ -]/g, "_") + '"', "Cache-Control": "no-store" } });
     }
     if (method === "POST" && path === "placement") {
       const acct = await currentAccount(req,s); if(!requireRole(acct,["student"])) return fail("Please sign in as a student.",401);
@@ -327,7 +425,7 @@ export default async (req) => {
       if (tel2 && tel2.replace(/\D/g, "").length < 9) throw new Bad("Phone number 2 must have at least 9 digits, or leave it empty.");
       const all = await getJSON(s, "placements", {}), id = sid(n, a), old = all[id];
       if (!old && Object.keys(all).length >= 20000) throw new Bad("The list is full. Please contact the Industrial Liaison Office.");
-      all[id] = { n, a, cls, dept, course, org, loc, sup, town: town.toUpperCase(), tel1, tel2, t: old ? old.t : Date.now(), u: Date.now(), ...(old && old.tid && { tid: old.tid }) };
+      all[id] = { n, a, cls, dept, course, org, loc, sup, town: town.toUpperCase(), tel1, tel2, t: old ? old.t : Date.now(), u: Date.now(), ...(old && old.tid && { tid: old.tid }), ...(old && old.sd && { sd: old.sd }), ...(old && old.ed && { ed: old.ed }) };
       await s.setJSON("placements", all);
       return json({ ok: true, updated: !!old });
     }
@@ -362,7 +460,7 @@ export default async (req) => {
       const n = clean(body.name, 120).toUpperCase(), a = clean(body.adm, 60).toUpperCase().replace(/\s+/g, ""),
         c = clean(body.cls, 40).toUpperCase().replace(/\s+/g, ""), tel = String(body.tel || "").trim(), pin=String(body.pin||"");
       if (n.length < 3 || a.length < 4 || c.length < 2 || digits(tel).replace(/\D/g,"").length < 9) throw new Bad("Fill in your full name, admission number, class and a valid phone number.");
-      if(pin && (pin.length<4 || pin.length>12 || !/^\d+$/.test(pin))) throw new Bad("Use a 4-12 digit PIN.");
+      if(pin && (pin.length<6 || pin.length>12 || !/^\d+$/.test(pin))) throw new Bad("Use a 6-12 digit PIN.");
       const reg = await getJSON(s, "register", {}), id = sid(n, a), updated = !!reg[id];
       reg[id] = { ...(reg[id] || {}), n, a, c, tel: digits(tel), t: Date.now() };
       await s.setJSON("register", reg);
@@ -435,6 +533,26 @@ export default async (req) => {
       await s.setJSON("ilo", all);
       return json({ ok: true });
     }
+    /* ----- yearly renewal: an expired cover moves the student to the newest valid policy (class policy, else default) ----- */
+    if (method === "POST" && path === "renew") {
+      const acct = await currentAccount(req, s); if (!requireRole(acct, ["student"])) return fail("Please sign in as a student.", 401);
+      const name = clean(body.name), adm = clean(body.adm, 60);
+      if (normAdm(adm) !== normAdm(acct.adm)) return fail("This is not your record.", 403);
+      const students = await getJSON(s, "students", {}), id = sid(name, adm), rec = students[id];
+      if (!rec) return fail("No cover is on file for you yet.");
+      const settings = await getJSON(s, "settings", DEFAULT_SETTINGS), pols = await getJSON(s, "policies", []), rules = await getJSON(s, "classpol", {});
+      const cur = effective(rec, settings, pols), today = new Date().toISOString().slice(0, 10);
+      if (cur.e >= today) return json({ ok: true, renewed: false, record: cur, settings });
+      const cp = pols.find((x) => x.id === rules[rec.c]);
+      const nb = [cp, settings].find((b) => b && b.policyEnd >= today && b.policyEnd > cur.e);
+      if (!nb) return fail("Your cover expired on " + cur.e.split("-").reverse().join("/") + ". The new year's policy has not been loaded yet. Please ask the Industrial Liaison Office.");
+      rec.hist = (rec.hist || []).concat({ p: cur.p, i: cur.i, s: cur.s, e: cur.e, at: Date.now() }).slice(-10);
+      delete rec.p; delete rec.i; delete rec.s; delete rec.e; rec.pid = nb === cp ? cp.id : "";
+      students[id] = rec; await s.setJSON("students", students);
+      await audit(s, { type: "cover renewed " + rec.a, by: acct.name, role: "student" });
+      return json({ ok: true, renewed: true, record: effective(rec, settings, pols), settings });
+    }
+
     if (method === "POST" && path === "lookup") {
       const acct=await currentAccount(req,s); if(!requireRole(acct,["student"])) return fail("Please sign in as a student.",401);
       const name = clean(body.name), adm = clean(body.adm, 60);
@@ -547,8 +665,8 @@ export default async (req) => {
         else return fail("Please sign in with an approved portal account.",401);
       }
       const students = await getJSON(s, "students", {}), reg = await getJSON(s, "register", {});
-      const placements = await getJSON(s, "placements", {}), marks = await getJSON(s, "marks", {});
-      const cdept = await getJSON(s, "classdept", {});
+      const placements = await getJSON(s, "placements", {}), marks = await getJSON(s, "marks", {}), trainers = await getJSON(s, "trainers", {});
+      const cdept = await getJSON(s, "classdept", {}), classlocks = await getJSON(s, "classlocks", {});
       const codes = await getJSON(s, "ilocodes", {});
       /* everyone in the database (cover list + student details), once each */
       const people = new Map();
@@ -569,13 +687,20 @@ export default async (req) => {
         for (const p of people.values()) {
           const c = p.c || "NO CLASS"; const d = p.c ? deptOf(p.c) : "Not yet assigned";
           if (repDept && d !== repDept) continue;
-          const g = byClass[c] || (byClass[c] = { c, dept: d, students: [] });
-          const m = marks[p.id];
-          g.students.push({ n: p.n, a: p.a, m: m ? m.m : null, o: m ? m.o : null, pct: m ? Math.round((m.m / m.o) * 1000) / 10 : null });
+          const pl = placements[p.id], m = marks[p.id];
+          if (!pl && !m) continue; /* only placed students are assessed */
+          const g = byClass[c] || (byClass[c] = { c, dept: d, students: [], locked: !!classlocks[c] });
+          const tr = pl && pl.tid && trainers[pl.tid] ? trainers[pl.tid].name : "";
+          g.students.push({ n: p.n, a: p.a, m: m ? m.m : null, o: m ? 100 : null, pct: m ? Math.round(m.m * 10) / 10 : null, course: pl ? pl.course : "", tr, lk: !!(m && m.locked), u: m ? m.u : null });
         }
         const classes = Object.values(byClass).sort((x, y) => (x.dept + "|" + x.c).localeCompare(y.dept + "|" + y.c));
         for (const g of classes) g.students.sort((x, y) => x.n.localeCompare(y.n));
-        return { classes, departments: repDept ? [repDept] : DEPTS.concat(OTHER, "Not yet assigned"), role: repDept ? "rep" : isAdmin ? "admin" : "hod", codes: isAdmin ? Object.keys(codes) : undefined };
+        const P = { dept: {}, course: {}, cls: {} }, bump = (o, k, e) => { const x = o[k] || (o[k] = { k, total: 0, entered: 0 }); x.total++; if (e) x.entered++; };
+        for (const g of classes) for (const x of g.students) {
+          const e = x.m != null; bump(P.dept, g.dept, e); bump(P.course, (x.course || "No course") + " (" + g.dept + ")", e); bump(P.cls, g.c, e);
+        }
+        const fin = (o) => Object.values(o).map((x) => ({ ...x, pct: x.total ? Math.round((x.entered / x.total) * 1000) / 10 : 0 })).sort((a, b) => a.k.localeCompare(b.k));
+        return { progress: { dept: fin(P.dept), course: fin(P.course), cls: fin(P.cls) }, classes, departments: repDept ? [repDept] : DEPTS.concat(OTHER, "Not yet assigned"), role: repDept ? "rep" : isAdmin ? "admin" : "hod", codes: isAdmin ? Object.keys(codes) : undefined };
       };
       if ((method === "GET" || method === "POST") && path === "marks/data") return json(build());
       /* ----- standard marksheet templates (kept per department) ----- */
@@ -613,10 +738,13 @@ export default async (req) => {
       if (method === "POST" && path === "marks/upload") {
         if (!requireRole(acct,["rep"])) return fail("Only an ILO Representative can record or edit attachment marks.",403);
         const rows = Array.isArray(body.rows) ? body.rows.slice(0, 20000) : [];
+        { const fresh = await getJSON(s, "marks", {}); for (const k of Object.keys(marks)) delete marks[k]; Object.assign(marks, fresh); } /* re-read just before writing so two reps do not overwrite each other */
+        const lockedList = [], log = [];
         /* a representative can only change marks of students in their own department's classes */
         const byAdm = new Map(); let other = 0; const otherList = [];
         for (const p of people.values()) {
           if (repDept && (!p.c || deptOf(p.c) !== repDept)) { byAdm.set(normAdm(p.a), null); continue; }
+          if (!placements[p.id] && !marks[p.id]) { byAdm.set(normAdm(p.a), undefined); continue; }
           byAdm.set(normAdm(p.a), p.id);
         }
         let saved = 0, cleared = 0; const unmatched = [], invalid = [];
@@ -626,15 +754,57 @@ export default async (req) => {
           if (id === null) { other++; if (otherList.length < 50) otherList.push(a); continue; }
           if (!id) { unmatched.push(a); continue; }
           const raw = String(r.m ?? "").trim();
-          if (raw === "") { if (r.clear === true && marks[id]) { delete marks[id]; cleared++; } continue; }
+          { const cl = classlocks[(people.get(id) || {}).c]; if ((marks[id] && marks[id].locked) || (cl && !(marks[id] && marks[id].locked === false))) { lockedList.push(a); continue; } }
+          if (raw === "") { if (r.clear === true && marks[id]) { log.push({ id, a, old: marks[id].m, nw: null }); delete marks[id]; cleared++; } continue; }
           const m = Number(String(raw).replace("%", ""));
           if (!(m >= 0) || m > 100 || isNaN(m)) { invalid.push(a); continue; }
-          marks[id] = { m, o: 100, u: Date.now(), by: acct.id }; saved++;
+          log.push({ id, a, old: marks[id] ? marks[id].m : null, nw: m });
+          marks[id] = { m, o: 100, u: Date.now(), by: acct.id, locked: !!classlocks[(people.get(id) || {}).c] }; saved++;
         }
         await s.setJSON("marks", marks);
-        return json({ saved, cleared, unmatched: unmatched.slice(0, 50), unmatchedCount: unmatched.length, invalid: invalid.slice(0, 50), invalidCount: invalid.length, otherDept: otherList, otherDeptCount: other, ...build() });
+        for (const l of log) await audit(s, { type: "mark", adm: l.a, old: l.old, nw: l.nw, by: acct.name, role: "rep", dept: acct.dept });
+        return json({ locked: lockedList.slice(0, 50), lockedCount: lockedList.length, saved, cleared, unmatched: unmatched.slice(0, 50), unmatchedCount: unmatched.length, invalid: invalid.slice(0, 50), invalidCount: invalid.length, otherDept: otherList, otherDeptCount: other, ...build() });
+      }
+      if (method === "POST" && path === "marks/lockclass") {
+        if (!requireRole(acct, ["rep"])) return fail("Only an ILO Representative can lock a class.", 403);
+        const c = clean(body.c, 40); if (!c || !people.size || deptOf(c) !== repDept) throw new Bad("Choose one of your department's classes.");
+        const fresh = await getJSON(s, "marks", {}); let n = 0;
+        for (const p of people.values()) if (p.c === c && fresh[p.id]) { fresh[p.id].locked = true; n++; }
+        classlocks[c] = { by: acct.name, t: Date.now() };
+        await s.setJSON("marks", fresh); await s.setJSON("classlocks", classlocks);
+        for (const k of Object.keys(marks)) delete marks[k]; Object.assign(marks, fresh);
+        await audit(s, { type: "lock-class", adm: c, old: n, nw: null, by: acct.name, role: "rep", dept: repDept });
+        return json(build());
       }
       if (!isHod) return fail("Not allowed.", 403);
+      if (method === "POST" && path === "marks/unlock") {
+        if (!requireRole(acct, ["hod", "deputy"])) return fail("Only the HOD or Deputy HOD can unlock a mark.", 403);
+        const reason = clean(body.reason, 300), a = normAdm(clean(body.a, 60));
+        if (reason.length < 5) throw new Bad("Give the reason for the correction (at least 5 letters).");
+        const fresh = await getJSON(s, "marks", {}), pid = [...people.values()].find((p) => normAdm(p.a) === a);
+        if (!pid || !fresh[pid.id]) throw new Bad("That student has no saved mark.");
+        if (!fresh[pid.id].locked) throw new Bad("That mark is already unlocked.");
+        fresh[pid.id].locked = false; await s.setJSON("marks", fresh);
+        await audit(s, { type: "unlock", adm: pid.a, old: fresh[pid.id].m, nw: null, by: acct.name, role: acct.role, reason });
+        for (const k of Object.keys(marks)) delete marks[k]; Object.assign(marks, fresh);
+        return json(build());
+      }
+      if (method === "POST" && path === "marks/unlockclass") {
+        if (!requireRole(acct, ["hod", "deputy"])) return fail("Only the HOD or Deputy HOD can unlock a class.", 403);
+        const c = clean(body.c, 40), reason = clean(body.reason, 300);
+        if (reason.length < 5) throw new Bad("Give the reason (at least 5 letters).");
+        if (!classlocks[c]) throw new Bad("That class is not locked.");
+        const fresh = await getJSON(s, "marks", {}); let n = 0;
+        for (const p of people.values()) if (p.c === c && fresh[p.id]) { fresh[p.id].locked = false; n++; }
+        delete classlocks[c]; await s.setJSON("marks", fresh); await s.setJSON("classlocks", classlocks);
+        for (const k of Object.keys(marks)) delete marks[k]; Object.assign(marks, fresh);
+        await audit(s, { type: "unlock-class", adm: c, old: n, nw: null, by: acct.name, role: acct.role, reason });
+        return json(build());
+      }
+      if (method === "POST" && path === "marks/audit") {
+        const a = await getJSON(s, "audit", []);
+        return json({ audit: a.slice(-300).reverse() });
+      }
       if (method === "POST" && path === "marks/classdept") {
         const c = clean(body.c, 40), d = clean(body.dept, 80);
         if (!c) throw new Bad("Choose the class.");
@@ -703,6 +873,131 @@ export default async (req) => {
       return fail("Not found", 404);
     }
 
+    /* ----- attachment start/end dates (entered by the ILO Rep from the trainer's paper feedback) ----- */
+    if (path === "attachment/list" || path === "attachment/dates") {
+      const c = await staff(req, s); if (!c.role) return fail("Please sign in with an approved portal account.", 401);
+      const all = await getJSON(s, "placements", {}), trainers = await getJSON(s, "trainers", {});
+      const view = () => ({ list: Object.entries(all).filter(([, r]) => !c.repDept || r.dept === c.repDept).map(([id, r]) => ({ id, n: r.n, a: r.a, cls: r.cls, dept: r.dept, course: r.course, org: r.org, tr: r.tid && trainers[r.tid] ? trainers[r.tid].name : "", sd: r.sd || "", ed: r.ed || "" })).sort((x, y) => (x.cls + x.n).localeCompare(y.cls + y.n)) });
+      if (path === "attachment/list") return json(view());
+      if (!(c.role === "rep" || c.role === "hod" || c.role === "deputy")) return fail("Not allowed.", 403);
+      const rows = Array.isArray(body.rows) ? body.rows.slice(0, 500) : []; let n = 0;
+      for (const r of rows) {
+        const p = all[clean(r.id, 60)]; if (!p || (c.repDept && p.dept !== c.repDept)) continue;
+        const sd = pdate(r.sd), ed = pdate(r.ed);
+        if (sd && ed && ed < sd) throw new Bad(p.n + ": the end date is before the start date.");
+        if (sd) p.sd = sd; else delete p.sd; if (ed) p.ed = ed; else delete p.ed; n++;
+      }
+      await s.setJSON("placements", all);
+      return json({ saved: n, ...view() });
+    }
+
+    /* ----- emergency contacts (ILO Rep: own department; HOD, Deputy, Admin: all) ----- */
+    if (method === "POST" && path === "emergency/search") {
+      const c = await staff(req, s); if (!c.role) return fail("Please sign in with an approved portal account.", 401);
+      const q = clean(body.q, 60).toUpperCase(); if (q.replace(/[^A-Z0-9]/g, "").length < 3) throw new Bad("Type at least 3 letters.");
+      const accts = Object.values(await getJSON(s, "accounts", {})).filter((a) => a.role === "student" && (!c.repDept || a.dept === c.repDept) && (a.name.includes(q) || a.adm.includes(q)));
+      return json({ list: accts.slice(0, 20).map((a) => ({ n: a.name, a: a.adm, cls: a.cls, dept: a.dept, tel: a.phone, nokName: a.nokName || "", nokRel: a.nokRel || "", nokTel: a.nokTel || "", emName: a.emName || "", emTel: a.emTel || "" })) });
+    }
+
+    /* ----- dropouts: the ILO Rep requests, the HOD or Deputy approves; approval withdraws the student (login blocked, removed from lists, a copy of the records is kept in the request) ----- */
+    if (path.startsWith("dropout/")) {
+      const c = await staff(req, s); if (!c.role) return fail("Please sign in with an approved portal account.", 401);
+      const list = await getJSON(s, "dropouts", []);
+      if (path === "dropout/list") {
+        const mine = list.filter((d) => c.isHod || d.dept === c.repDept || d.byId === (c.acct && c.acct.id)).slice(-200).reverse();
+        return json({ list: mine.map(({ snap, ...d }) => d), canDecide: c.isHod && !c.isAdmin });
+      }
+      if (method === "POST" && path === "dropout/request") {
+        if (c.role !== "rep") throw new Bad("Only the ILO Representative sends a dropout request.");
+        const adm = clean(body.adm, 60).toUpperCase().replace(/\s+/g, ""), reason = clean(body.reason, 300);
+        if (adm.length < 4) throw new Bad("Enter the student's admission number.");
+        if (reason.length < 5) throw new Bad("Give the reason (for example: left the college, transferred).");
+        const accts = await getJSON(s, "accounts", {}), a = Object.values(accts).find((x) => x.role === "student" && x.adm === adm);
+        const students = await getJSON(s, "students", {}), reg = await getJSON(s, "register", {});
+        const rec = Object.values(students).find((r) => normAdm(r.a) === normAdm(adm)) || Object.values(reg).find((r) => normAdm(r.a) === normAdm(adm));
+        if (!a && !rec) throw new Bad("No student with that admission number.");
+        if (a && a.dept && a.dept !== c.repDept) throw new Bad("That student is not in your department.");
+        if (list.some((d) => d.adm === adm && d.status === "pending")) throw new Bad("A request for this student is already waiting for approval.");
+        list.push({ id: "D" + Date.now().toString(36) + randomBytes(2).toString("hex"), adm, name: (a && a.name) || rec.n, cls: (a && a.cls) || (rec && rec.c) || "", dept: c.repDept, reason, byId: c.acct.id, by: c.who, t: Date.now(), status: "pending" });
+        await s.setJSON("dropouts", list.slice(-1000));
+        await audit(s, { type: "dropout requested " + adm, reason, by: c.who, role: c.role });
+        return json({ ok: true });
+      }
+      if (method === "POST" && path === "dropout/decide") {
+        if (!c.isHod || c.isAdmin) throw new Bad("Only the HOD or Deputy HOD can approve or reject.");
+        const d = list.find((x) => x.id === clean(body.id, 40));
+        if (!d || d.status !== "pending") throw new Bad("This request is no longer waiting.");
+        const approve = body.approve === true, note = clean(body.note, 200);
+        d.status = approve ? "approved" : "rejected"; d.decidedBy = c.who; d.decidedAt = Date.now(); d.note = note;
+        if (approve) {
+          const accts = await getJSON(s, "accounts", {}), students = await getJSON(s, "students", {}), reg = await getJSON(s, "register", {});
+          d.snap = { students: {}, reg: {} };
+          for (const a of Object.values(accts)) if (a.role === "student" && a.adm === d.adm) a.status = "withdrawn";
+          for (const [k, r] of Object.entries(students)) if (normAdm(r.a) === normAdm(d.adm)) { d.snap.students[k] = r; delete students[k]; }
+          for (const [k, r] of Object.entries(reg)) if (normAdm(r.a) === normAdm(d.adm)) { d.snap.reg[k] = r; delete reg[k]; }
+          await s.setJSON("accounts", accts); await s.setJSON("students", students); await s.setJSON("register", reg);
+        }
+        await s.setJSON("dropouts", list);
+        await audit(s, { type: "dropout " + d.status + " " + d.adm, reason: note, by: c.who, role: c.role });
+        return json({ ok: true });
+      }
+    }
+
+    /* ----- reset a student's PIN (so nobody can take over an account by re-registering) ----- */
+    if (method === "POST" && path === "auth/reset-pin") {
+      const c = await staff(req, s); if (!c.role) return fail("Please sign in with an approved portal account.", 401);
+      const adm = clean(body.adm, 60).toUpperCase().replace(/\s+/g, ""), pin = String(body.pin || "");
+      if (pin.length < 6 || pin.length > 12 || !/^\d+$/.test(pin)) throw new Bad("Use a 6-12 digit PIN.");
+      const all = await getJSON(s, "accounts", {}), a = Object.values(all).find((x) => x.role === "student" && x.adm === adm);
+      if (!a || (c.repDept && a.dept !== c.repDept)) throw new Bad("No student with that admission number" + (c.repDept ? " in your department." : "."));
+      const salt = randomBytes(16).toString("hex"); a.salt = salt; a.pinHash = pinHash(pin, salt); await s.setJSON("accounts", all);
+      await audit(s, { type: "pin-reset", adm, by: c.who, role: c.role });
+      return json({ ok: true });
+    }
+
+    /* ----- memos: HOD / Deputy / Admin send; ILO Reps reply; replies are read-only once sent ----- */
+    if (path.startsWith("memo")) {
+      const c = await staff(req, s); if (!c.role) return fail("Please sign in with an approved portal account.", 401);
+      const memos = await getJSON(s, "memos", []), replies = await getJSON(s, "memoreplies", {});
+      if (path === "memo/list") {
+        const accts = Object.values(await getJSON(s, "accounts", {})).filter((a) => a.role === "rep" && a.status === "approved");
+        const expected = [...new Set(accts.map((a) => a.dept))].sort();
+        const out = memos.slice().reverse().map((m) => {
+          let rs = replies[m.id] || [];
+          const tracker = c.isHod ? { responded: expected.filter((d) => rs.some((r) => r.dept === d)).length, total: expected.length, missing: expected.filter((d) => !rs.some((r) => r.dept === d)) } : undefined;
+          if (!c.isHod) rs = rs.filter((r) => r.acc === c.acct.id);
+          return { ...m, replies: rs.map((r) => ({ id: r.id, name: r.name, dept: r.dept, t: r.t, text: r.text, file: r.file ? r.file.name : "" })), tracker };
+        });
+        return json({ memos: out, canSend: c.isHod, canReply: c.role === "rep" });
+      }
+      if (method === "POST" && path === "memo/create") {
+        if (!c.isHod) return fail("Only the HOD, Deputy HOD or Admin can send a memo.", 403);
+        const title = clean(body.title, 120), text = String(body.text || "").trim().slice(0, 4000);
+        if (title.length < 3 || text.length < 3) throw new Bad("Give the memo a title and a message.");
+        memos.push({ id: "M" + Date.now().toString(36), title, text, by: c.who, t: Date.now() }); await s.setJSON("memos", memos.slice(-300));
+        return json({ ok: true });
+      }
+      if (method === "POST" && path === "memo/reply") {
+        if (c.role !== "rep") return fail("Only an ILO Representative can reply to a memo.", 403);
+        const m = memos.find((x) => x.id === clean(body.memoId, 30)); if (!m) throw new Bad("That memo was not found.");
+        const text = String(body.text || "").trim().slice(0, 4000); if (text.length < 3) throw new Bad("Type your reply.");
+        const rid = "R" + Date.now().toString(36) + randomBytes(2).toString("hex"); let file = null;
+        if (body.file && body.file.data) {
+          const d = String(body.file.data); if (d.length > 1900000) throw new Bad("The attached file is too big (limit about 1.4 MB).");
+          file = { name: clean(body.file.name, 100) || "attachment" }; await s.setJSON("mf-" + rid, { name: file.name, data: d });
+        }
+        (replies[m.id] = replies[m.id] || []).push({ id: rid, acc: c.acct.id, name: c.acct.name, dept: c.acct.dept, t: Date.now(), text, file });
+        await s.setJSON("memoreplies", replies); return json({ ok: true });
+      }
+      if (path.startsWith("memo/file/")) {
+        const rid = clean(path.split("/")[2], 40);
+        const r = Object.values(replies).flat().find((x) => x.id === rid);
+        if (!r || !(c.isHod || r.acc === c.acct.id)) return fail("Not allowed.", 403);
+        return json(await getJSON(s, "mf-" + rid, {}));
+      }
+      return fail("Not found", 404);
+    }
+
     /* ----- admin login ----- */
     if (method === "POST" && path === "login") {
       if (!samePassword(body.password)) { await new Promise((r) => setTimeout(r, 800)); return fail("Wrong password.", 401); }
@@ -740,6 +1035,8 @@ export default async (req) => {
           classpol: await getJSON(s, "classpol", {}),
           hodSet: !!(await getJSON(s, "hodcode", null)),
           nita: await getJSON(s, "nitameta", null),
+          stamps: await getJSON(s, "stampmeta", {}),
+          nitas: await getJSON(s, "nitasmeta", {}),
           ilo: Object.entries(await getJSON(s, "ilo", {})).map(([id, r]) => ({ id, ...r })).sort((x, y) => (x.t || 0) - (y.t || 0)),
           students: Object.entries(students).map(([id, r]) => ({ id, ...r })),
           requests: Object.entries(await getJSON(s, "requests", {})).map(([id, r]) => ({ id, ...r })).sort((x, y) => (x.t || 0) - (y.t || 0)),
@@ -831,6 +1128,26 @@ export default async (req) => {
       if (method === "DELETE" && path.startsWith("admin/ilo/")) {
         const all = await getJSON(s, "ilo", {}); delete all[path.split("/")[2]]; await s.setJSON("ilo", all);
         return json({ total: Object.keys(all).length });
+      }
+      if (method === "POST" && path === "admin/stamps") {
+        const k = clean(body.key, 10), data = String(body.data || ""), meta = await getJSON(s, "stampmeta", {});
+        if (!/^(oct|feb|jun)\d{4}$/.test(k)) throw new Bad("Choose the stamp month and year.");
+        if (body.remove === true) { await s.setJSON("stamp_" + k, {}); delete meta[k]; await s.setJSON("stampmeta", meta); return json({ stamps: meta }); }
+        const name = clean(body.name, 100), type = /\.jpe?g$/i.test(name) ? "image/jpeg" : /\.png$/i.test(name) ? "image/png" : "";
+        if (!type) throw new Bad("Upload the stamp as a PNG or JPG image.");
+        if (!data || data.length > 2800000) throw new Bad("The image is empty or too large. Keep it under 2 MB.");
+        await s.setJSON("stamp_" + k, { data, type }); meta[k] = { name, t: Date.now() }; await s.setJSON("stampmeta", meta);
+        return json({ stamps: meta });
+      }
+      if (method === "POST" && path === "admin/nitas") {
+        const k = clean(body.key, 10), meta = await getJSON(s, "nitasmeta", {});
+        if (!/^(oct|feb|jun)\d{4}$/.test(k)) throw new Bad("Choose the stamp month and year.");
+        if (body.remove === true) { await s.setJSON("nitaf_" + k, {}); delete meta[k]; await s.setJSON("nitasmeta", meta); return json({ nitas: meta }); }
+        const name = clean(body.name, 100), data = String(body.data || "");
+        if (!/\.(pdf|docx?|jpe?g|png)$/i.test(name)) throw new Bad("Upload the NITA form as a PDF, Word document or image.");
+        if (!data || data.length > 5500000) throw new Bad("The file is empty or too large. Keep it under 4 MB.");
+        await s.setJSON("nitaf_" + k, { data }); meta[k] = { name, type: clean(body.type, 80) || "application/octet-stream", t: Date.now() }; await s.setJSON("nitasmeta", meta);
+        return json({ nitas: meta });
       }
       if (method === "POST" && path === "admin/nita") {
         const name = clean(body.name, 100), data = String(body.data || "");

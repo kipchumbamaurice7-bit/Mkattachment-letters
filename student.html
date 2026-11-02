@@ -166,7 +166,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <p class="j" id="pol">The Rift Valley National Polytechnic Liaison centre has arranged for the group personal accident policy number <b id="pnum"></b> from <b id="pins"></b>.</p>
 <p class="j">Your participation in this exercise will be of great service not only to the training and the zone but to the nations as a whole.</p>
 <p class="d">Yours faithfully,</p>
-<div class="sg"><img src="signature.png" alt="ILO stamp and signature"><div style="padding-top:34px"><b>B.K. CHERUIYOT</b><br>HOD-ILO<br>CELL NO 0721-842868</div></div>
+<div class="sg"><img id="sgi" src="signature.png" alt="ILO stamp and signature"><div style="padding-top:34px"><b>B.K. CHERUIYOT</b><br>HOD-ILO<br>CELL NO 0721-842868</div></div>
 <p class="d" style="font-style:italic;font-size:13px;margin:4px 0 0">All correspondences should be made to the HOD INDUSTRIAL LIAISON OFFICER (RVNP)<br>PO BOX 7182-20100 NAKURU</p>
 <img class="ft" src="iso.png" alt="ISO 9001:2015 certified institution">
 </div></div></div>
@@ -236,7 +236,7 @@ function note(){var n=document.getElementById("cn"),t=C[document.getElementById(
 (function(){api("courses").then(function(d){var dsel=document.getElementById("dp");ALLC=d.courses||[];
  (d.departments||[]).forEach(function(n){if(ALLC.some(function(c){return c.dept===n})){var o=document.createElement("option");o.value=n;o.textContent=n;dsel.appendChild(o)}});
  ALLC.forEach(function(c){C[c.key]=[c.title,c.percent,c.units]});
- if(d.nita)document.getElementById("nita").hidden=false;
+ if(d.nita||(d.nitas&&Object.keys(d.nitas).length))document.getElementById("nita").hidden=false;
  dsel.addEventListener("change",fillCourses);document.getElementById("co").addEventListener("change",note);
  render()}).catch(function(){var m=document.getElementById("lm");m.className="msg err";m.textContent="Could not load the course list. Check your connection and refresh the page."})})();
 var $=function(i){return document.getElementById(i)},te=new TextEncoder();
@@ -256,6 +256,7 @@ function dmy(iso){var p=iso.split("-");return p[2]+"/"+p[1]+"/"+p[0]}
  for(var y=y0;y<=y0+3;y++)blocks.forEach(function(b){
   if(new Date(y,b[1]+1,0,23,59)<now)return;
   var t=MON[b[0]].toUpperCase()+" to "+MON[b[1]].toUpperCase()+" "+y,o=document.createElement("option");o.value=t;o.textContent=t;sel.appendChild(o)})})();
+function stampKey(v){var p=String(v).toUpperCase().split(" "),y=+p[p.length-1],m=p[0];if(!y)return"";return m==="JANUARY"?"oct"+(y-1):m==="MAY"?"feb"+y:m==="SEPTEMBER"?"jun"+y:""}
 function save(bl,fn){var u=URL.createObjectURL(bl),k=document.createElement("a");k.href=u;k.download=fn;document.body.appendChild(k);k.click();k.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)}
 function say(id,cls,t){var m=$(id);m.className="msg"+(cls?" "+cls:"");m.textContent=t||""}
 function busy(b,on,t){b.disabled=on;b.querySelector("span").textContent=on?"Preparing\u2026":t}
@@ -285,7 +286,7 @@ function render(){
  $("pt").textContent=$("lt").value.trim();$("pe").textContent=$("le").value.trim();
  if(t&&t[2].length){$("pc").textContent=t[0]+".";$("pp").textContent=t[1];$("pu").textContent=list(t[2])}
  else{$("pc").textContent="";$("pp").textContent="";$("pu").textContent=""}
- $("pd").textContent=$("pr").value;var PL=polOf(insured?LREC:null);$("pnum").textContent=PL.p;$("pins").textContent=PL.ins;
+ $("pd").textContent=$("pr").value;(function(){var k=stampKey($("pr").value),im=$("sgi");if(k&&im.getAttribute("data-k")!==k){im.setAttribute("data-k",k);im.onerror=function(){im.onerror=null;im.src="signature.png"};im.src="/api/stamp?k="+k}else if(!k&&im.getAttribute("data-k")){im.removeAttribute("data-k");im.src="signature.png"}})();var PL=polOf(insured?LREC:null);$("pnum").textContent=PL.p;$("pins").textContent=PL.ins;
  $("pol").style.display=insured?"":"none";fit();
 }
 var timer;
@@ -442,10 +443,17 @@ $("rqs").addEventListener("click",async function(){
    log("insurance request","requested",n,a,co+" / "+c,"","")}
  }catch(x){say("rqm","err","Could not send your request. Check your connection and try again.")}
  busy(b,false,"Send request")});
+
+document.getElementById("nita").addEventListener("click",async function(ev){ev.preventDefault();
+ var k=stampKey($("pr").value);
+ if(!k){say("lm","err","Select the period of attachment first, then press NITA form.");$("pr").scrollIntoView({block:"center"});return}
+ try{var r=await fetch("/api/nita?k="+k);if(!r.ok)throw 0;var bl=await r.blob();save(bl,r.headers.get("X-Filename")||"NITA_form")}catch(x){say("lm","err","The NITA form for this period is not available yet. Please ask the Industrial Liaison Office.")}});
 $("id").addEventListener("click",async function(){
  if(!INS)return;var b=this;busy(b,true);
  try{
   if(!window.jspdf)throw 0;
+  var td=new Date().toISOString().slice(0,10);
+  if(INS.r.e&&INS.r.e<td){var rn=await api("renew",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:INS.r.n,adm:INS.r.a})});if(rn.error){say("im","err",rn.error);busy(b,false,"Download insurance cover");return}INS.r=rn.record;if(rn.settings)SETTINGS=rn.settings}
   save(await makeCover(INS.r),"Insurance_Cover_"+INS.r.a.replace(/[^A-Za-z0-9]+/g,"_")+".pdf");
   log("insurance cover","cover on file",INS.r.n,INS.r.a,INS.r.c,"","");
  }catch(x){say("im","err","Could not create the insurance cover. Check your connection and try again.")}
