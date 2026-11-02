@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RVNP Portal Sign in</title><link rel="stylesheet" href="/portal-theme.css">
+<style>
+body{background:#f3f8f4}.auth{max-width:760px;margin:0 auto;padding:28px 16px 50px}
+.hero{background:#12304a;color:#fff;border-radius:18px;padding:26px 22px;margin-bottom:18px}
+.hero h1{margin:0 0 6px;font-size:28px}.hero p{margin:0;opacity:.88}
+.tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{flex:1;padding:12px;border:1px solid #cfe0d4;border-radius:10px;background:#fff;font:inherit;font-weight:700;cursor:pointer}
+.tabs button.on{background:#17803f;color:#fff;border-color:#17803f}
+.card{background:#fff;border:1px solid #cfe0d4;border-radius:16px;padding:22px;box-shadow:0 3px 14px rgba(0,0,0,.06)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:620px){.grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}label{display:block;font-weight:650;font-size:14px;margin-bottom:5px}
+input,select{width:100%;min-height:46px;padding:10px 12px;border:1px solid #cfe0d4;border-radius:9px;font:inherit;background:#fff}
+button.primary{margin-top:16px;width:100%;min-height:48px;border:0;border-radius:10px;background:#17803f;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.msg{margin-top:14px;padding:12px;border-radius:10px}.err{background:#fdecea;color:#b3261e}.ok{background:#e6f4ea;color:#17703a}.hint{font-size:13px;color:#51675a;margin-top:5px}
+a{color:#17803f;font-weight:600}
+</style><link rel="manifest" href="/manifest.webmanifest"></head><body><main class="auth">
+<section class="hero"><h1 id="title">Portal access</h1><p id="sub">Use your approved account to continue.</p></section>
+<div class="tabs" id="tabs"><button id="loginTab" class="on">Sign in</button><button id="regTab">Create account</button></div>
+<section class="card" id="loginBox">
+<h2 id="loginTitle">Sign in</h2>
+<p class="hint" id="loginHint">Enter your admission number and PIN.</p>
+<div class="grid" style="margin-top:16px">
+<div class="full"><label id="idLabel">Admission number</label><input id="identifier" autocomplete="username" placeholder=""><div class="hint" id="idFormatHint" hidden>Type it as on your ID, e.g. <b>EPL6/24S/404930</b></div></div>
+<div class="full"><label>PIN</label><input id="pin" type="password" inputmode="numeric" autocomplete="current-password"></div>
+</div>
+<button class="primary" id="loginBtn">Sign in</button><div class="msg" id="msg"></div>
+</section>
+<section class="card" id="regBox" hidden>
+<h2 id="regTitle">Create account</h2><p class="hint" id="regHint"></p>
+<div id="staffForm">
+<div class="grid">
+<div class="full"><label>Account type</label><select id="role"><option value="rep">ILO Representative</option><option value="hod">ILO HOD</option><option value="deputy">Deputy HOD</option></select></div>
+<div class="full" id="deptWrap"><label>Department</label><select id="dept"><option value="">Select department</option></select></div>
+<div class="full"><label>Full name</label><input id="name"></div>
+<div><label>ID number</label><input id="idno"></div><div><label>PF number</label><input id="pf"></div>
+<div class="full"><label>Phone number</label><input id="phone" type="tel"></div>
+<div class="full"><label>Create PIN</label><input id="regPin" type="password" inputmode="numeric" autocomplete="new-password"><div class="hint">4–12 digits. Keep it private.</div></div>
+</div>
+</div>
+<div id="studentForm" hidden>
+<div class="grid">
+<div class="full"><label>Full name</label><input id="sn"></div>
+<div><label>Admission number</label><input id="sa" placeholder="EPL6/24S/404930" autocapitalize="characters"><div class="hint">Type it as on your ID, e.g. <b>EPL6/24S/404930</b></div></div><div><label>Class</label><input id="sc"></div>
+<div class="full"><label>Department</label><select id="sdept"><option value="">Select department</option></select></div>
+<div class="full"><label>Phone number</label><input id="st" type="tel"></div>
+<div class="full"><label>Create PIN</label><input id="sp" type="password" inputmode="numeric" autocomplete="new-password"><div class="hint">4–12 digits. You will use this PIN to access the student portal.</div></div>
+</div>
+</div>
+<button class="primary" id="regBtn">Submit registration</button><div class="msg" id="regMsg"></div>
+</section>
+<p style="margin-top:16px"><a href="/">← Back to main portal</a></p>
+</main>
+<script>
+const q=new URLSearchParams(location.search), mode=q.get("role")==="staff"?"staff":"student";
+const $=id=>document.getElementById(id);
+const DEFAULT_DEPARTMENTS=["Agriculture and Environmental Studies","Agricultural and Mechanical Engineering","Building and Civil Engineering","Business Studies","Electrical and Electronics Engineering","Health and Applied Sciences","Hospitality and Tourism","Information Communication Technology","Liberal Studies","Other courses"];
+function fillDepartmentSelect(sel,names){if(!sel)return;sel.innerHTML="<option value=\"\">Select department</option>";names.forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n;sel.appendChild(o)});}
+function loadDepartments(){return fetch("/api/auth-info",{headers:{Accept:"application/json"}}).then(r=>{if(!r.ok)throw new Error("department load failed");return r.json()}).then(d=>{const names=(d.departments||[]).filter(Boolean);if(!names.length)throw new Error("no departments");fillDepartmentSelect($("sdept"),names);if($("dept"))fillDepartmentSelect($("dept"),names);return names}).catch(()=>{fillDepartmentSelect($("sdept"),DEFAULT_DEPARTMENTS);if($("dept"))fillDepartmentSelect($("dept"),DEFAULT_DEPARTMENTS);return DEFAULT_DEPARTMENTS;});}
+loadDepartments();
+let depts=[];
+$("title").textContent=mode==="staff"?"Staff portal access":"Student portal access";
+$("sub").textContent=mode==="staff"?"HOD, Deputy HOD and ILO representatives must register and wait for administrator approval.":"Register once, then use your admission number and PIN whenever you return.";
+$("loginTitle").textContent=mode==="staff"?"Staff sign in":"Student sign in";
+$("loginHint").textContent=mode==="staff"?"Use your ID number or PF number and PIN.":"Use your admission number and PIN.";
+$("idLabel").textContent=mode==="staff"?"ID number or PF number":"Admission number";$("idFormatHint").hidden=mode!=="student";if(mode==="student")$("identifier").placeholder="EPL6/24S/404930";
+$("staffForm").hidden=mode!=="staff";$("studentForm").hidden=mode==="staff";
+$("regTitle").textContent=mode==="staff"?"Staff registration":"Student registration";
+$("regHint").textContent=mode==="staff"?"Your account stays pending until the administrator approves it.":"Your details and PIN are stored securely in the portal database.";
+if(mode==="staff"){loadDepartments().then(d=>{depts=d;});}
+function show(box){$("loginBox").hidden=box!=="login";$("regBox").hidden=box!=="reg";$("loginTab").classList.toggle("on",box==="login");$("regTab").classList.toggle("on",box==="reg")}
+$("loginTab").onclick=()=>show("login");$("regTab").onclick=()=>show("reg");
+$("role").onchange=()=>{$("deptWrap").hidden=$("role").value!=="rep"};
+async function send(path,body){let r=await fetch("/api/"+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),d=await r.json().catch(()=>({error:"The server is not answering (code "+r.status+"). Please tell the ILO office."}));if(!r.ok)throw Error(d.error||"Something went wrong.");return d}
+$("loginBtn").onclick=async()=>{let b=$("loginBtn");$("msg").className="msg";$("msg").textContent="";b.disabled=true;try{let d=await send("auth/login",{role:mode==="staff"?"staff":"student",identifier:$("identifier").value,pin:$("pin").value});sessionStorage.setItem("rvnp_user",d.token);if(d.role==="student")localStorage.setItem("rvnp_student",d.token);sessionStorage.setItem("rvnp_user_role",d.role);location.href=d.role==="student"?"/student.html":d.role==="rep"?"/ilo.html":"/hod.html"}catch(e){$("msg").className="msg err";$("msg").textContent=e.message}b.disabled=false};
+$("regBtn").onclick=async()=>{let b=$("regBtn");$("regMsg").className="msg";$("regMsg").textContent="";b.disabled=true;try{
+ if(mode==="staff"){let d=await send("auth/register-staff",{role:$("role").value,dept:$("dept").value,name:$("name").value,idno:$("idno").value,pf:$("pf").value,phone:$("phone").value,pin:$("regPin").value});$("regMsg").className="msg ok";$("regMsg").textContent=d.message;show("login")}
+ else {let d=await send("auth/register-student",{name:$("sn").value,adm:$("sa").value,cls:$("sc").value,dept:$("sdept").value,phone:$("st").value,pin:$("sp").value});$("regMsg").className="msg ok";$("regMsg").textContent=d.updated?"Your account was updated. You can now sign in.":"Registration complete. You can now sign in.";show("login")}
+}catch(e){$("regMsg").className="msg err";$("regMsg").textContent=e.message}b.disabled=false};
+</script><script src="/pwa.js" defer></script></body></html>

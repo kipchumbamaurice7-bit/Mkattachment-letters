@@ -147,16 +147,12 @@
       h += "</tbody></table></div>";
       h += '<div class="actions"><button class="btn" data-dl="sel">Download selected class</button><button class="btn" data-dl="all">Download ' + (canAll && !dept ? "everything" : "whole department") + '</button>' +
         (canAll ? '<button class="btn sec" data-dl="bulk">Bulk download (one list)</button>' : "") + '<button class="btn sec" data-rf>Refresh</button></div>';
-      h += '<div class="hint">Every class sheet lists all students in the database. Students without marks are marked "' + NOTE.toUpperCase() + '". Percentage = marks / out of.</div>';
-      h += '<div class="reqbox"><b>Upload marks</b><div class="hint" style="margin-bottom:8px">Excel or CSV with columns: <b>Admission number</b>, <b>Marks</b> and optionally <b>Out of</b> (default 100). Students are matched by admission number' + (role === "rep" ? ". You can only upload marks for students in your own department." : ".") + ' Uploading again updates marks already saved.</div><input type="file" data-f accept=".xlsx,.xls,.csv"></div>';
-      h += '<div class="reqbox"><b>Enter or edit marks</b><div class="hint" style="margin-bottom:8px">Search for one student by name or admission number, or edit a whole class. Clear a box to remove a mark.</div><label>Search a student</label><div style="display:flex;gap:8px"><input data-eq placeholder="Name or admission number" autocomplete="off"><button class="btn" data-es0 style="flex:none">Search</button></div><div class="actions"><button class="btn sec" data-ed>Edit whole class (choose it in the Class box above)</button></div><div data-edbox style="margin-top:12px"></div></div>';
+      h += '<div class="hint">Every class sheet lists all students in the database. Students without marks are marked "' + NOTE.toUpperCase() + '". All attachment marks are recorded out of 100.</div>';
+      if (role === "rep") h += '<div class="reqbox"><b>Upload marks</b><div class="hint" style="margin-bottom:8px">Excel or CSV with columns: <b>Admission number</b>, <b>Marks</b> (marks must be between 0 and 100). Students are matched by admission number' + (role === "rep" ? ". You can only upload marks for students in your own department." : ".") + ' Uploading again updates marks already saved.</div><input type="file" data-f accept=".xlsx,.xls,.csv"></div>';
+      if (role === "rep") h += '<div class="reqbox"><b>Enter or edit marks</b><div class="hint" style="margin-bottom:8px">Search for one student by name or admission number, or edit a whole class. Clear a box to remove a mark.</div><label>Search a student</label><div style="display:flex;gap:8px"><input data-eq placeholder="Name or admission number" autocomplete="off"><button class="btn" data-es0 style="flex:none">Search</button></div><div class="actions"><button class="btn sec" data-ed>Edit whole class (choose it in the Class box above)</button></div><div data-edbox style="margin-top:12px"></div></div>';
       h += '<div class="reqbox"><button class="btn" data-ms type="button" style="width:100%;justify-content:flex-start;gap:14px;padding:14px 18px;background:linear-gradient(135deg,var(--or),var(--ord))"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h8M11 10v10"/></svg><span style="text-align:left"><b style="display:block;font-size:17px">Standard marksheets</b><span style="font-weight:400;font-size:13px">Upload your marksheet, then transfer the marks into it</span></span></button><div data-msbox hidden style="margin-top:14px"></div></div>';
       if (canAll) {
         h += '<div class="reqbox" data-cdbox hidden><b data-cdt></b><div class="grid" style="margin-top:8px"><div class="full"><select data-cd><option value="">Work it out from placements</option>' + D.departments.filter(function (d) { return d !== "Not yet assigned"; }).map(function (d) { return "<option>" + esc(d) + "</option>"; }).join("") + '</select></div></div><div class="actions"><button class="btn" data-cds>Save department</button></div></div>';
-      }
-      if (role === "admin") {
-        h += '<div class="reqbox"><b>Department codes for ILO representatives</b><div class="hint" style="margin-bottom:8px">Each representative opens the ILO page, picks the department and types its code. Leave the code empty and save to remove it.</div><div class="grid"><div><select data-kd>' +
-          D.departments.filter(function (d) { return d !== "Not yet assigned"; }).map(function (d) { return "<option>" + esc(d) + (D.codes && D.codes.indexOf(d) >= 0 ? " (code set)" : "") + "</option>"; }).join("") + '</select></div><div><input data-kc placeholder="New code (6+ characters)" autocomplete="off"></div></div><div class="actions"><button class="btn sec" data-ks>Save code</button></div></div>';
       }
       body.innerHTML = h; wire();
     }
@@ -186,10 +182,6 @@
         var box = body.querySelector("[data-cdbox]");
         try { D = await call("POST", "marks/classdept", { c: box.getAttribute("data-c"), dept: box.querySelector("[data-cd]").value }); render(); say("ok", "Saved."); } catch (e) { fail(e); }
       };
-      var ks = body.querySelector("[data-ks]");
-      if (ks) ks.onclick = async function () {
-        try { D = await call("POST", "marks/ilocode", { dept: body.querySelector("[data-kd]").value.replace(" (code set)", ""), code: body.querySelector("[data-kc]").value }); render(); say("ok", "Code saved."); } catch (e) { fail(e); }
-      };
       function editor(list, title) {
         var box = body.querySelector("[data-edbox]");
         if (!list.length) { box.innerHTML = '<div class="hint">No students found.</div>'; return; }
@@ -211,7 +203,7 @@
           try { say("", "Saving..."); var res = await call("POST", "marks/upload", { rows: rows }); D = res; var q = (body.querySelector("[data-eq]") || {}).value; render(); say(res.invalidCount ? "err" : "ok", "Saved " + res.saved + " marks" + (res.cleared ? ", removed " + res.cleared : "") + "." + (res.invalidCount ? " " + res.invalidCount + " were not saved: marks must be a number not above the total." : "")); } catch (e) { fail(e); }
         };
       }
-      body.querySelector("[data-ed]").onclick = function () {
+      var edBtn = body.querySelector("[data-ed]") || {}; edBtn.onclick = function () {
         var cv = (body.querySelector("[data-c]") || {}).value;
         if (!cv) return say("err", "Choose a class in the Class box first, or search for a student below.");
         var g = inScope().filter(function (x) { return x.c === cv; })[0]; if (!g) return;
@@ -225,8 +217,8 @@
         inScope().forEach(function (g) { g.students.forEach(function (x) { var hay = (x.n + " " + x.a).toUpperCase().replace(/[^A-Z0-9\s]/g, " "); if (q.every(function (w) { return hay.indexOf(w) >= 0; })) found.push({ x: x, c: g.c }); }); });
         say("", ""); editor(found.slice(0, 25), found.length > 25 ? "First 25 of " + found.length + " students found. Type more to narrow." : found.length + " student(s) found");
       }
-      body.querySelector("[data-es0]").onclick = doSearch;
-      eq.onkeydown = function (e) { if (e.key === "Enter") { e.preventDefault(); doSearch(); } };
+      (body.querySelector("[data-es0]") || {}).onclick = doSearch;
+      if (eq) eq.onkeydown = function (e) { if (e.key === "Enter") { e.preventDefault(); doSearch(); } };
 
       var msb = body.querySelector("[data-ms]"), msx = body.querySelector("[data-msbox]");
       async function drawTemplates(list) {

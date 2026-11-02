@@ -89,7 +89,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div id="app" hidden>
 <div class="top">
 <div><h1>Portal admin</h1><p class="lead" style="margin:0">Changes here show on the student link straight away. No rebuilding or re-uploading.</p></div>
-<div class="row" style="margin:0"><a class="btn sec" href="/" target="_blank" rel="noopener">Open student page</a><button class="btn sec" id="out">Sign out</button></div>
+<div class="row" style="margin:0"><a class="btn sec" href="/student.html" target="_blank" rel="noopener">Open student page</a><button class="btn sec" id="out">Sign out</button></div>
 </div>
 <div class="card">
 <h2>Student link</h2>
@@ -98,16 +98,8 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div class="row"><button class="btn" id="cp">Copy link</button><a class="btn sec" id="wa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
 <div class="msg" id="ml"></div>
 </div>
-<div class="card">
-<h2>ILO representatives link</h2>
-<p class="lead">Share this link with the ILO representative of each department. They pick their department and course and send the units the students have covered. You approve each one in the <b>ILO units</b> tab before it appears on any letter.</p>
-<input id="il" readonly onclick="this.select()">
-<div class="row"><button class="btn" id="icp">Copy link</button><a class="btn sec" id="iwa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
-<div class="msg" id="mi"></div>
-</div>
-
-
 <div class="tabs" role="tablist">
+<button class="tab" id="t-ac" role="tab" aria-selected="false">Accounts <span class="badge" id="acnt">0</span></button>
 <button class="tab" id="t-ins" role="tab" aria-selected="true">Insurance covers</button>
 <button class="tab" id="t-req" role="tab" aria-selected="false">Cover requests <span class="badge" id="rcnt">0</span></button>
 <button class="tab" id="t-let" role="tab" aria-selected="false">Attachment letters</button>
@@ -116,6 +108,16 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <button class="tab" id="t-pm" role="tab" aria-selected="false">Placements <span class="badge" id="pmcnt">0</span></button>
 <button class="tab" id="t-mk" role="tab" aria-selected="false">Marks</button>
 </div>
+
+<!-- ACCOUNTS -->
+<div id="s-ac" hidden>
+<div class="card">
+<h2>Portal accounts <span class="badge" id="acall">0</span></h2>
+<p class="lead">All HOD, Deputy HOD and ILO representative accounts are created here through registration. Nothing becomes active until you approve it. Students register immediately and use their admission number + PIN.</p>
+<div class="row"><button class="btn sec" id="acrf">Refresh</button></div>
+<div class="msg" id="acm"></div>
+<div class="scroll"><table><thead><tr><th>Status</th><th>Role</th><th>Name</th><th>ID / Admission</th><th>PF</th><th>Department</th><th>Phone</th><th>Action</th></tr></thead><tbody id="actb"></tbody></table></div>
+</div></div>
 
 <!-- INSURANCE -->
 <div id="s-ins">
@@ -258,11 +260,6 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <label for="pml">Link for students</label>
 <input id="pml" readonly onclick="this.select()">
 <div class="row"><button class="btn" id="pmcp">Copy link</button><a class="btn sec" id="pmwa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
-<label for="phl" style="margin-top:14px;display:block">Link for the ILO HOD / deputy HOD (needs the access code below)</label>
-<input id="phl" readonly onclick="this.select()">
-<div class="row"><button class="btn" id="phcp">Copy HOD link</button><a class="btn sec" id="phwa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
-<div class="grid" style="margin-top:14px"><div class="full"><label for="phc">HOD access code (at least 6 characters)</label><input id="phc" type="password" autocomplete="off" placeholder="Type a new code to set or change it"><div class="hint" id="phs"></div></div></div>
-<div class="row"><button class="btn" id="phk">Save access code</button></div>
 <div class="msg" id="pmm"></div>
 </div>
 <div class="card">
@@ -318,7 +315,7 @@ var $=function(i){return document.getElementById(i)},TOKEN=sessionStorage.getIte
 function say(id,cls,t){var m=$(id);m.className="msg"+(cls?" "+cls:"");m.textContent=t||""}
 async function call(method,path,body){
  var r=await fetch("/api/"+path,{method:method,headers:{"Content-Type":"application/json",Authorization:"Bearer "+(TOKEN||"")},body:body?JSON.stringify(body):undefined});
- var d=await r.json().catch(function(){return{error:"Unexpected response"}});
+ var d=await r.json().catch(function(){return{error:"The server is not answering (code "+r.status+"). The site needs to be redeployed on Netlify."}});
  if(r.status===401&&path!=="login"){signOut();throw new Error("Please sign in again.")}
  if(!r.ok)throw new Error(d.error||"Something went wrong");return d}
 function signOut(){TOKEN=null;sessionStorage.removeItem("rvnp_admin");$("app").hidden=true;$("login").hidden=false}
@@ -339,8 +336,20 @@ async function start(){
 if(TOKEN)start().catch(function(){signOut()});
 
 /* tabs */
-var MK=null;function tab(w){["i","r","l","o","g","m","k"].forEach(function(k){var id={i:"ins",r:"req",l:"let",o:"ilo",g:"reg",m:"pm",k:"mk"}[k];$("t-"+id).setAttribute("aria-selected",k===w);$("s-"+id).hidden=k!==w});if(w==="g"&&!REG)loadReg();if(w==="m"&&!PM)loadPm();if(w==="k"&&!MK)MK=RVMarks.mount($("mkbox"),{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut})}
-$("t-ins").onclick=function(){tab("i")};$("t-req").onclick=function(){tab("r")};$("t-let").onclick=function(){tab("l")};$("t-ilo").onclick=function(){tab("o")};$("t-reg").onclick=function(){tab("g")};$("t-pm").onclick=function(){tab("m")};$("t-mk").onclick=function(){tab("k")};
+var MK=null;function tab(w){["a","i","r","l","o","g","m","k"].forEach(function(k){var id={a:"ac",i:"ins",r:"req",l:"let",o:"ilo",g:"reg",m:"pm",k:"mk"}[k];$("t-"+id).setAttribute("aria-selected",k===w);$("s-"+id).hidden=k!==w});if(w==="a")loadAccounts();if(w==="g"&&!REG)loadReg();if(w==="m"&&!PM)loadPm();if(w==="k"&&!MK)MK=RVMarks.mount($("mkbox"),{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut})}
+$("t-ac").onclick=function(){tab("a")};$("t-ins").onclick=function(){tab("i")};$("t-req").onclick=function(){tab("r")};$("t-let").onclick=function(){tab("l")};$("t-ilo").onclick=function(){tab("o")};$("t-reg").onclick=function(){tab("g")};$("t-pm").onclick=function(){tab("m")};$("t-mk").onclick=function(){tab("k")};
+
+/* accounts */
+var ACC=null;
+async function loadAccounts(){say("acm","");try{var d=await call("GET","admin/accounts");ACC=d.list||[];drawAccounts()}catch(e){say("acm","err",e.message)}}
+function drawAccounts(){if(!ACC)return;$("acall").textContent=ACC.length;$("acnt").textContent=ACC.filter(function(a){return a.status==="pending"}).length;
+ $("actb").innerHTML=ACC.map(function(a){
+  var who=a.role==="student"?a.adm:a.idno,action=a.status==="pending"?'<button class="btn ok" data-acc-ap="'+a.id+'">Approve</button> <button class="btn del" data-acc-rj="'+a.id+'">Reject</button>':a.status==="approved"?"<span class=\"tag\">Active</span>":"<span class=\"tag\">Rejected</span>";
+  return "<tr><td>"+esc(a.status)+"</td><td>"+esc(a.role==="rep"?"ILO Representative":a.role==="hod"?"HOD":a.role==="deputy"?"Deputy HOD":"Student")+"</td><td>"+esc(a.name)+"</td><td>"+esc(who)+"</td><td>"+esc(a.pf||"—")+"</td><td>"+esc(a.dept||"—")+"</td><td>"+esc(a.phone||"")+"</td><td>"+action+"</td></tr>";
+ }).join("")||"<tr><td colspan=8>No accounts yet.</td></tr>"}
+$("acrf").onclick=loadAccounts;
+$("actb").onclick=async function(e){var ap=e.target.getAttribute("data-acc-ap"),rj=e.target.getAttribute("data-acc-rj");if(!ap&&!rj)return;var id=ap||rj;
+ try{await call("POST","admin/accounts/"+(ap?"approve":"reject"),{id:id});await loadAccounts();say("acm","ok",ap?"Account approved.":"Account rejected.")}catch(x){say("acm","err",x.message)}};
 
 /* policy */
 $("sp").onclick=async function(){say("mp","");try{
@@ -573,7 +582,7 @@ function drawPm(){if(!PM)return;var P=PM.placements,as=P.filter(function(p){retu
  $("pmt").textContent=P.length;$("pma").textContent=as;$("pmu").textContent=P.length-as;$("pmcnt").textContent=P.length;
  $("pmd").innerHTML=Object.keys(by).sort().map(function(d){return '<tr data-pd="'+esc(d)+'" style="cursor:pointer"><td><b>'+esc(d)+'</b></td><td>'+by[d]+'</td><td>'+(ba[d]||0)+'</td></tr>'}).join("")||"<tr><td colspan=3>No placements yet. Share the student link above.</td></tr>";
  $("pmtr").innerHTML=PM.trainers.map(function(t){return "<tr><td>"+esc(t.name)+"</td><td>"+esc(t.tel)+"</td><td><b>"+t.count+"</b></td></tr>"}).join("")||"<tr><td colspan=3>No trainers yet. The HOD adds them on the HOD link.</td></tr>";
- $("phs").textContent=D.hodSet?"An access code is set. Type a new one only if you want to change it.":"No access code yet. Set one before you send the HOD link.";
+ 
  drawPmList()}
 function drawPmList(){if(!PM)return;var q=$("pmq").value.trim().toUpperCase(),rows;
  if(PDEPT&&q.length<2){rows=PM.placements.filter(function(p){return p.dept===PDEPT});$("pmh").textContent=PDEPT+": "+rows.length+" students."}
@@ -585,30 +594,23 @@ $("pmd").onclick=function(e){var tr=e.target.closest("[data-pd]");if(!tr)return;
 $("pml2").onclick=async function(e){var id=e.target.getAttribute("data-pdx");if(!id)return;if(!confirm("Remove this placement?"))return;
  try{await call("DELETE","admin/placements/"+id);PM.placements=PM.placements.filter(function(p){return p.id!==id});drawPm()}catch(x){say("pmm","err",x.message)}};
 $("pmrf").onclick=loadPm;
-$("phk").onclick=async function(){say("pmm","");try{await call("POST","admin/hodcode",{code:$("phc").value});D.hodSet=true;$("phc").value="";drawPm();say("pmm","ok","Access code saved. Give the code to the HOD together with the HOD link.")}catch(e){say("pmm","err",e.message)}};
-function pmHead(){return ["Student name","Admission number","Department","Course","Organization","Where (landmark)","Town","Supervisor at organization","Phone 1","Phone 2","College trainer","Trainer phone"]}
-function pmRow(p){var t=trOf(p.tid)||{name:"",tel:""};return [p.n,p.a,p.dept,p.course,p.org,p.loc,p.town,p.sup,p.tel1,p.tel2||"",t.name,t.tel]}
+
+function pmHead(){return ["Student name","Admission number","Class","Department","Course","Organization","Where (landmark)","Town","Supervisor at organization","Phone 1","Phone 2","College trainer","Trainer phone"]}
+function pmRow(p){var t=trOf(p.tid)||{name:"",tel:""};return [p.n,p.a,p.cls||"",p.dept,p.course,p.org,p.loc,p.town,p.sup,p.tel1,p.tel2||"",t.name,t.tel]}
 $("pmxl").onclick=function(){if(!PM||!PM.placements.length){say("pmm","err","Nothing to download yet.");return}
  if(!window.XLSX){say("pmm","err","The spreadsheet tool did not load. Check your connection and try again.");return}
  var P=PM.placements,by={},wb=XLSX.utils.book_new(),used={};P.forEach(function(p){(by[p.dept]=by[p.dept]||[]).push(p)});
- var add=function(nm,aoa){nm=nm.replace(/[\\\/\?\*\[\]:]/g,"-").slice(0,28)||"Sheet";var k=nm,i=2;while(used[k])k=nm.slice(0,26)+"-"+i++;used[k]=1;var ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=[30,20,28,34,28,36,14,24,14,14,24,14].map(function(x){return{wch:x}});XLSX.utils.book_append_sheet(wb,ws,k)};
+ var add=function(nm,aoa){nm=nm.replace(/[\\\/\?\*\[\]:]/g,"-").slice(0,28)||"Sheet";var k=nm,i=2;while(used[k])k=nm.slice(0,26)+"-"+i++;used[k]=1;var ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=[30,20,18,28,34,28,36,14,24,14,14,24,14].map(function(x){return{wch:x}});XLSX.utils.book_append_sheet(wb,ws,k)};
  var sum=[["Department","Placed","Assigned to a trainer"]].concat(Object.keys(by).sort().map(function(d){return [d,by[d].length,by[d].filter(function(p){return p.tid}).length]}));sum.push(["TOTAL",P.length,P.filter(function(p){return p.tid}).length]);sum.push([]);sum.push(["Trainer","Phone","Students"]);PM.trainers.forEach(function(t){sum.push([t.name,t.tel,t.count])});
  add("Summary",sum);add("All placements",[pmHead()].concat(P.map(pmRow)));
  Object.keys(by).sort().forEach(function(d){add(d,[pmHead()].concat(by[d].map(pmRow)))});
  XLSX.writeFile(wb,"RVNP_placements.xlsx")};
-(function(){var o=location.origin,u1=o+"/placement.html",u2=o+"/hod.html";$("pml").value=u1;$("phl").value=u2;
+(function(){var o=location.origin,u1=o+"/placement.html",u2=o+"/hod.html";$("pml").value=u1;
  $("pmwa").href="https://wa.me/?text="+encodeURIComponent("Secured an attachment place? Tell us where you are, and see your trainer, here: "+u1);
- $("phwa").href="https://wa.me/?text="+encodeURIComponent("ILO: assign trainers to students here (you need the access code): "+u2);
+ 
  var cp=function(id,u,m){$(id).onclick=function(){var ok=function(){say("pmm","ok",m)};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok,ok);else ok()}};
- cp("pmcp",u1,"Student link copied.");cp("phcp",u2,"HOD link copied.")})();
-
-/* ILO link */
-(function(){var u=location.origin+"/ilo.html";$("il").value=u;
- $("iwa").href="https://wa.me/?text="+encodeURIComponent("ILO representatives: send the units covered by your students here: "+u);
- $("icp").onclick=function(){var done=function(){say("mi","ok","Link copied.")};
-  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done,function(){$("il").select();document.execCommand("copy");done()});
-  else{$("il").select();document.execCommand("copy");done()}}})();
+ cp("pmcp",u1,"Student link copied.")})();
 
 /* share link */
 (function(){var u=location.origin+"/";$("sl").value=u;

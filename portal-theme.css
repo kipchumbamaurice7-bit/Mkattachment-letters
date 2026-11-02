@@ -83,3 +83,21 @@ a:not(.btn){color:#176b45}
 a:not(.btn):hover{color:#b96512}
 .badge,.tag{background:#fff2e3 !important;color:#98500d !important}
 .msg.info{background:#fff3e5 !important;color:#98500d !important;border-left:3px solid #e58a24}
+
+/* Role dashboards: clear, consistent navigation */
+.rolebar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;margin:0 0 20px;background:#fff;border:1px solid #dce5ed;border-radius:14px;box-shadow:0 5px 18px rgba(22,48,72,.05)}
+.rolebar .role-id{display:flex;align-items:center;gap:11px;min-width:0}
+.rolebar .role-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#edf5ef;color:#176b45;font-weight:900;font-size:19px}
+.rolebar strong{display:block;color:#17364f;font-size:14px}
+.rolebar small{display:block;color:#718397;font-size:12px;margin-top:1px}
+.rolebar .role-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.rolebar a,.rolebar button{font:inherit;text-decoration:none;border:1px solid #dce5ed;background:#f8fafb;color:#34536d;border-radius:9px;padding:8px 11px;font-weight:700;cursor:pointer}
+.rolebar a:hover,.rolebar button:hover{border-color:#e58a24;background:#fff5e8;color:#98500d}
+.rolebar .current{background:#176b45;color:#fff;border-color:#176b45}
+.dashboard-title{margin:0 0 5px!important}
+.dashboard-subtitle{margin:0 0 18px;color:#687789;font-size:14px}
+.role-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 22px}
+.role-card{background:#fff;border:1px solid #dce5ed;border-radius:14px;padding:15px;min-height:92px}
+.role-card b{display:block;color:#17364f;margin-bottom:4px}
+.role-card span{font-size:13px;color:#718397}
+@media(max-width:720px){.rolebar{align-items:flex-start;flex-direction:column}.rolebar .role-actions{width:100%;justify-content:flex-start}.role-grid{grid-template-columns:1fr}}

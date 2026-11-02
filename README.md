@@ -3,18 +3,20 @@
 Students download their attachment letter and personal accident insurance cover.
 The admin manages courses, insurance policy details, student lists and cover requests.
 
-The portal includes a unified responsive visual theme using RVNP navy, green and gold styling. The theme is provided by `portal-theme.css`, which must be deployed alongside the HTML pages.
+The portal includes a unified responsive visual theme using RVNP navy, green and gold styling. Staff accounts (HOD, Deputy HOD and departmental ILO representatives) must register with full name, ID, phone and PF number; representatives also choose their department. The administrator approves staff accounts before they can log in. Students register their name, admission number, class, phone and a private PIN; their details are stored in the student database. The theme is provided by `portal-theme.css`, which must be deployed alongside the HTML pages.
 
 ## Files (keep all project files at the top level, not inside a sub-folder)
 
 | File | Purpose |
 |---|---|
-| index.html | Student page (attachment letter and insurance cover) |
+| index.html | Main access gateway; each role now goes through its secure sign-in/registration flow |
+| auth.html | Secure staff/student registration and PIN login |
+| student.html | Student page (attachment letter and insurance cover) |
 | portal-theme.css | Shared responsive design theme used by all portal pages |
 | admin.html | Admin page (open at `your-site/admin.html`) |
 | register.html | Page where students fill in their name, admission number, class and contact number (`your-site/register.html`) |
 | placement.html | Students tell the college where they were placed and see their trainer (`your-site/placement.html`) |
-| hod.html | ILO HOD / deputy HOD page for adding trainers and assigning students (`your-site/hod.html`, needs the access code) |
+| hod.html | ILO HOD / deputy HOD page for adding trainers and assigning students (`your-site/hod.html`, needs an approved HOD / Deputy HOD account) |
 | marks.js | Marks panel (view, upload, download) used on the admin, HOD and ILO pages |
 | manifest.webmanifest, manifest-ilo.webmanifest, manifest-hod.webmanifest, sw.js, pwa.js, icon-192.png, icon-512.png, icon-maskable.png, apple-touch-icon.png | Make the portal installable as an app |
 | ilo.html | Page for ILO representatives of departments (open at `your-site/ilo.html`) |
@@ -121,10 +123,20 @@ The student's cover (and the policy number and insurer in their attachment lette
 ## Student database (details filled in by students)
 
 1. Share the **student details link** (`your-site/register.html`). You can copy it from the admin page (**Student database** tab) or from the ILO page, so ILO representatives can send it to their classes too.
-2. Students enter their full name, admission number, class and contact number. If they submit again with the same name and admission number, their details are updated, not duplicated.
+2. Students enter their full name, admission number, class, contact number and a private PIN. The PIN is stored as a secure password hash, not as plain text. If they submit again with the same name and admission number, their details are updated, not duplicated.
 3. In the admin page, **Student database** tab, you see the **total number of students**, the number per class, and how many already have an insurance cover. Tap a class to list its students, or search by name, admission number, class or phone (the list stays hidden until you do).
 4. **Download Excel (by class)** gives one file with a Summary sheet (students per class and the total), an "All students" sheet sorted by class, and a separate sheet for each class. **Download CSV** gives the same list as one sorted file.
 5. Remove a student with the Remove button next to their name.
+
+## Accounts and access flow
+
+1. The main `/` page no longer gives direct access to ILO or student tools.
+2. **Admin** still uses the existing `ADMIN_PASSWORD` login.
+3. **Staff / ILO** opens `auth.html?role=staff`. HOD, Deputy HOD and ILO representatives register there. A representative must select a department. Their account remains **Pending** until the administrator approves it in **Admin → Accounts**.
+4. **Students** open `auth.html?role=student` (the old `register.html` address redirects there). They register their full name, admission number, class, phone and a 4–12 digit PIN. The details are stored in the database and the student can then sign in with admission number + PIN.
+5. Direct visits to `ilo.html`, `hod.html` and `student.html` are protected and redirect unauthenticated users to the appropriate sign-in page.
+6. ILO representative and HOD/deputy API actions now require an approved account token; old department/HOD access codes are no longer needed for those pages.
+7. The admin **Accounts** tab shows pending/active/rejected accounts and provides Approve/Reject controls.
 
 ## Installing the portal as an app
 
@@ -138,7 +150,7 @@ If you ever change sw.js, change the `VERSION` line at the top of it so phones r
 ## Placements and trainers
 
 1. **Students** open the **Attachment placement** card on the portal (or `your-site/placement.html`) once they have a place. They enter name, admission number, department, course, two phone numbers, the organization with a description of where it is (road and landmark, "near ..."), their supervisor at the organization, and the town. Submitting again with the same name and admission number corrects the entry.
-2. **Admin page, Placements tab:** set the **HOD access code** (at least 6 characters), copy the **HOD link** (`your-site/hod.html`) and send it, with the code, to the ILO HOD / deputy HOD. The tab also shows how many students are placed and assigned, per department and per trainer, and downloads everything as Excel (summary, all placements with the trainer, one sheet per department).
+2. **Admin page, Placements tab:** (the HOD access code is no longer used; HODs sign in with their approved account)  Old text: set the **HOD access code** (at least 6 characters), copy the **HOD link** (`your-site/hod.html`) and send it, with the code, to the ILO HOD / deputy HOD. The tab also shows how many students are placed and assigned, per department and per trainer, and downloads everything as Excel (summary, all placements with the trainer, one sheet per department).
 3. **The HOD** opens the link, types the code, and:
    - adds trainers (name and phone number),
    - filters students by department, town, or "waiting for a trainer", ticks the students (or **Select all shown**), chooses a trainer and presses **Assign**,
@@ -170,11 +182,11 @@ Green and white theme with orange accents (title underline, counters, selected t
 | Who | See | Download | Upload marks |
 |---|---|---|---|
 | ILO representative | Only their own department | One class, or the whole department | Yes, own department only |
-| HOD / deputy HOD (access code) | All departments | One class, a department, or everything | Yes |
+| HOD / deputy HOD (approved account) | All departments | One class, a department, or everything | Yes |
 | Admin | All departments | One class, a department, or everything | Yes |
 
 **Setting it up (admin page, Marks tab)**
-1. **Department codes**: pick a department, type a code (6+ characters), Save. Give each ILO representative the code for their department only. One code opens one department.
+1. **Accounts**: staff register on the sign-in page; approve them in the admin page, Accounts tab. An ILO representative only ever sees the department on their own account.
 2. **Upload marks**: Excel or CSV with columns **Admission number**, **Marks**, and optionally **Out of** (default 100). Students are matched by admission number. Uploading again updates marks already saved. Rows that do not match anyone, or have marks above the total, are reported and skipped.
 3. **Class to department**: the system works out each class's department from the placements its students filled in. A class with no placements shows "Not yet assigned". Press **Change** next to the class to set its department.
 
@@ -197,3 +209,31 @@ Green and white theme with orange accents (title underline, counters, selected t
 
 ### Visual colour update
 The portal uses a balanced green, orange and white palette: green remains the institutional identity and primary action colour; orange is used for highlights, selected navigation, secondary actions and status accents; white and soft neutral backgrounds keep pages clean and readable. Official print templates remain unchanged.
+
+
+## Latest corrections (read this first)
+
+**Security**
+- Sign-in tokens for students and staff were being accepted as administrator tokens, so any signed-in student could open the admin and HOD data. Administrator tokens are now a separate kind, and students, ILO representatives and the HOD can no longer reach admin data. Administrators must sign in again once after this update.
+- The administrator can now use the HOD data (the admin **Placements** tab was getting "401" before).
+
+**Students' main details are kept, not retyped**
+- At registration a student gives name, admission number, class, **department**, phone and a PIN. The placement page shows these locked, and the student only fills in: course, organization, where it is, supervisor, town and an optional second phone number. The server also ignores any attempt to change the locked details.
+- Admission numbers: the strict format rule rejected about half of the real numbers (for example DEET/25J/212371 and ES22/184248). It now accepts every real format (letters and digits, slashes, then 4 to 6 digits) and still rejects junk.
+- Students who registered before departments existed must register once more (same admission number) to add their department. Their PIN is reset to the new one.
+
+**Trainer shows up by itself**
+- No searching. The student's dashboard has a **Your attachment** card and the placement page has a trainer box. Both update on their own (every 45 seconds and when the page is opened again) as soon as the HOD assigns a trainer.
+- Students stay signed in on their own phone (they do not have to sign in again each time).
+
+**HOD, Deputy HOD and administrator can see and download every response**
+- HOD / Deputy HOD page: new **All responses (full details)** card with search, **Download Excel (all details)** and **Download CSV**. The Excel has a Summary sheet, an All responses sheet and one sheet per department. Columns: name, admission number, class, department, course, both phones, organization, where, town, supervisor, college trainer and trainer phone, and the date sent.
+- Admin page, **Placements** tab: the same full list, with Excel and CSV downloads.
+
+**Deployment**
+- `netlify.toml` now has `command = "node build.mjs"`. Without it Netlify never created the function and the whole site would answer with errors. Keep `build.mjs` and `package.json` at the top level with the other files.
+- A script error that stopped the admin page from finishing loading (it looked for a HOD link box that no longer exists) is fixed.
+
+## If sign-in shows "Unexpected end of JSON input" or "Unexpected response"
+
+This means the server function (`api.mjs`) is not running on Netlify. Keep `api.mjs` and `netlify.toml` at the top level of the repository (there is no build step and no `netlify/functions` folder). In Netlify open **Site configuration, Build and deploy**, clear the **Build command** and **Functions directory** if they are filled in, and check **Environment variables** has `ADMIN_PASSWORD`. Then **Deploys, Trigger deploy, Clear cache and deploy site**. Open `your-site/api/auth-info`: it should show a list of departments. If it shows "Page not found", the function was not deployed; check **Functions** in the Netlify menu for one named `api`.

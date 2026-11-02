@@ -93,6 +93,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 .panel h2{display:inline-block;border-bottom:3px solid var(--or);padding-bottom:2px}
 .msg.info{background:var(--orb);color:var(--ord)}
 :focus-visible{outline-color:var(--or)!important}
+#gate{display:none!important}
 </style>
 <link rel="stylesheet" href="/portal-theme.css"><link rel="manifest" href="/manifest-hod.webmanifest">
 <meta name="theme-color" content="#12304a">
@@ -106,6 +107,8 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div class="wrap" style="max-width:900px;margin:0 auto;padding:20px 16px 40px">
 <header><h1>Assign trainers</h1>
 <p>Industrial Liaison Office. Add the trainers (supervisors) and give each one their students.</p></header>
+<div class="rolebar"><div class="role-id"><div class="role-icon">H</div><div><strong>HOD / DEPUTY HOD</strong><small>HOD & Deputy Dashboard</small></div></div><div class="role-actions"><a class="current" href="/hod.html">Dashboard</a><a href="#department">Department</a><button type="button" onclick="sessionStorage.removeItem('rvnp_user');location.href='/auth.html'">Sign out</button></div></div>
+<div class="dashboard-subtitle">Manage trainers, placements and department oversight.</div>
 
 <section class="panel" id="gate" style="margin-top:18px">
 <h2>Access</h2>
@@ -115,12 +118,22 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div class="actions"><button class="btn" id="gb" type="button">Open</button></div>
 </section>
 
-<div id="app" hidden>
+<div id="app" hidden><div class="actions" style="justify-content:flex-end"><button class="btn sec" id="signout" type="button">Sign out</button></div>
 <section class="panel" style="margin-top:18px">
 <h2>Overview</h2>
 <p style="font-size:18px;margin:0"><b id="s1">0</b> students placed &middot; <b id="s2">0</b> assigned &middot; <b id="s3">0</b> waiting for a trainer</p>
 <div class="actions"><button class="btn sec" id="rf" type="button">Refresh</button><button class="btn sec" id="xl" type="button">Download Excel (by trainer)</button></div>
 <div class="msg" id="m0" role="status"></div>
+</section>
+
+<section class="panel" style="margin-top:18px">
+<h2>All responses (full details)</h2>
+<p class="lead">Every student who has sent their placement, with all their details. Search the list, or download everything.</p>
+<div class="actions" style="margin:0 0 10px"><button class="btn" id="rx" type="button">Download Excel (all details)</button><button class="btn sec" id="rv" type="button">Download CSV</button></div>
+<label for="rq">Search</label><input id="rq" placeholder="Name, admission, class, organization, town">
+<div class="hint" id="rc" style="margin:8px 0"></div>
+<div id="rl"></div>
+<div class="msg" id="rm" role="status"></div>
 </section>
 
 <section class="panel" style="margin-top:18px">
@@ -162,16 +175,15 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-var $=function(i){return document.getElementById(i)},CODE=sessionStorage.getItem("hodcode")||"",D=null,SEL={};
+var $=function(i){return document.getElementById(i)},USER_TOKEN=sessionStorage.getItem("rvnp_user"),D=null,SEL={};
+if(!USER_TOKEN){location.replace("/auth.html?role=staff");throw new Error("Staff sign-in required");}
 function say(id,c,t){var m=$(id);m.className="msg"+(c?" "+c:"");m.textContent=t||""}
 function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
-async function api(method,path,body){var r=await fetch("/api/"+path,{method:method,headers:{"Content-Type":"application/json","x-hod-code":CODE},body:body?JSON.stringify(body):undefined});
+async function api(method,path,body){var r=await fetch("/api/"+path,{method:method,headers:{"Content-Type":"application/json","Authorization":"Bearer "+USER_TOKEN},body:body?JSON.stringify(body):undefined});
  var d=await r.json().catch(function(){return{}});if(!r.ok){var e=new Error(d.error||"Something went wrong.");e.status=r.status;throw e}return d}
-async function open_(){try{D=await api("GET","hod/data");sessionStorage.setItem("hodcode",CODE);$("gate").hidden=true;$("app").hidden=false;SEL={};setFilters(true);draw();if(!window.MKP)window.MKP=RVMarks.mount($("mkbox"),{role:"hod",headers:function(){return{"x-hod-code":CODE}}})}
- catch(e){if(e.status===401){CODE="";sessionStorage.removeItem("hodcode");$("gate").hidden=false;$("app").hidden=true;say("gm","err",e.message)}else say("gm","err",e.message)}}
-$("gb").onclick=function(){CODE=$("code").value.trim();if(!CODE){say("gm","err","Enter the access code.");return}say("gm","");open_()};
-$("code").addEventListener("keydown",function(e){if(e.key==="Enter")$("gb").click()});
-if(CODE)open_();
+async function open_(){try{D=await api("GET","hod/data");$("gate").hidden=true;$("app").hidden=false;SEL={};setFilters(true);draw();if(!window.MKP)window.MKP=RVMarks.mount($("mkbox"),{role:"hod",headers:function(){return{"Authorization":"Bearer "+USER_TOKEN}},onAuthFail:function(){location.replace("/auth.html?role=staff")}})}
+ catch(e){if(e.status===401){sessionStorage.removeItem("rvnp_user");sessionStorage.removeItem("rvnp_user_role");location.replace("/auth.html?role=staff")}else say("gm","err",e.message)}}
+open_();
 function tname(id){var t=D.trainers.find(function(x){return x.id===id});return t?t.name:""}
 function setFilters(first){var keep={d:$("fd").value,t:$("ft").value,r:$("fr").value};
  var ds=[],ts=[];D.placements.forEach(function(p){if(ds.indexOf(p.dept)<0)ds.push(p.dept);if(ts.indexOf(p.town)<0)ts.push(p.town)});ds.sort();ts.sort();
@@ -208,8 +220,8 @@ $("ab").onclick=async function(){say("m2","");var ids=Object.keys(SEL),tid=$("at
  try{var d=await api("POST","hod/assign",{ids:ids,tid:tid==="__none"?"":tid});D=d;SEL={};setFilters();draw();
   var t=D.trainers.find(function(x){return x.id===tid});say("m2","ok",tid==="__none"?d.assigned+" student(s) now wait for a trainer.":d.assigned+" student"+(d.assigned===1?"":"s")+" assigned to "+t.name+". "+t.name+" now has "+t.count+" student"+(t.count===1?"":"s")+".")}
  catch(e){say("m2","err",e.message)}b.disabled=false};
-function row(p){return [p.n,p.a,p.dept,p.course,p.org,p.loc,p.town,p.sup,p.tel1,p.tel2||""]}
-var HEAD=["Student name","Admission number","Department","Course","Organization","Where (landmark)","Town","Supervisor at organization","Phone 1","Phone 2"];
+function row(p){var t=D.trainers.find(function(x){return x.id===p.tid})||{name:"",tel:""};return [p.n,p.a,p.cls||"",p.dept,p.course,p.org,p.loc,p.town,p.sup,p.tel1,p.tel2||"",t.name,t.tel]}
+var HEAD=["Student name","Admission number","Class","Department","Course","Organization","Where (landmark)","Town","Supervisor at organization","Phone 1","Phone 2","College trainer","Trainer phone"];
 $("xl").onclick=function(){if(!D.placements.length){say("m0","err","Nothing to download yet.");return}
  var by={},none=[];D.placements.forEach(function(p){if(p.tid)(by[p.tid]=by[p.tid]||[]).push(p);else none.push(p)});
  if(!window.XLSX){var l=[["Trainer","Trainer phone"].concat(HEAD).join(",")];D.placements.forEach(function(p){var t=D.trainers.find(function(x){return x.id===p.tid})||{name:"Not assigned",tel:""};l.push([t.name,t.tel].concat(row(p)).map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(","))});
@@ -222,4 +234,26 @@ $("xl").onclick=function(){if(!D.placements.length){say("m0","err","Nothing to d
  D.trainers.forEach(function(t){add(t.name,[HEAD].concat((by[t.id]||[]).map(row)),wid)});
  if(none.length)add("Waiting",[HEAD].concat(none.map(row)),wid);
  XLSX.writeFile(wb,"RVNP_students_by_trainer.xlsx")};
+$("signout").onclick=function(){sessionStorage.removeItem("rvnp_user");sessionStorage.removeItem("rvnp_user_role");location.href="/auth.html?role=staff"};
+
+/* ---- all responses with full details: list, Excel and CSV ---- */
+var RHEAD=["Student name","Admission number","Class","Department","Course","Phone 1","Phone 2","Organization","Where (landmark)","Town","Supervisor at organization","College trainer","Trainer phone","Submitted"];
+function rrow(p){var t=D.trainers.find(function(x){return x.id===p.tid})||{name:"",tel:""};return [p.n,p.a,p.cls||"",p.dept,p.course,p.tel1,p.tel2||"",p.org,p.loc,p.town,p.sup,t.name,t.tel,p.t?new Date(p.t).toLocaleDateString("en-GB"):""]}
+function drawRecs(){var q=$("rq").value.trim().toUpperCase(),rows=D.placements.filter(function(p){return !q||(p.n+" "+p.a+" "+(p.cls||"")+" "+p.org+" "+p.town+" "+p.course+" "+p.dept).toUpperCase().indexOf(q)>=0});
+ $("rc").textContent=D.placements.length+" student"+(D.placements.length===1?"":"s")+" responded"+(q?"; "+rows.length+" match your search":"")+(rows.length>50?" (showing the first 50)":"")+".";
+ $("rl").innerHTML=rows.slice(0,50).map(function(p){var r=rrow(p);return '<div class="card2"><b>'+esc(p.n)+'</b><span class="mut" style="display:block">'+esc(p.a)+(p.cls?' &middot; '+esc(p.cls):'')+' &middot; '+esc(p.dept)+'</span><span class="mut" style="display:block">'+esc(p.course)+'</span><span style="display:block">'+esc(p.org)+', '+esc(p.town)+'</span><span class="mut" style="display:block">'+esc(p.loc)+'</span><span class="mut" style="display:block">Supervisor: '+esc(p.sup)+' &middot; '+esc(p.tel1)+(p.tel2?' / '+esc(p.tel2):'')+'</span><span style="display:block;margin-top:4px">'+(r[11]?'Trainer: <b style="display:inline">'+esc(r[11])+'</b> ('+esc(r[12])+')':'<i>Waiting for a trainer</i>')+'</span></div>'}).join("")||'<p class="mut">No responses yet.</p>'}
+$("rq").oninput=drawRecs;
+var _draw=draw;draw=function(){_draw();drawRecs()};
+function sortedP(){return D.placements.slice().sort(function(a,b){return (a.cls||"").localeCompare(b.cls||"")||a.n.localeCompare(b.n)})}
+function csvOut(){var l=[RHEAD.join(",")].concat(sortedP().map(function(p){return rrow(p).map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(",")}));
+ var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+l.join("\n")],{type:"text/csv"}));a.download="RVNP_placement_responses.csv";a.click()}
+$("rv").onclick=function(){if(!D.placements.length){say("rm","err","Nothing to download yet.");return}csvOut()};
+$("rx").onclick=function(){if(!D.placements.length){say("rm","err","Nothing to download yet.");return}
+ if(!window.XLSX){csvOut();say("rm","info","The Excel tool did not load, so a CSV file was downloaded instead.");return}
+ var P=sortedP(),by={},wb=XLSX.utils.book_new(),used={};P.forEach(function(p){(by[p.dept]=by[p.dept]||[]).push(p)});
+ var add=function(nm,aoa){nm=nm.replace(/[\\\/\?\*\[\]:]/g,"-").slice(0,28)||"Sheet";var k=nm,i=2;while(used[k])k=nm.slice(0,26)+"-"+i++;used[k]=1;var ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=[30,20,16,28,34,14,14,28,36,14,24,24,14,12].map(function(x){return{wch:x}});XLSX.utils.book_append_sheet(wb,ws,k)};
+ var sum=[["Department","Students who responded","Assigned to a trainer"]].concat(Object.keys(by).sort().map(function(d){return [d,by[d].length,by[d].filter(function(p){return p.tid}).length]}));sum.push(["TOTAL",P.length,P.filter(function(p){return p.tid}).length]);
+ add("Summary",sum);add("All responses",[RHEAD].concat(P.map(rrow)));
+ Object.keys(by).sort().forEach(function(d){add(d,[RHEAD].concat(by[d].map(rrow)))});
+ XLSX.writeFile(wb,"RVNP_placement_responses.xlsx")};
 </script><script src="/marks.js"></script><script src="/pwa.js" defer></script></body></html>

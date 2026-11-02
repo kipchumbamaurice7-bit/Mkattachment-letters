@@ -102,6 +102,8 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div class="wrap" style="max-width:640px;margin:0 auto;padding:20px 16px 40px">
 <header><h1>ILO representatives</h1>
 <p>Rift Valley National Polytechnic. Send the units your students have covered so far, and the insurance policy each class is covered by. They are used on the attachment letters and insurance covers once the Industrial Liaison Office approves them.</p></header>
+<div class="rolebar"><div class="role-id"><div class="role-icon">I</div><div><strong>ILO REP</strong><small>ILO Representative Dashboard</small></div></div><div class="role-actions"><a class="current" href="/ilo.html">Dashboard</a><a href="#marks">Marks & Approvals</a><button type="button" onclick="sessionStorage.removeItem('rvnp_user');location.href='/auth.html'">Sign out</button></div></div>
+<div class="dashboard-subtitle">Department units, insurance approvals and student marks.</div>
 <section class="panel" style="margin-top:18px">
 <h2>Units covered</h2>
 <p class="lead">Choose your department and course. If the course already has units, they appear below: edit them and send. Put one unit on each line.</p>
@@ -140,23 +142,24 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div class="actions"><button class="btn" id="go2" type="button">Send insurance details</button></div>
 </section>
 <section class="panel" style="margin-top:18px">
-<h2>Student marks</h2>
-<p class="lead">See and download the marks of the students in your department, class by class. Classes where some students have no marks yet are shown clearly. Ask the Industrial Liaison Office for your department code.</p>
-<div id="mkgate"><div class="grid"><div><label for="md">Department</label><select id="md"><option value="">Select your department</option></select></div>
-<div><label for="mcode">Department code</label><input id="mcode" type="password" autocomplete="off"></div></div>
-<div class="actions"><button class="btn" id="mgo" type="button">Open marks</button></div></div>
-<div id="mkbox"></div>
+<h2>Insurance requests from students</h2>
+<p class="lead">Approve insurance requests from students in your department. Approval uses the policy already assigned to their class; if none is assigned, the request is approved and the administrator can finish the policy details.</p>
+<div class="actions"><button class="btn sec" id="irf" type="button">Refresh requests</button></div>
+<div class="msg" id="irm" role="status"></div>
+<div id="irt"><p class="hint">Loading requests...</p></div>
 </section>
 <section class="panel" style="margin-top:18px">
-<h2>Collect student details</h2>
-<p class="lead">Send this link to your students. They fill in their name, admission number, class and contact number once, and the Industrial Liaison Office keeps the records, sorted by class.</p>
-<input id="rl" readonly onclick="this.select()">
-<div class="actions"><button class="btn" id="rcp" type="button">Copy link</button><a class="btn sec" id="rwa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
-<div class="msg" id="m3" role="status"></div>
+<h2>Student marks</h2>
+<p class="lead">See and download the marks of the students in your department, class by class. Classes where some students have no marks yet are shown clearly. Your approved department account is used automatically. Choose a class to view its marks, edit the whole class, or search by student name/admission number.</p>
+<div id="mkgate"><p class="hint">Your approved department account is used automatically.</p><div class="actions"><button class="btn" id="mgo" type="button">Open marks</button></div></div>
+<div id="mkbox"></div>
 </section>
-<footer>Your submission goes to the Industrial Liaison Office for approval. It does not change student letters until approved.</footer>
+<div class="actions" style="justify-content:center"><button class="btn sec" id="signout" type="button">Sign out</button></div><footer>Your submission goes to the Industrial Liaison Office for approval. It does not change student letters until approved.</footer>
 </div>
 <script>
+var USER_TOKEN=sessionStorage.getItem("rvnp_user");
+if(!USER_TOKEN){location.replace("/auth.html?role=staff");throw new Error("Staff sign-in required");}
+var _fetch=window.fetch;window.fetch=function(url,opt){opt=opt||{};if(String(url).indexOf("/api/")===0){opt.headers=Object.assign({"Authorization":"Bearer "+USER_TOKEN},opt.headers||{})}return _fetch(url,opt)};
 var $=function(i){return document.getElementById(i)},ALL=[];
 function say(c,t){var m=$("m");m.className="msg"+(c?" "+c:"");m.textContent=t||""}
 fetch("/api/courses").then(function(r){return r.json()}).then(function(d){ALL=d.courses||[];
@@ -209,17 +212,31 @@ $("go2").addEventListener("click",async function(){say2("");var b=this,k=$("kc")
  catch(e){say2("err","Could not send. Check your connection and try again.")}
  b.disabled=false});
 
+/* ---------- student insurance-request approvals ---------- */
+var IR=[];
+function sayIR(c,t){var m=$("irm");m.className="msg"+(c?" "+c:"");m.textContent=t||""}
+function drawIR(){
+ var box=$("irt");
+ if(!IR.length){box.innerHTML='<p class="hint">No waiting insurance requests for your department.</p>';return}
+ box.innerHTML='<div class="scroll"><table style="width:100%"><thead><tr><th>Student</th><th>Admission</th><th>Class</th><th>Course</th><th>Action</th></tr></thead><tbody>'+IR.map(function(r){return '<tr><td>'+esc(r.n)+'</td><td>'+esc(r.a)+'</td><td>'+esc(r.c)+'</td><td>'+esc(r.course)+'</td><td><button class="btn" data-ira="'+esc(r.id)+'" style="min-height:36px;padding:5px 10px">Approve</button></td></tr>'}).join('')+'</tbody></table></div>' ;
+ box.querySelectorAll('[data-ira]').forEach(function(b){b.onclick=async function(){b.disabled=true;try{var r=await fetch('/api/ilo/requests/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:b.getAttribute('data-ira')})});var d=await r.json();if(!r.ok)throw new Error(d.error||'Could not approve request.');sayIR('ok','Insurance request approved.');loadIR();}catch(e){sayIR('err',e.message);b.disabled=false}}});
+}
+async function loadIR(){try{sayIR('','Loading...');var r=await fetch('/api/ilo/requests');var d=await r.json();if(!r.ok)throw new Error(d.error||'Could not load requests.');IR=d.requests||[];drawIR();if(!IR.length)sayIR('','')}catch(e){sayIR('err',e.message)}}
+$("irf").onclick=loadIR; loadIR();
+
 /* ---------- link for students to fill their details ---------- */
-(function(){var u=location.origin+"/register.html";$("rl").value=u;
+(function(){if(!$("rl")||!$("rwa")||!$("rcp"))return;var u=location.origin+"/register.html";$("rl").value=u;
  $("rwa").href="https://wa.me/?text="+encodeURIComponent("Please fill in your student details here (name, admission number, class, contact number): "+u);
  $("rcp").onclick=function(){var ok=function(){var m=$("m3");m.className="msg ok";m.textContent="Link copied."};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok,function(){$("rl").select();document.execCommand("copy");ok()});
   else{$("rl").select();document.execCommand("copy");ok()}}})();
 /* ---------- student marks (department code) ---------- */
-(function(){fetch("/api/courses").then(function(r){return r.json()}).then(function(d){(d.departments||[]).forEach(function(n){var o=document.createElement("option");o.value=n;o.textContent=n;$("md").appendChild(o)})}).catch(function(){});
+(function(){fetch("/api/courses").then(function(r){return r.json()}).then(function(d){(d.departments||[]).forEach(function(n){var o=document.createElement("option");o.value=n;o.textContent=n;if($("md"))$("md").appendChild(o)})}).catch(function(){});
  var mk=null;
- $("mgo").onclick=function(){var dp=$("md").value,cd=$("mcode").value;if(!dp||!cd){alert("Choose your department and type its code.");return}
+ $("mgo").onclick=function(){
   $("mkgate").hidden=true;
-  mk=RVMarks.mount($("mkbox"),{role:"rep",dept:dp,headers:function(){return{"x-ilo-code":cd}},onAuthFail:function(){$("mkgate").hidden=false}})}})();
-</script><script src="/marks.js"></script><script src="/pwa.js" defer></script>
+  mk=RVMarks.mount($("mkbox"),{role:"rep",headers:function(){return{"Authorization":"Bearer "+USER_TOKEN}},onAuthFail:function(){location.replace("/auth.html?role=staff")}})
+ }})();
+$("signout").onclick=function(){sessionStorage.removeItem("rvnp_user");sessionStorage.removeItem("rvnp_user_role");location.href="/auth.html?role=staff"};
+</script><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="/marks.js"></script><script src="/pwa.js" defer></script>
 </body></html>
