@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ILO HOD - assign trainers</title>
+<style>
+:root{--bg:#f3f8f4;--card:#fff;--ink:#12301f;--mut:#51675a;--ac:#17803f;--acd:#0f6330;--soft:#e3f3e8;--bd:#cfe0d4;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff;--or:#f28a1d;--orb:#fff1e0;--ord:#c2610a}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1a12;--card:#14261b;--ink:#e6f4ea;--mut:#9fb8a7;--ac:#4cc77a;--acd:#6fd99a;--soft:#1a3524;--bd:#2c4a38;--in:#0f1f16;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#08140d;--or:#ffa94d;--orb:#3a2610;--ord:#ffbf73}}
+@font-face{font-family:"CoverFont";src:url(cover_font.ttf) format("truetype")}
+*,*:before,*:after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 16px 48px}
+header{margin-bottom:22px}
+h1{font-size:28px;line-height:1.2;margin:0 0 6px;font-weight:700;letter-spacing:-.01em}
+header p{margin:0;color:var(--mut);max-width:60ch}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:620px){.tiles{grid-template-columns:1fr}h1{font-size:24px}}
+.tile{display:flex;gap:14px;align-items:center;text-align:left;width:100%;padding:18px;background:var(--card);color:var(--ink);border:2px solid var(--bd);border-radius:14px;cursor:pointer;font:inherit;transition:border-color .15s,background .15s}
+a.tile{text-decoration:none}.tile[hidden]{display:none}
+.tile:hover{border-color:var(--ac)}
+.tile[aria-selected="true"]{border-color:var(--ac);background:var(--soft)}
+.tile .ic{flex:none;width:56px;height:56px;border-radius:12px;display:grid;place-items:center;background:var(--soft);color:var(--ac)}
+.tile[aria-selected="true"] .ic{background:var(--ac);color:var(--on)}
+.tile .ic svg{width:30px;height:30px}
+.tile b{display:block;font-size:17px;margin-bottom:2px}
+.tile span.d{display:block;color:var(--mut);font-size:14px;line-height:1.35}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:22px}
+.panel[hidden]{display:none}
+.panel h2{font-size:19px;margin:0 0 4px}
+.panel .lead{margin:0 0 18px;color:var(--mut);font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+input,select{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--in);color:var(--ink);font:inherit}
+select{appearance:auto}
+.hint{font-size:13px;color:var(--mut);margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border:0;border-radius:10px;background:var(--ac);color:var(--on);font-weight:600;font-size:16px;font-family:inherit;cursor:pointer}
+.btn:hover{background:var(--acd)}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn svg{width:20px;height:20px}
+.msg{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:15px}
+.msg:empty{display:none}
+.msg.err{background:var(--erb);color:var(--er)}
+.msg.ok{background:var(--okb);color:var(--ok)}
+.msg.info{background:var(--soft);color:var(--ink)}
+.actions{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sug{margin-top:6px;border:1px solid var(--bd);border-radius:10px;background:var(--card);overflow:hidden}
+.sug button{display:block;width:100%;text-align:left;padding:11px 14px;border:0;border-bottom:1px solid var(--bd);background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.sug button:last-child{border-bottom:0}
+.sug button:hover,.sug button:focus-visible,.sug button.on{background:var(--soft)}
+.sug b{display:block;font-size:15px}.sug span{display:block;font-size:13px;color:var(--mut)}
+.reqbox{margin-top:18px;padding-top:16px;border-top:1px solid var(--bd)}
+.btn.sec{background:var(--soft);color:var(--ink);border:1px solid var(--bd)}
+.pvh{margin:22px 0 8px;font-weight:600;font-size:14px;color:var(--mut)}
+.pv{overflow:hidden;border:1px solid var(--bd);border-radius:10px;background:#97BFEB}
+footer{margin-top:22px;color:var(--mut);font-size:13px}
+/* letter (A4 at 794x1123) */
+#L{width:794px;height:1123px;background:#97BFEB;color:#000;font:14.67px/1.42 Arial,Helvetica,sans-serif;position:relative;transform-origin:top left;padding:20px 76px 0}
+#L .h{display:block;margin:0 auto 8px;width:640px}#L .ft{position:absolute;bottom:26px;left:232px;width:330px}
+#L .r{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;margin:8px 0 14px}
+#L .d{margin:0 0 8px}#L .j{text-align:justify;margin:0 0 8px}
+#L .ln{display:flex;align-items:flex-end;gap:6px;margin:0 0 9px}
+#L .fd{flex:1;border-bottom:1.5px dotted #000;min-height:20px;padding:0 4px;font-weight:400}
+#L .sg{position:relative;margin-top:6px;height:92px}#L .sg img{position:absolute;left:92px;top:-2px;width:205px}
+#L .sg div{position:relative}
+
+textarea{width:100%;min-height:170px;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--in);color:var(--ink);font:inherit;resize:vertical}
+
+.card2{border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-top:10px;background:var(--card)}
+.card2 b{display:block;font-size:16px}.mut{color:var(--mut);font-size:14px}
+a.tel{color:inherit;font-weight:600}
+/*GREEN*/
+body{background:var(--bg) linear-gradient(180deg,var(--soft),transparent 260px) no-repeat}
+header{padding-bottom:14px;border-bottom:4px solid var(--or);position:relative}
+h1{color:var(--ac)}
+.panel,.card2,.tile{box-shadow:0 2px 10px rgba(23,128,63,.08)}
+.panel{border-top:4px solid var(--ac)}
+.tile:hover{box-shadow:0 4px 16px rgba(23,128,63,.18)}
+.btn{background:linear-gradient(135deg,var(--ac),var(--acd));box-shadow:0 2px 8px rgba(23,128,63,.28)}
+.btn.sec{background:var(--soft);box-shadow:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(23,128,63,.2)}
+/*ORANGE*/
+header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px;background:var(--or);margin-top:8px}
+.badge{background:var(--or)!important;color:#fff!important}
+.tab[aria-selected="true"]{border-color:var(--or)!important;background:var(--orb)!important;color:var(--ord)}
+.tile[aria-selected="true"] .ic{background:var(--or)!important}
+.tile:hover{border-color:var(--or)!important}
+.tile .ic{background:var(--orb)!important;color:var(--ord)!important}
+.btn:hover{background:var(--or)!important;box-shadow:0 3px 10px rgba(242,138,29,.4)}
+.btn.sec:hover{background:var(--orb)!important;border-color:var(--or)}
+.panel h2{display:inline-block;border-bottom:3px solid var(--or);padding-bottom:2px}
+.msg.info{background:var(--orb);color:var(--ord)}
+:focus-visible{outline-color:var(--or)!important}
+</style>
+<link rel="stylesheet" href="/portal-theme.css"><link rel="manifest" href="/manifest-hod.webmanifest">
+<meta name="theme-color" content="#12304a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RVNP Attachment">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/icon-192.png">
+</head><body>
+<div class="wrap" style="max-width:900px;margin:0 auto;padding:20px 16px 40px">
+<header><h1>Assign trainers</h1>
+<p>Industrial Liaison Office. Add the trainers (supervisors) and give each one their students.</p></header>
+
+<section class="panel" id="gate" style="margin-top:18px">
+<h2>Access</h2>
+<p class="lead">Enter the access code you were given by the Industrial Liaison Office.</p>
+<label for="code">Access code</label><input id="code" type="password" autocomplete="off">
+<div class="msg" id="gm" role="status"></div>
+<div class="actions"><button class="btn" id="gb" type="button">Open</button></div>
+</section>
+
+<div id="app" hidden>
+<section class="panel" style="margin-top:18px">
+<h2>Overview</h2>
+<p style="font-size:18px;margin:0"><b id="s1">0</b> students placed &middot; <b id="s2">0</b> assigned &middot; <b id="s3">0</b> waiting for a trainer</p>
+<div class="actions"><button class="btn sec" id="rf" type="button">Refresh</button><button class="btn sec" id="xl" type="button">Download Excel (by trainer)</button></div>
+<div class="msg" id="m0" role="status"></div>
+</section>
+
+<section class="panel" style="margin-top:18px">
+<h2>Marks</h2>
+<p class="lead">Marks for all departments. Download one class, a whole department (sorted per class), or everything.</p>
+<div id="mkbox"></div>
+</section>
+
+<section class="panel" style="margin-top:18px">
+<h2>Trainers (supervisors)</h2>
+<div class="grid">
+<div><label for="tn">Trainer's name</label><input id="tn" placeholder="e.g. Mr. John Otieno"></div>
+<div><label for="tp">Phone number</label><input id="tp" type="tel" inputmode="tel" placeholder="07XX XXX XXX"></div>
+</div>
+<div class="actions"><button class="btn" id="ta" type="button">Add trainer</button></div>
+<div class="msg" id="m1" role="status"></div>
+<div id="tl"></div>
+</section>
+
+<section class="panel" style="margin-top:18px">
+<h2>Students</h2>
+<div class="grid">
+<div><label for="fd">Department</label><select id="fd"></select></div>
+<div><label for="ft">Town</label><select id="ft"></select></div>
+<div><label for="fr">Show</label><select id="fr"></select></div>
+<div><label for="fq">Search</label><input id="fq" placeholder="Name, admission, organization"></div>
+</div>
+<div class="hint" id="fh" style="margin:8px 0"></div>
+<div class="actions"><button class="btn sec" id="sa" type="button">Select all shown</button><button class="btn sec" id="sn" type="button">Clear selection</button></div>
+<div id="sl"></div>
+</section>
+<div class="panel" id="bar" style="position:sticky;bottom:8px;margin-top:14px;box-shadow:0 4px 18px rgba(0,0,0,.2)">
+<b id="sc">0 selected</b>
+<div class="grid" style="margin-top:6px"><div class="full"><label for="at">Assign the selected students to</label><select id="at"></select></div></div>
+<div class="msg" id="m2" role="status"></div>
+<div class="actions"><button class="btn" id="ab" type="button">Assign</button></div>
+</div>
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+var $=function(i){return document.getElementById(i)},CODE=sessionStorage.getItem("hodcode")||"",D=null,SEL={};
+function say(id,c,t){var m=$(id);m.className="msg"+(c?" "+c:"");m.textContent=t||""}
+function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+async function api(method,path,body){var r=await fetch("/api/"+path,{method:method,headers:{"Content-Type":"application/json","x-hod-code":CODE},body:body?JSON.stringify(body):undefined});
+ var d=await r.json().catch(function(){return{}});if(!r.ok){var e=new Error(d.error||"Something went wrong.");e.status=r.status;throw e}return d}
+async function open_(){try{D=await api("GET","hod/data");sessionStorage.setItem("hodcode",CODE);$("gate").hidden=true;$("app").hidden=false;SEL={};setFilters(true);draw();if(!window.MKP)window.MKP=RVMarks.mount($("mkbox"),{role:"hod",headers:function(){return{"x-hod-code":CODE}}})}
+ catch(e){if(e.status===401){CODE="";sessionStorage.removeItem("hodcode");$("gate").hidden=false;$("app").hidden=true;say("gm","err",e.message)}else say("gm","err",e.message)}}
+$("gb").onclick=function(){CODE=$("code").value.trim();if(!CODE){say("gm","err","Enter the access code.");return}say("gm","");open_()};
+$("code").addEventListener("keydown",function(e){if(e.key==="Enter")$("gb").click()});
+if(CODE)open_();
+function tname(id){var t=D.trainers.find(function(x){return x.id===id});return t?t.name:""}
+function setFilters(first){var keep={d:$("fd").value,t:$("ft").value,r:$("fr").value};
+ var ds=[],ts=[];D.placements.forEach(function(p){if(ds.indexOf(p.dept)<0)ds.push(p.dept);if(ts.indexOf(p.town)<0)ts.push(p.town)});ds.sort();ts.sort();
+ $("fd").innerHTML='<option value="">All departments</option>'+ds.map(function(x){return '<option>'+esc(x)+'</option>'}).join("");
+ $("ft").innerHTML='<option value="">All towns</option>'+ts.map(function(x){return '<option>'+esc(x)+'</option>'}).join("");
+ $("fr").innerHTML='<option value="none">Waiting for a trainer</option><option value="all">All students</option>'+D.trainers.map(function(t){return '<option value="'+esc(t.id)+'">'+esc(t.name)+' ('+t.count+')</option>'}).join("");
+ $("at").innerHTML='<option value="">Choose a trainer</option><option value="__none">No trainer (unassign)</option>'+D.trainers.map(function(t){return '<option value="'+esc(t.id)+'">'+esc(t.name)+' - now '+t.count+'</option>'}).join("");
+ if(!first){$("fd").value=keep.d;$("ft").value=keep.t;$("fr").value=keep.r||"none"}}
+function draw(){var n=D.placements.length,as=D.placements.filter(function(p){return p.tid}).length;
+ $("s1").textContent=n;$("s2").textContent=as;$("s3").textContent=n-as;
+ $("tl").innerHTML=D.trainers.map(function(t){return '<div class="card2"><b>'+esc(t.name)+'</b><div class="mut"><a class="tel" href="tel:'+esc(t.tel)+'">'+esc(t.tel)+'</a> &middot; <b style="display:inline">'+t.count+'</b> student'+(t.count===1?"":"s")+' assigned</div><div class="actions" style="margin-top:8px"><button class="btn sec" data-v="'+t.id+'" style="min-height:34px;padding:4px 12px;font-size:14px">View their students</button><button class="btn sec" data-x="'+t.id+'" style="min-height:34px;padding:4px 12px;font-size:14px;color:#b3261e">Remove</button></div></div>'}).join("")||'<p class="mut">No trainers yet. Add the first one above.</p>';
+ drawList()}
+function filtered(){var d=$("fd").value,t=$("ft").value,r=$("fr").value,q=$("fq").value.trim().toUpperCase();
+ return D.placements.filter(function(p){return (!d||p.dept===d)&&(!t||p.town===t)&&(r==="all"||(r==="none"?!p.tid:p.tid===r))&&(!q||(p.n+" "+p.a+" "+p.org+" "+p.loc+" "+p.course).toUpperCase().indexOf(q)>=0)})}
+function drawList(){var rows=filtered(),shown=rows.slice(0,100);
+ $("fh").textContent=rows.length+" student"+(rows.length===1?"":"s")+(rows.length>100?" (showing the first 100; use the filters to narrow, or Select all shown)":"")+".";
+ $("sl").innerHTML=shown.map(function(p){return '<label class="card2" style="display:block;cursor:pointer"><span style="display:flex;gap:10px;align-items:flex-start"><input type="checkbox" data-s="'+p.id+'"'+(SEL[p.id]?" checked":"")+' style="width:auto;min-height:0;margin-top:4px"><span><b>'+esc(p.n)+'</b><span class="mut" style="display:block">'+esc(p.a)+' &middot; '+esc(p.course)+'</span><span style="display:block">'+esc(p.org)+', '+esc(p.town)+'</span><span class="mut" style="display:block">'+esc(p.loc)+'</span><span class="mut" style="display:block">Supervisor: '+esc(p.sup)+' &middot; <a class="tel" href="tel:'+esc(p.tel1)+'">'+esc(p.tel1)+'</a>'+(p.tel2?' / <a class="tel" href="tel:'+esc(p.tel2)+'">'+esc(p.tel2)+'</a>':"")+'</span><span style="display:block;margin-top:4px">'+(p.tid?'Trainer: <b style="display:inline">'+esc(tname(p.tid))+'</b>':'<i>Waiting for a trainer</i>')+'</span></span></span></label>'}).join("")||'<p class="mut">No students match.</p>';
+ count()}
+function count(){var n=Object.keys(SEL).length;$("sc").textContent=n+" selected"}
+["fd","ft","fr"].forEach(function(i){$(i).onchange=drawList});$("fq").oninput=drawList;
+$("sl").onchange=function(e){var id=e.target.getAttribute("data-s");if(!id)return;if(e.target.checked)SEL[id]=1;else delete SEL[id];count()};
+$("sa").onclick=function(){filtered().forEach(function(p){SEL[p.id]=1});drawList()};
+$("sn").onclick=function(){SEL={};drawList()};
+$("tl").onclick=async function(e){var v=e.target.getAttribute("data-v"),x=e.target.getAttribute("data-x");
+ if(v){$("fd").value="";$("ft").value="";$("fq").value="";$("fr").value=v;drawList();$("fh").scrollIntoView({behavior:"smooth",block:"center"});return}
+ if(x){var t=D.trainers.find(function(y){return y.id===x});if(!confirm("Remove "+t.name+"? "+t.count+" student(s) assigned to them will be waiting for a trainer again."))return;
+  try{D=await api("DELETE","hod/trainers/"+x);setFilters();draw();say("m1","ok","Removed.")}catch(err){say("m1","err",err.message)}}};
+$("ta").onclick=async function(){say("m1","");try{D=await api("POST","hod/trainers",{name:$("tn").value,tel:$("tp").value});$("tn").value=$("tp").value="";setFilters();draw();say("m1","ok","Trainer added.")}catch(e){say("m1","err",e.message)}};
+$("rf").onclick=async function(){say("m0","");try{D=await api("GET","hod/data");setFilters();draw();say("m0","ok","Updated.")}catch(e){say("m0","err",e.message)}};
+$("ab").onclick=async function(){say("m2","");var ids=Object.keys(SEL),tid=$("at").value;
+ if(!ids.length){say("m2","err","Tick at least one student.");return}
+ if(!tid){say("m2","err","Choose a trainer.");return}
+ var b=this;b.disabled=true;
+ try{var d=await api("POST","hod/assign",{ids:ids,tid:tid==="__none"?"":tid});D=d;SEL={};setFilters();draw();
+  var t=D.trainers.find(function(x){return x.id===tid});say("m2","ok",tid==="__none"?d.assigned+" student(s) now wait for a trainer.":d.assigned+" student"+(d.assigned===1?"":"s")+" assigned to "+t.name+". "+t.name+" now has "+t.count+" student"+(t.count===1?"":"s")+".")}
+ catch(e){say("m2","err",e.message)}b.disabled=false};
+function row(p){return [p.n,p.a,p.dept,p.course,p.org,p.loc,p.town,p.sup,p.tel1,p.tel2||""]}
+var HEAD=["Student name","Admission number","Department","Course","Organization","Where (landmark)","Town","Supervisor at organization","Phone 1","Phone 2"];
+$("xl").onclick=function(){if(!D.placements.length){say("m0","err","Nothing to download yet.");return}
+ var by={},none=[];D.placements.forEach(function(p){if(p.tid)(by[p.tid]=by[p.tid]||[]).push(p);else none.push(p)});
+ if(!window.XLSX){var l=[["Trainer","Trainer phone"].concat(HEAD).join(",")];D.placements.forEach(function(p){var t=D.trainers.find(function(x){return x.id===p.tid})||{name:"Not assigned",tel:""};l.push([t.name,t.tel].concat(row(p)).map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(","))});
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+l.join("\n")],{type:"text/csv"}));a.download="RVNP_students_by_trainer.csv";a.click();return}
+ var wb=XLSX.utils.book_new(),used={};
+ var add=function(nm,aoa,w){nm=nm.replace(/[\\\/\?\*\[\]:]/g,"-").slice(0,28)||"Sheet";var k=nm,i=2;while(used[k])k=nm.slice(0,26)+"-"+i++;used[k]=1;var ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=w.map(function(x){return{wch:x}});XLSX.utils.book_append_sheet(wb,ws,k)};
+ var sum=[["Trainer","Phone","Students"]].concat(D.trainers.map(function(t){return [t.name,t.tel,t.count]}));sum.push(["Waiting for a trainer","",none.length]);sum.push(["TOTAL","",D.placements.length]);
+ add("Summary",sum,[30,16,10]);
+ var wid=[30,20,28,34,28,36,14,24,14,14];
+ D.trainers.forEach(function(t){add(t.name,[HEAD].concat((by[t.id]||[]).map(row)),wid)});
+ if(none.length)add("Waiting",[HEAD].concat(none.map(row)),wid);
+ XLSX.writeFile(wb,"RVNP_students_by_trainer.xlsx")};
+</script><script src="/marks.js"></script><script src="/pwa.js" defer></script></body></html>

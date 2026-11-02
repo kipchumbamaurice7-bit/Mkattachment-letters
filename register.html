@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Student details - RVNP</title>
+<style>
+:root{--bg:#f3f8f4;--card:#fff;--ink:#12301f;--mut:#51675a;--ac:#17803f;--acd:#0f6330;--soft:#e3f3e8;--bd:#cfe0d4;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff;--or:#f28a1d;--orb:#fff1e0;--ord:#c2610a}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1a12;--card:#14261b;--ink:#e6f4ea;--mut:#9fb8a7;--ac:#4cc77a;--acd:#6fd99a;--soft:#1a3524;--bd:#2c4a38;--in:#0f1f16;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#08140d;--or:#ffa94d;--orb:#3a2610;--ord:#ffbf73}}
+@font-face{font-family:"CoverFont";src:url(cover_font.ttf) format("truetype")}
+*,*:before,*:after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 16px 48px}
+header{margin-bottom:22px}
+h1{font-size:28px;line-height:1.2;margin:0 0 6px;font-weight:700;letter-spacing:-.01em}
+header p{margin:0;color:var(--mut);max-width:60ch}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:620px){.tiles{grid-template-columns:1fr}h1{font-size:24px}}
+.tile{display:flex;gap:14px;align-items:center;text-align:left;width:100%;padding:18px;background:var(--card);color:var(--ink);border:2px solid var(--bd);border-radius:14px;cursor:pointer;font:inherit;transition:border-color .15s,background .15s}
+a.tile{text-decoration:none}.tile[hidden]{display:none}
+.tile:hover{border-color:var(--ac)}
+.tile[aria-selected="true"]{border-color:var(--ac);background:var(--soft)}
+.tile .ic{flex:none;width:56px;height:56px;border-radius:12px;display:grid;place-items:center;background:var(--soft);color:var(--ac)}
+.tile[aria-selected="true"] .ic{background:var(--ac);color:var(--on)}
+.tile .ic svg{width:30px;height:30px}
+.tile b{display:block;font-size:17px;margin-bottom:2px}
+.tile span.d{display:block;color:var(--mut);font-size:14px;line-height:1.35}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:22px}
+.panel[hidden]{display:none}
+.panel h2{font-size:19px;margin:0 0 4px}
+.panel .lead{margin:0 0 18px;color:var(--mut);font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+input,select{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--in);color:var(--ink);font:inherit}
+select{appearance:auto}
+.hint{font-size:13px;color:var(--mut);margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border:0;border-radius:10px;background:var(--ac);color:var(--on);font-weight:600;font-size:16px;font-family:inherit;cursor:pointer}
+.btn:hover{background:var(--acd)}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn svg{width:20px;height:20px}
+.msg{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:15px}
+.msg:empty{display:none}
+.msg.err{background:var(--erb);color:var(--er)}
+.msg.ok{background:var(--okb);color:var(--ok)}
+.msg.info{background:var(--soft);color:var(--ink)}
+.actions{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sug{margin-top:6px;border:1px solid var(--bd);border-radius:10px;background:var(--card);overflow:hidden}
+.sug button{display:block;width:100%;text-align:left;padding:11px 14px;border:0;border-bottom:1px solid var(--bd);background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.sug button:last-child{border-bottom:0}
+.sug button:hover,.sug button:focus-visible,.sug button.on{background:var(--soft)}
+.sug b{display:block;font-size:15px}.sug span{display:block;font-size:13px;color:var(--mut)}
+.reqbox{margin-top:18px;padding-top:16px;border-top:1px solid var(--bd)}
+.btn.sec{background:var(--soft);color:var(--ink);border:1px solid var(--bd)}
+.pvh{margin:22px 0 8px;font-weight:600;font-size:14px;color:var(--mut)}
+.pv{overflow:hidden;border:1px solid var(--bd);border-radius:10px;background:#97BFEB}
+footer{margin-top:22px;color:var(--mut);font-size:13px}
+/* letter (A4 at 794x1123) */
+#L{width:794px;height:1123px;background:#97BFEB;color:#000;font:14.67px/1.42 Arial,Helvetica,sans-serif;position:relative;transform-origin:top left;padding:20px 76px 0}
+#L .h{display:block;margin:0 auto 8px;width:640px}#L .ft{position:absolute;bottom:26px;left:232px;width:330px}
+#L .r{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;margin:8px 0 14px}
+#L .d{margin:0 0 8px}#L .j{text-align:justify;margin:0 0 8px}
+#L .ln{display:flex;align-items:flex-end;gap:6px;margin:0 0 9px}
+#L .fd{flex:1;border-bottom:1.5px dotted #000;min-height:20px;padding:0 4px;font-weight:400}
+#L .sg{position:relative;margin-top:6px;height:92px}#L .sg img{position:absolute;left:92px;top:-2px;width:205px}
+#L .sg div{position:relative}
+
+textarea{width:100%;min-height:170px;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--in);color:var(--ink);font:inherit;resize:vertical}
+/*GREEN*/
+body{background:var(--bg) linear-gradient(180deg,var(--soft),transparent 260px) no-repeat}
+header{padding-bottom:14px;border-bottom:4px solid var(--or);position:relative}
+h1{color:var(--ac)}
+.panel,.card2,.tile{box-shadow:0 2px 10px rgba(23,128,63,.08)}
+.panel{border-top:4px solid var(--ac)}
+.tile:hover{box-shadow:0 4px 16px rgba(23,128,63,.18)}
+.btn{background:linear-gradient(135deg,var(--ac),var(--acd));box-shadow:0 2px 8px rgba(23,128,63,.28)}
+.btn.sec{background:var(--soft);box-shadow:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(23,128,63,.2)}
+/*ORANGE*/
+header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px;background:var(--or);margin-top:8px}
+.badge{background:var(--or)!important;color:#fff!important}
+.tab[aria-selected="true"]{border-color:var(--or)!important;background:var(--orb)!important;color:var(--ord)}
+.tile[aria-selected="true"] .ic{background:var(--or)!important}
+.tile:hover{border-color:var(--or)!important}
+.tile .ic{background:var(--orb)!important;color:var(--ord)!important}
+.btn:hover{background:var(--or)!important;box-shadow:0 3px 10px rgba(242,138,29,.4)}
+.btn.sec:hover{background:var(--orb)!important;border-color:var(--or)}
+.panel h2{display:inline-block;border-bottom:3px solid var(--or);padding-bottom:2px}
+.msg.info{background:var(--orb);color:var(--ord)}
+:focus-visible{outline-color:var(--or)!important}
+</style>
+<link rel="stylesheet" href="/portal-theme.css"><link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#12304a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RVNP Attachment">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/icon-192.png">
+</head><body>
+<div class="wrap" style="max-width:640px;margin:0 auto;padding:20px 16px 40px">
+<header><h1>Student details</h1>
+<p>Rift Valley National Polytechnic, Industrial Liaison Office. Fill in your details once so the college has your correct records.</p></header>
+<section class="panel" style="margin-top:18px">
+<h2>Your details</h2>
+<div class="grid">
+<div class="full"><label for="n">Full name</label><input id="n" autocomplete="name" autocapitalize="characters" placeholder="e.g. KABIRU ELIUD GATHUTHI"></div>
+<div class="full"><label for="a">Admission number</label><input id="a" autocomplete="off" autocapitalize="characters" placeholder="e.g. EIL4/26J/306761"><div class="hint">As on your student ID.</div></div>
+<div class="full"><label for="c">Class</label><input id="c" list="cl" autocomplete="off" autocapitalize="characters" placeholder="e.g. EEPL5-25-J-RS"><datalist id="cl"></datalist><div class="hint">Pick from the suggestions if you see your class, or type it.</div></div>
+<div class="full"><label for="t">Contact number</label><input id="t" type="tel" inputmode="tel" autocomplete="tel" placeholder="e.g. 0712 345 678"></div>
+</div>
+<div class="msg" id="m" role="status"></div>
+<div class="actions"><button class="btn" id="go" type="button">Submit my details</button></div>
+</section>
+<footer>If you submit again with the same name and admission number, your details are updated.</footer>
+</div>
+<script>
+var $=function(i){return document.getElementById(i)};
+function say(c,t){var m=$("m");m.className="msg"+(c?" "+c:"");m.textContent=t||""}
+fetch("/api/register-info").then(function(r){return r.json()}).then(function(d){(d.classes||[]).forEach(function(c){var o=document.createElement("option");o.value=c;$("cl").appendChild(o)})}).catch(function(){});
+$("go").addEventListener("click",async function(){say("");var b=this;
+ var n=$("n").value.replace(/\s+/g," ").trim(),a=$("a").value.replace(/\s+/g,""),c=$("c").value.replace(/\s+/g,""),t=$("t").value;
+ if(n.length<3){say("err","Enter your full name.");return}
+ if(a.length<6){say("err","Enter your full admission number.");return}
+ if(c.length<2){say("err","Enter your class.");return}
+ if(t.replace(/\D/g,"").length<9){say("err","Enter a contact number with at least 9 digits.");return}
+ b.disabled=true;
+ try{var r=await fetch("/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:n,adm:a,cls:c,tel:t})});
+  var d=await r.json();if(!r.ok)say("err",d.error||"Something went wrong.");
+  else{say("ok",d.updated?"Your details were updated. Thank you.":"Thank you. Your details were saved.");$("n").value=$("a").value=$("c").value=$("t").value=""}}
+ catch(e){say("err","Could not send. Check your connection and try again.")}
+ b.disabled=false});
+</script><script src="/pwa.js" defer></script>
+</body></html>

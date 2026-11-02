@@ -3,8 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RVNP Industrial Attachment Portal</title>
 <style>
-:root{--bg:#eef2f6;--card:#fff;--ink:#12304f;--mut:#566b80;--ac:#1d5fa6;--acd:#154a85;--soft:#e4eefa;--bd:#c7d3e0;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff}
-@media (prefers-color-scheme:dark){:root{--bg:#0e1722;--card:#16222f;--ink:#e6eef7;--mut:#9db0c3;--ac:#6fb0f5;--acd:#8cc2fa;--soft:#1c3250;--bd:#2f4358;--in:#101b27;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#0b1420}}
+:root{--bg:#f3f8f4;--card:#fff;--ink:#12301f;--mut:#51675a;--ac:#17803f;--acd:#0f6330;--soft:#e3f3e8;--bd:#cfe0d4;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff;--or:#f28a1d;--orb:#fff1e0;--ord:#c2610a}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1a12;--card:#14261b;--ink:#e6f4ea;--mut:#9fb8a7;--ac:#4cc77a;--acd:#6fd99a;--soft:#1a3524;--bd:#2c4a38;--in:#0f1f16;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#08140d;--or:#ffa94d;--orb:#3a2610;--ord:#ffbf73}}
 @font-face{font-family:"CoverFont";src:url(cover_font.ttf) format("truetype")}
 *,*:before,*:after{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -17,6 +17,7 @@ header p{margin:0;color:var(--mut);max-width:60ch}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
 @media(max-width:620px){.tiles{grid-template-columns:1fr}h1{font-size:24px}}
 .tile{display:flex;gap:14px;align-items:center;text-align:left;width:100%;padding:18px;background:var(--card);color:var(--ink);border:2px solid var(--bd);border-radius:14px;cursor:pointer;font:inherit;transition:border-color .15s,background .15s}
+a.tile{text-decoration:none}.tile[hidden]{display:none}
 .tile:hover{border-color:var(--ac)}
 .tile[aria-selected="true"]{border-color:var(--ac);background:var(--soft)}
 .tile .ic{flex:none;width:56px;height:56px;border-radius:12px;display:grid;place-items:center;background:var(--soft);color:var(--ac)}
@@ -46,6 +47,13 @@ select{appearance:auto}
 .msg.ok{background:var(--okb);color:var(--ok)}
 .msg.info{background:var(--soft);color:var(--ink)}
 .actions{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sug{margin-top:6px;border:1px solid var(--bd);border-radius:10px;background:var(--card);overflow:hidden}
+.sug button{display:block;width:100%;text-align:left;padding:11px 14px;border:0;border-bottom:1px solid var(--bd);background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.sug button:last-child{border-bottom:0}
+.sug button:hover,.sug button:focus-visible,.sug button.on{background:var(--soft)}
+.sug b{display:block;font-size:15px}.sug span{display:block;font-size:13px;color:var(--mut)}
+.reqbox{margin-top:18px;padding-top:16px;border-top:1px solid var(--bd)}
+.btn.sec{background:var(--soft);color:var(--ink);border:1px solid var(--bd)}
 .pvh{margin:22px 0 8px;font-weight:600;font-size:14px;color:var(--mut)}
 .pv{overflow:hidden;border:1px solid var(--bd);border-radius:10px;background:#97BFEB}
 footer{margin-top:22px;color:var(--mut);font-size:13px}
@@ -58,11 +66,42 @@ footer{margin-top:22px;color:var(--mut);font-size:13px}
 #L .fd{flex:1;border-bottom:1.5px dotted #000;min-height:20px;padding:0 4px;font-weight:400}
 #L .sg{position:relative;margin-top:6px;height:92px}#L .sg img{position:absolute;left:92px;top:-2px;width:205px}
 #L .sg div{position:relative}
-</style></head><body>
+/*GREEN*/
+body{background:var(--bg) linear-gradient(180deg,var(--soft),transparent 260px) no-repeat}
+header{padding-bottom:14px;border-bottom:4px solid var(--or);position:relative}
+h1{color:var(--ac)}
+.panel,.card2,.tile{box-shadow:0 2px 10px rgba(23,128,63,.08)}
+.panel{border-top:4px solid var(--ac)}
+.tile:hover{box-shadow:0 4px 16px rgba(23,128,63,.18)}
+.btn{background:linear-gradient(135deg,var(--ac),var(--acd));box-shadow:0 2px 8px rgba(23,128,63,.28)}
+.btn.sec{background:var(--soft);box-shadow:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(23,128,63,.2)}
+/*ORANGE*/
+header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px;background:var(--or);margin-top:8px}
+.badge{background:var(--or)!important;color:#fff!important}
+.tab[aria-selected="true"]{border-color:var(--or)!important;background:var(--orb)!important;color:var(--ord)}
+.tile[aria-selected="true"] .ic{background:var(--or)!important}
+.tile:hover{border-color:var(--or)!important}
+.tile .ic{background:var(--orb)!important;color:var(--ord)!important}
+.btn:hover{background:var(--or)!important;box-shadow:0 3px 10px rgba(242,138,29,.4)}
+.btn.sec:hover{background:var(--orb)!important;border-color:var(--or)}
+.panel h2{display:inline-block;border-bottom:3px solid var(--or);padding-bottom:2px}
+.msg.info{background:var(--orb);color:var(--ord)}
+:focus-visible{outline-color:var(--or)!important}
+</style>
+<link rel="stylesheet" href="/portal-theme.css"><link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#12304a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RVNP Attachment">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/icon-192.png">
+</head><body>
 <div class="wrap">
 <header>
 <h1>Industrial Attachment Portal</h1>
-<p>The Rift Valley National Polytechnic, Electrical Department. Download your attachment letter and your insurance cover.</p>
+<p>Rift Valley National Polytechnic. Access your industrial attachment letter, insurance cover and placement services.</p>
 </header>
 
 <div class="tiles" role="tablist" aria-label="Choose a document">
@@ -72,14 +111,23 @@ footer{margin-top:22px;color:var(--mut);font-size:13px}
 <button class="tile" id="tl-ins" role="tab" aria-selected="false" aria-controls="p-ins" type="button">
 <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg></span>
 <span><b>Insurance cover</b><span class="d">Download your personal accident cover.</span></span></button>
+<a class="tile" id="plc" href="/placement.html">
+<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+<span><b>Attachment placement</b><span class="d">Tell us where you were placed and see your trainer.</span></span></a>
+<a class="tile" id="nita" href="/api/nita" download hidden>
+<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4"/><path d="M5 20h14"/></svg></span>
+<span><b>NITA form</b><span class="d">Download the NITA attachment form.</span></span></a>
 </div>
 
 <section class="panel" id="p-letter" role="tabpanel" aria-labelledby="tl-letter">
 <h2>Attachment letter</h2>
 <p class="lead">Fill in your details exactly as you want them on the letter.</p>
 <div class="grid">
+<div class="full"><label for="dp">Department</label>
+<select id="dp"><option value="">Select your department</option></select></div>
 <div class="full"><label for="co">Course</label>
-<select id="co"><option value="">Select your course</option></select></div>
+<select id="co" disabled><option value="">Select your department first</option></select>
+<div class="hint" id="cn" hidden></div></div>
 <div class="full"><label for="pr">Period of attachment</label>
 <select id="pr"><option value="">Select the period</option></select></div>
 <div class="full"><label for="ln">Full name</label><input id="ln" autocomplete="name" placeholder="e.g. KABIRU ELIUD GATHUTHI"></div>
@@ -115,24 +163,35 @@ footer{margin-top:22px;color:var(--mut);font-size:13px}
 
 <section class="panel" id="p-ins" role="tabpanel" aria-labelledby="tl-ins" hidden>
 <h2>Insurance cover</h2>
-<p class="lead">Enter your name and admission number exactly as they appear on your insurance cover.</p>
-<div class="grid">
-<div class="full"><label for="in">Full name</label><input id="in" autocomplete="name" placeholder="e.g. KABIRU ELIUD GATHUTHI"></div>
-<div class="full"><label for="ia">Admission number</label><input id="ia" autocomplete="off" placeholder="e.g. EIL4/26J/306761"></div>
-</div>
+<p class="lead">Start typing your name or admission number (at least 3 letters). Pick yourself from the suggestions to get your cover.</p>
+<div class="full"><label for="iq">Your name or admission number</label>
+<input id="iq" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. KABIRU or EIL4/26J/306761" role="combobox" aria-expanded="false" aria-controls="isg" aria-autocomplete="list">
+<div class="sug" id="isg" role="listbox" hidden></div></div>
 <div class="msg" id="im" role="status"></div>
 <div class="actions">
-<button class="btn" id="if" type="button"><span>Find my cover</span></button>
 <button class="btn" id="id" type="button" hidden>
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg><span>Download insurance cover</span></button>
 </div>
+
+<div class="reqbox">
+<button class="btn sec" id="rqo" type="button">Cannot find your cover? Request it</button>
+<div id="rqf" hidden>
+<p class="lead" style="margin:14px 0 12px">Fill in your details exactly as they appear on your student records. The Industrial Liaison Office will prepare your cover. Come back to this page later and search for your name to download it.</p>
+<div class="grid">
+<div class="full"><label for="rn">Full name</label><input id="rn" autocomplete="name" placeholder="e.g. KABIRU ELIUD GATHUTHI"></div>
+<div><label for="rc">Class</label><input id="rc" autocomplete="off" placeholder="e.g. DEET-25-J-RS2"></div>
+<div><label for="rco">Course</label><select id="rco"></select></div>
+<div class="full"><label for="ra">Admission number</label><input id="ra" autocomplete="off" placeholder="e.g. EIL4/26J/306761"></div>
+</div>
+<div class="actions"><button class="btn" id="rqs" type="button"><span>Send request</span></button></div>
+<div class="msg" id="rqm" role="status"></div>
+</div></div>
 </section>
 
 <footer>Group personal accident cover. Problems with your details? See the Industrial Liaison Office.</footer>
 </div>
 
 <form name="attachment-log" data-netlify="true" hidden><input name="document"><input name="insurance"><input name="name"><input name="admission"><input name="course"><input name="tel"><input name="email"></form>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 /* course key: [course title, % of coursework covered, units] -- loaded from the admin site */
@@ -140,8 +199,18 @@ var C={};
 var SETTINGS={policyNumber:"",insurer:"",policyStart:"2000-01-01",policyEnd:"2000-01-01",issueDate:"2000-01-01"};
 var COVER_BG="cover_bg.jpg";
 function api(path,opt){return fetch("/api/"+path,opt).then(function(r){return r.json()})}
-(function(){api("courses").then(function(d){var sel=document.getElementById("co");
- (d.courses||[]).forEach(function(c){C[c.key]=[c.title,c.percent,c.units];var o=document.createElement("option");o.value=c.key;o.textContent=c.title;sel.appendChild(o)});
+var ALLC=[];
+function fillCourses(){var dp=document.getElementById("dp").value,sel=document.getElementById("co");sel.textContent="";
+ var o0=document.createElement("option");o0.value="";o0.textContent=dp?"Select your course":"Select your department first";sel.appendChild(o0);
+ ALLC.filter(function(c){return c.dept===dp}).forEach(function(c){var o=document.createElement("option");o.value=c.key;o.textContent=c.title+(c.units.length?"":" (coming soon)");sel.appendChild(o)});
+ sel.disabled=!dp;note();if(typeof render==="function")render()}
+function note(){var n=document.getElementById("cn"),t=C[document.getElementById("co").value];
+ n.hidden=!(t&&!t[2].length);n.textContent=n.hidden?"":"The units for this course have not been added yet. Please check again soon, or see the Industrial Liaison Office."}
+(function(){api("courses").then(function(d){var dsel=document.getElementById("dp");ALLC=d.courses||[];
+ (d.departments||[]).forEach(function(n){if(ALLC.some(function(c){return c.dept===n})){var o=document.createElement("option");o.value=n;o.textContent=n;dsel.appendChild(o)}});
+ ALLC.forEach(function(c){C[c.key]=[c.title,c.percent,c.units]});
+ if(d.nita)document.getElementById("nita").hidden=false;
+ dsel.addEventListener("change",fillCourses);document.getElementById("co").addEventListener("change",note);
  render()}).catch(function(){var m=document.getElementById("lm");m.className="msg err";m.textContent="Could not load the course list. Check your connection and refresh the page."})})();
 var $=function(i){return document.getElementById(i)},te=new TextEncoder();
 function list(a){return a.length<2?a.join("")+".":a.length===2?a[0]+" and "+a[1]+".":a.slice(0,-1).join(", ")+", and "+a[a.length-1]+"."}
@@ -170,16 +239,18 @@ function tab(w){var l=w==="l";$("tl-letter").setAttribute("aria-selected",l);$("
 $("tl-letter").onclick=function(){tab("l")};$("tl-ins").onclick=function(){tab("i")};
 
 /* ---------- attachment letter ---------- */
-var insured=false,seq=0;
+var insured=false,seq=0,LREC=null;
+/* the letter and the cover both read the policy from here, so the numbers always match */
+function polOf(r){var S=SETTINGS;return{p:(r&&r.p)||S.policyNumber,i:(r&&r.i)||S.issueDate,s:(r&&r.s)||S.policyStart,e:(r&&r.e)||S.policyEnd,ins:(r&&r.ins)||S.insurer}}
 function fit(){var pv=$("pv"),w=pv.clientWidth,s=Math.min(1,w/794);$("L").style.transform="scale("+s+")";$("sc").style.width="794px";pv.style.height=(1123*s)+"px"}
 window.addEventListener("resize",fit);
 function render(){
  var t=C[$("co").value];
  $("pn").textContent=cleanName($("ln").value);$("pa").textContent=cleanAdm($("la").value);
  $("pt").textContent=$("lt").value.trim();$("pe").textContent=$("le").value.trim();
- if(t){$("pc").textContent=t[0]+".";$("pp").textContent=t[1];$("pu").textContent=list(t[2])}
+ if(t&&t[2].length){$("pc").textContent=t[0]+".";$("pp").textContent=t[1];$("pu").textContent=list(t[2])}
  else{$("pc").textContent="";$("pp").textContent="";$("pu").textContent=""}
- $("pd").textContent=$("pr").value;$("pnum").textContent=SETTINGS.policyNumber;$("pins").textContent=SETTINGS.insurer;
+ $("pd").textContent=$("pr").value;var PL=polOf(insured?LREC:null);$("pnum").textContent=PL.p;$("pins").textContent=PL.ins;
  $("pol").style.display=insured?"":"none";fit();
 }
 var timer;
@@ -189,28 +260,68 @@ function check(){
   var n=$("ln").value.trim(),a=$("la").value.trim(),my=++seq;
   if(n.length<3||a.length<6){insured=false;render();return}
   var r=await inList(n,a);if(my!==seq)return;
-  insured=!!r;render();
+  insured=!!r;LREC=r||null;render();
  },450);
 }
 ["co","pr","ln","la","lt","le"].forEach(function(i){$(i).addEventListener("input",function(){render();if(i==="ln"||i==="la")check()});$(i).addEventListener("change",render)});
 render();
+/* paints the letter onto a canvas from the browser's own layout of the preview: every word, line and image lands exactly where the preview shows it */
+function paintLetter(root,S){
+ var W=794,H=1123,cv=document.createElement("canvas");cv.width=W*S;cv.height=H*S;
+ var x=cv.getContext("2d");x.scale(S,S);x.imageSmoothingEnabled=true;x.imageSmoothingQuality="high";x.fillStyle="#97BFEB";x.fillRect(0,0,W,H);
+ var o=root.getBoundingClientRect();
+ function sn(v){return Math.round(v*S)/S}
+ function dots(r,cs,bw){
+  var l=r.left-o.left,rt=r.right-o.left,y=sn(r.bottom-o.top-bw/2),p=bw*2,n=Math.max(1,Math.round((rt-l-bw)/p));
+  x.fillStyle=cs.borderBottomColor;
+  for(var i=0;i<=n;i++){var cx=l+bw/2+(rt-l-bw)*(n?i/n:0);x.beginPath();x.arc(cx,y,bw/2,0,6.2832);x.fill()}
+ }
+ function text(t){
+  var s=t.nodeValue;if(!/\S/.test(s))return;
+  var p=t.parentNode,cs=getComputedStyle(p);
+  x.font=cs.fontStyle+" "+cs.fontWeight+" "+cs.fontSize+" "+cs.fontFamily;x.fillStyle=cs.color;x.textBaseline="alphabetic";
+  var fs=parseFloat(cs.fontSize),m=x.measureText("Hg"),asc=Math.round(m.fontBoundingBoxAscent||fs*0.905);
+  var re=/\S+/g,w,rg=document.createRange();
+  while((w=re.exec(s))){rg.setStart(t,w.index);rg.setEnd(t,w.index+w[0].length);
+   var q=rg.getClientRects()[0];if(q)x.fillText(w[0],q.left-o.left,sn(q.top-o.top+asc))}
+  var u=false;for(var a=p;a&&a!==root.parentNode;a=a.parentNode){if(a.nodeType===1&&/underline/.test(getComputedStyle(a).textDecorationLine)){u=true;break}}
+  if(u){rg.selectNodeContents(t);var rs=rg.getClientRects();
+   for(var i=0;i<rs.length;i++){var r=rs[i],th=Math.max(1,fs/14);x.fillRect(r.left-o.left,sn(r.top-o.top+asc+fs*0.1),r.width,th)}}
+ }
+ function walk(n){
+  if(n.nodeType===3){text(n);return}
+  if(n.nodeType!==1)return;
+  var cs=getComputedStyle(n);if(cs.display==="none"||cs.visibility==="hidden")return;
+  var r=n.getBoundingClientRect();
+  if(n.tagName==="IMG"){x.drawImage(n,r.left-o.left,r.top-o.top,r.width,r.height);return}
+  var bw=parseFloat(cs.borderBottomWidth);
+  if(bw>0&&cs.borderBottomStyle==="dotted")dots(r,cs,bw);
+  for(var c=n.firstChild;c;c=c.nextSibling)walk(c)
+ }
+ for(var c=root.firstChild;c;c=c.nextSibling)walk(c);
+ return cv;
+}
+function waitImgs(el){return Promise.all([].map.call(el.querySelectorAll("img"),function(i){return i.complete&&i.naturalWidth?0:new Promise(function(ok){i.onload=i.onerror=ok})}))}
 $("ld").addEventListener("click",async function(){
  var c=$("co").value,n=cleanName($("ln").value),a=cleanAdm($("la").value),t=$("lt").value.replace(/[\s-]/g,""),e=$("le").value.trim();
  say("lm","");
+ if(!$("dp").value){say("lm","err","Select your department.");return}
  if(!c){say("lm","err","Select your course.");return}
+ if(!C[c][2].length){say("lm","err","The units for this course have not been added yet. Please check again soon, or see the Industrial Liaison Office.");return}
  if(!$("pr").value){say("lm","err","Select the period of attachment.");return}
  if(n.length<3){say("lm","err","Enter your full name.");return}
  if(a.length<6){say("lm","err","Enter your full admission number.");return}
  if(!t||!/^(\+?254|0)?\d{9,10}$/.test(t)){say("lm","err","Enter a valid telephone number.");return}
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){say("lm","err","Enter a valid email address.");return}
- if(!window.html2canvas||!window.jspdf){say("lm","err","The PDF tools did not load. Check your internet connection and try again.");return}
+ if(!window.jspdf){say("lm","err","The PDF tools did not load. Check your internet connection and try again.");return}
  var b=this;busy(b,true);
  try{
-  var r=await inList(n,a);insured=!!r;render();
-  var h=document.createElement("div");h.style.cssText="position:fixed;left:-10000px;top:0";
-  var cl=$("L").cloneNode(true);cl.removeAttribute("id");cl.style.transform="none";h.appendChild(cl);document.body.appendChild(h);
-  var cv=await html2canvas(cl,{scale:2,useCORS:true,backgroundColor:"#97BFEB",width:794,height:1123});document.body.removeChild(h);
-  var pd=new window.jspdf.jsPDF({unit:"mm",format:"a4"});pd.addImage(cv.toDataURL("image/jpeg",0.92),"JPEG",0,0,210,297);
+  var r=await inList(n,a);insured=!!r;LREC=r||null;render();
+  var orig=$("L"),h=document.createElement("div"),cv;h.style.cssText="position:absolute;left:-10000px;top:0;width:794px;height:1123px";
+  var cl=orig.cloneNode(true);cl.style.transform="none";orig.id="Lpv";cl.id="L";h.appendChild(cl);document.body.appendChild(h);
+  try{await waitImgs(cl);if(document.fonts&&document.fonts.ready)await document.fonts.ready;cv=paintLetter(cl,3)}
+  finally{document.body.removeChild(h);orig.id="L"}
+  var pd=new window.jspdf.jsPDF({unit:"mm",format:"a4"});pd.addImage(cv.toDataURL("image/jpeg",0.95),"JPEG",0,0,210,297);
   save(pd.output("blob"),"Attachment_Letter_"+a.replace(/[^A-Za-z0-9]+/g,"_")+".pdf");
   log("attachment letter",insured?"cover on file":"no cover on file",n,a,C[c][0]+" / "+$("pr").value,t,e);
   say("lm","ok",insured?"Your letter has downloaded. It includes your insurance policy details. You can also download your insurance cover from the Insurance cover tab.":"Your letter has downloaded.");
@@ -228,31 +339,62 @@ async function makeCover(rec){
  cv.width=Math.round(W*S);cv.height=Math.round(H*S);
  var x=cv.getContext("2d");x.drawImage(img,0,0,cv.width,cv.height);x.scale(S,S);
  x.fillStyle="#000";x.textBaseline="alphabetic";x.font="11px CoverFont";
- var d=fmtDate(SETTINGS.issueDate),px=56.64,sf=ord(d.d).replace(/^\d+/,"");
+ var P=polOf(rec),d=fmtDate(P.i),px=56.64,sf=ord(d.d).replace(/^\d+/,"");
  x.fillText(String(d.d),px,107.4);px+=x.measureText(String(d.d)).width;
  x.font="7px CoverFont";x.fillText(sf,px,103.5);px+=x.measureText(sf).width;
  x.font="11px CoverFont";x.fillText(" "+d.m+","+d.y,px,107.4);
  var vx=186.3;
  x.fillText(rec.n.toUpperCase(),vx,246.0);
- x.fillText(SETTINGS.policyNumber,vx,267.9);
+ x.fillText(P.p,vx,267.9);
  x.fillText(rec.a,vx,289.9);
  x.fillText(rec.c,vx,338.9);
- x.fillText(dmy(SETTINGS.policyStart)+"-"+dmy(SETTINGS.policyEnd),vx,360.8);
+ x.fillText(dmy(P.s)+"-"+dmy(P.e),vx,360.8);
  var pd=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
  pd.addImage(cv.toDataURL("image/jpeg",0.93),"JPEG",0,0,210,297);
  return pd.output("blob");
 }
-$("if").addEventListener("click",async function(){
- var n=$("in").value.trim(),a=$("ia").value.trim();INS=null;$("id").hidden=true;say("im","");
- if(n.length<3||a.length<6){say("im","err","Enter your full name and full admission number.");return}
-  var b=this;busy(b,true);
- var r=false;try{r=await inList(n,a)}catch(x){}
- busy(b,false,"Find my cover");
- if(!r){say("im","err","No insurance cover found for these details. Check that your name and admission number match your cover. If they do, your cover has not been added yet. Please see the Industrial Liaison Office.");return}
- INS={r:r};
- say("im","ok","Cover found for "+r.n.toUpperCase()+".");$("id").hidden=false;
-});
-["in","ia"].forEach(function(i){$(i).addEventListener("input",function(){INS=null;$("id").hidden=true;say("im","")})});
+var qTimer,qSeq=0;
+function pick(r,auto){INS={r:r};if(!auto){$("iq").value=r.n.toUpperCase()+" ("+r.a+")";$("isg").hidden=true;$("iq").setAttribute("aria-expanded","false")}
+ say("im","ok","Cover found for "+r.n.toUpperCase()+".");$("id").hidden=false}
+function showSug(list){var g=$("isg");g.textContent="";
+ list.forEach(function(r){var b=document.createElement("button");b.type="button";b.setAttribute("role","option");
+  var n=document.createElement("b");n.textContent=r.n.toUpperCase();var d=document.createElement("span");d.textContent=r.a+(r.c?" \u00b7 "+r.c:"");
+  b.appendChild(n);b.appendChild(d);b.addEventListener("click",function(){pick(r)});g.appendChild(b)});
+ g.hidden=!list.length;$("iq").setAttribute("aria-expanded",list.length?"true":"false")}
+$("iq").addEventListener("input",function(){
+ INS=null;$("id").hidden=true;say("im","");clearTimeout(qTimer);
+ var q=this.value.trim(),my=++qSeq;
+ if(q.replace(/[^A-Za-z0-9]/g,"").length<3){showSug([]);return}
+ qTimer=setTimeout(async function(){
+  try{var d=await api("search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({q:q})});
+   if(my!==qSeq)return;
+   var m=d.matches||[];if(d.settings)SETTINGS=d.settings;showSug(m);
+   if(!m.length)say("im","err","No insurance cover found for \""+q+"\". Check the spelling. If it is correct, your cover has not been added yet. Please see the Industrial Liaison Office.");
+   else if(m.length===1)pick(m[0],true);
+  }catch(x){if(my===qSeq)say("im","err","Could not search right now. Check your connection and try again.")}
+ },300)});
+
+/* ---------- request a cover that is not on file yet ---------- */
+$("rqo").addEventListener("click",function(){
+ var f=$("rqf"),open=f.hidden;f.hidden=!open;if(!open)return;
+ var sel=$("rco");sel.textContent="";var o0=document.createElement("option");o0.value="";o0.textContent="Select your course";sel.appendChild(o0);
+ ALLC.forEach(function(c){var x=document.createElement("option");x.value=c.title;x.textContent=c.title;sel.appendChild(x)});
+ var q=$("iq").value.trim();if(q&&!$("rn").value&&!$("ra").value){if(/\d/.test(q))$("ra").value=q.toUpperCase();else $("rn").value=q.toUpperCase()}
+ $("rn").focus()});
+$("rqs").addEventListener("click",async function(){
+ var n=cleanName($("rn").value),c=cleanName($("rc").value),co=$("rco").value,a=cleanAdm($("ra").value);say("rqm","");
+ if(n.length<3){say("rqm","err","Enter your full name.");return}
+ if(c.length<2){say("rqm","err","Enter your class.");return}
+ if(!co){say("rqm","err","Select your course.");return}
+ if(a.length<4){say("rqm","err","Enter your full admission number.");return}
+ var b=this;busy(b,true);
+ try{var d=await api("request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:n,cls:c,course:co,adm:a})});
+  if(d.error){say("rqm","err",d.error)}
+  else if(d.already){say("rqm","ok","Your cover is already on file. Search for your name above to download it.")}
+  else{say("rqm","ok","Request sent. The Industrial Liaison Office will prepare your cover. Come back later and search for your name to download it.");
+   log("insurance request","requested",n,a,co+" / "+c,"","")}
+ }catch(x){say("rqm","err","Could not send your request. Check your connection and try again.")}
+ busy(b,false,"Send request")});
 $("id").addEventListener("click",async function(){
  if(!INS)return;var b=this;busy(b,true);
  try{
@@ -264,4 +406,5 @@ $("id").addEventListener("click",async function(){
 });
 window.addEventListener("load",fit);
 </script>
+<script src="/pwa.js" defer></script>
 </body></html>

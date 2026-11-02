@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attachment placement - RVNP</title>
+<style>
+:root{--bg:#f3f8f4;--card:#fff;--ink:#12301f;--mut:#51675a;--ac:#17803f;--acd:#0f6330;--soft:#e3f3e8;--bd:#cfe0d4;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff;--or:#f28a1d;--orb:#fff1e0;--ord:#c2610a}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1a12;--card:#14261b;--ink:#e6f4ea;--mut:#9fb8a7;--ac:#4cc77a;--acd:#6fd99a;--soft:#1a3524;--bd:#2c4a38;--in:#0f1f16;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#08140d;--or:#ffa94d;--orb:#3a2610;--ord:#ffbf73}}
+@font-face{font-family:"CoverFont";src:url(cover_font.ttf) format("truetype")}
+*,*:before,*:after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 16px 48px}
+header{margin-bottom:22px}
+h1{font-size:28px;line-height:1.2;margin:0 0 6px;font-weight:700;letter-spacing:-.01em}
+header p{margin:0;color:var(--mut);max-width:60ch}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:620px){.tiles{grid-template-columns:1fr}h1{font-size:24px}}
+.tile{display:flex;gap:14px;align-items:center;text-align:left;width:100%;padding:18px;background:var(--card);color:var(--ink);border:2px solid var(--bd);border-radius:14px;cursor:pointer;font:inherit;transition:border-color .15s,background .15s}
+a.tile{text-decoration:none}.tile[hidden]{display:none}
+.tile:hover{border-color:var(--ac)}
+.tile[aria-selected="true"]{border-color:var(--ac);background:var(--soft)}
+.tile .ic{flex:none;width:56px;height:56px;border-radius:12px;display:grid;place-items:center;background:var(--soft);color:var(--ac)}
+.tile[aria-selected="true"] .ic{background:var(--ac);color:var(--on)}
+.tile .ic svg{width:30px;height:30px}
+.tile b{display:block;font-size:17px;margin-bottom:2px}
+.tile span.d{display:block;color:var(--mut);font-size:14px;line-height:1.35}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:22px}
+.panel[hidden]{display:none}
+.panel h2{font-size:19px;margin:0 0 4px}
+.panel .lead{margin:0 0 18px;color:var(--mut);font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+input,select{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--in);color:var(--ink);font:inherit}
+select{appearance:auto}
+.hint{font-size:13px;color:var(--mut);margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border:0;border-radius:10px;background:var(--ac);color:var(--on);font-weight:600;font-size:16px;font-family:inherit;cursor:pointer}
+.btn:hover{background:var(--acd)}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn svg{width:20px;height:20px}
+.msg{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:15px}
+.msg:empty{display:none}
+.msg.err{background:var(--erb);color:var(--er)}
+.msg.ok{background:var(--okb);color:var(--ok)}
+.msg.info{background:var(--soft);color:var(--ink)}
+.actions{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sug{margin-top:6px;border:1px solid var(--bd);border-radius:10px;background:var(--card);overflow:hidden}
+.sug button{display:block;width:100%;text-align:left;padding:11px 14px;border:0;border-bottom:1px solid var(--bd);background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.sug button:last-child{border-bottom:0}
+.sug button:hover,.sug button:focus-visible,.sug button.on{background:var(--soft)}
+.sug b{display:block;font-size:15px}.sug span{display:block;font-size:13px;color:var(--mut)}
+.reqbox{margin-top:18px;padding-top:16px;border-top:1px solid var(--bd)}
+.btn.sec{background:var(--soft);color:var(--ink);border:1px solid var(--bd)}
+.pvh{margin:22px 0 8px;font-weight:600;font-size:14px;color:var(--mut)}
+.pv{overflow:hidden;border:1px solid var(--bd);border-radius:10px;background:#97BFEB}
+footer{margin-top:22px;color:var(--mut);font-size:13px}
+/* letter (A4 at 794x1123) */
+#L{width:794px;height:1123px;background:#97BFEB;color:#000;font:14.67px/1.42 Arial,Helvetica,sans-serif;position:relative;transform-origin:top left;padding:20px 76px 0}
+#L .h{display:block;margin:0 auto 8px;width:640px}#L .ft{position:absolute;bottom:26px;left:232px;width:330px}
+#L .r{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;margin:8px 0 14px}
+#L .d{margin:0 0 8px}#L .j{text-align:justify;margin:0 0 8px}
+#L .ln{display:flex;align-items:flex-end;gap:6px;margin:0 0 9px}
+#L .fd{flex:1;border-bottom:1.5px dotted #000;min-height:20px;padding:0 4px;font-weight:400}
+#L .sg{position:relative;margin-top:6px;height:92px}#L .sg img{position:absolute;left:92px;top:-2px;width:205px}
+#L .sg div{position:relative}
+
+textarea{width:100%;min-height:170px;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--in);color:var(--ink);font:inherit;resize:vertical}
+
+.card2{border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-top:10px;background:var(--card)}
+.card2 b{display:block;font-size:16px}.mut{color:var(--mut);font-size:14px}
+a.tel{color:inherit;font-weight:600}
+/*GREEN*/
+body{background:var(--bg) linear-gradient(180deg,var(--soft),transparent 260px) no-repeat}
+header{padding-bottom:14px;border-bottom:4px solid var(--or);position:relative}
+h1{color:var(--ac)}
+.panel,.card2,.tile{box-shadow:0 2px 10px rgba(23,128,63,.08)}
+.panel{border-top:4px solid var(--ac)}
+.tile:hover{box-shadow:0 4px 16px rgba(23,128,63,.18)}
+.btn{background:linear-gradient(135deg,var(--ac),var(--acd));box-shadow:0 2px 8px rgba(23,128,63,.28)}
+.btn.sec{background:var(--soft);box-shadow:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(23,128,63,.2)}
+/*ORANGE*/
+header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px;background:var(--or);margin-top:8px}
+.badge{background:var(--or)!important;color:#fff!important}
+.tab[aria-selected="true"]{border-color:var(--or)!important;background:var(--orb)!important;color:var(--ord)}
+.tile[aria-selected="true"] .ic{background:var(--or)!important}
+.tile:hover{border-color:var(--or)!important}
+.tile .ic{background:var(--orb)!important;color:var(--ord)!important}
+.btn:hover{background:var(--or)!important;box-shadow:0 3px 10px rgba(242,138,29,.4)}
+.btn.sec:hover{background:var(--orb)!important;border-color:var(--or)}
+.panel h2{display:inline-block;border-bottom:3px solid var(--or);padding-bottom:2px}
+.msg.info{background:var(--orb);color:var(--ord)}
+:focus-visible{outline-color:var(--or)!important}
+</style>
+<link rel="stylesheet" href="/portal-theme.css"><link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#12304a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RVNP Attachment">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/icon-192.png">
+</head><body>
+<div class="wrap" style="max-width:640px;margin:0 auto;padding:20px 16px 40px">
+<header><h1>Attachment placement</h1>
+<p>Rift Valley National Polytechnic. Once you have secured an attachment place, tell the Industrial Liaison Office where you are. You can also check which college trainer was assigned to you.</p></header>
+
+<section class="panel" style="margin-top:18px">
+<h2>Where were you placed?</h2>
+<div class="grid">
+<div class="full"><label for="n">Full name</label><input id="n" autocomplete="name" autocapitalize="characters" placeholder="e.g. KABIRU ELIUD GATHUTHI"></div>
+<div class="full"><label for="a">Admission number</label><input id="a" autocomplete="off" autocapitalize="characters" placeholder="e.g. EIL4/26J/306761"></div>
+<div class="full"><label for="dp">Department</label><select id="dp"><option value="">Select your department</option></select></div>
+<div class="full"><label for="co">Course</label><select id="co" disabled><option value="">Select your department first</option></select></div>
+<div class="full" id="cw" hidden><label for="ct">Your course (with its level)</label><input id="ct" placeholder="e.g. ELECTRICAL ENGINEERING TECHNOLOGY LEVEL 6"></div>
+<div><label for="t1">Phone number 1</label><input id="t1" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XX XXX XXX"></div>
+<div><label for="t2">Phone number 2 (optional)</label><input id="t2" type="tel" inputmode="tel" placeholder="07XX XXX XXX"></div>
+<div class="full"><label for="og">Organization</label><input id="og" placeholder="Name of the company or institution"></div>
+<div class="full"><label for="lc">Where exactly is it?</label><input id="lc" placeholder="e.g. Njoro Road, near Naivas supermarket"><div class="hint">Give a clear description so a trainer can find it: the road or area and a landmark (near ...).</div></div>
+<div class="full"><label for="sp">Your supervisor at the organization</label><input id="sp" placeholder="Name of your supervisor"></div>
+<div class="full"><label for="tw">Town</label><input id="tw" placeholder="e.g. Nakuru"></div>
+</div>
+<div class="msg" id="m" role="status"></div>
+<div class="actions"><button class="btn" id="go" type="button">Submit my placement</button></div>
+<div class="hint" style="margin-top:8px">Submit again with the same name and admission number to correct something.</div>
+</section>
+
+<section class="panel" style="margin-top:18px">
+<h2>Find my trainer</h2>
+<p class="lead">Type your name or admission number (at least 3 letters). Your trainer appears here after the Industrial Liaison Office assigns one.</p>
+<label for="fq">Your name or admission number</label>
+<input id="fq" autocomplete="off" placeholder="e.g. KABIRU or EIL4/26J/306761">
+<div id="fr"></div>
+</section>
+<footer>Questions? See the Industrial Liaison Office.</footer>
+</div>
+<script>
+var $=function(i){return document.getElementById(i)},ALL=[];
+function say(c,t){var m=$("m");m.className="msg"+(c?" "+c:"");m.textContent=t||""}
+fetch("/api/courses").then(function(r){return r.json()}).then(function(d){ALL=d.courses||[];
+ (d.departments||[]).forEach(function(n){if(ALL.some(function(c){return c.dept===n})){var o=document.createElement("option");o.value=n;o.textContent=n;$("dp").appendChild(o)}})}).catch(function(){say("err","Could not load the course list. Check your connection and refresh.")});
+$("dp").addEventListener("change",function(){var dp=this.value,sel=$("co");sel.textContent="";
+ var o0=document.createElement("option");o0.value="";o0.textContent=dp?"Select your course":"Select your department first";sel.appendChild(o0);
+ ALL.filter(function(c){return c.dept===dp}).forEach(function(c){var o=document.createElement("option");o.value=c.title;o.textContent=c.title;sel.appendChild(o)});
+ if(dp){var x=document.createElement("option");x.value="__other";x.textContent="My course is not listed";sel.appendChild(x)}
+ sel.disabled=!dp;$("cw").hidden=true});
+$("co").addEventListener("change",function(){$("cw").hidden=this.value!=="__other"});
+$("go").addEventListener("click",async function(){say("");var b=this,course=$("co").value==="__other"?$("ct").value.trim():$("co").value;
+ var f={name:$("n").value,adm:$("a").value,dept:$("dp").value,course:course,org:$("og").value,loc:$("lc").value,sup:$("sp").value,town:$("tw").value,tel1:$("t1").value,tel2:$("t2").value};
+ if(f.name.trim().length<3){say("err","Enter your full name.");return}
+ if(f.adm.replace(/\s+/g,"").length<6){say("err","Enter your full admission number.");return}
+ if(!f.dept){say("err","Select your department.");return}
+ if(course.length<3){say("err","Select your course.");return}
+ if(f.tel1.replace(/\D/g,"").length<9){say("err","Enter phone number 1 (at least 9 digits).");return}
+ if(f.tel2.trim()&&f.tel2.replace(/\D/g,"").length<9){say("err","Phone number 2 must have at least 9 digits, or leave it empty.");return}
+ if(f.org.trim().length<2){say("err","Enter the name of the organization.");return}
+ if(f.loc.trim().length<5){say("err","Describe where the organization is, e.g. near Naivas, Njoro Road.");return}
+ if(f.sup.trim().length<3){say("err","Enter your supervisor's name.");return}
+ if(f.town.trim().length<2){say("err","Enter the town.");return}
+ b.disabled=true;
+ try{var r=await fetch("/api/placement",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(f)});
+  var d=await r.json();if(!r.ok)say("err",d.error||"Something went wrong.");
+  else{say("ok",d.updated?"Your placement details were updated. Thank you.":"Thank you. Your placement was saved. Check below later to see your trainer.")}}
+ catch(e){say("err","Could not send. Check your connection and try again.")}
+ b.disabled=false});
+var qt,qs=0;
+$("fq").addEventListener("input",function(){clearTimeout(qt);var q=this.value.trim(),my=++qs,box=$("fr");
+ if(q.replace(/[^A-Za-z0-9]/g,"").length<3){box.textContent="";return}
+ qt=setTimeout(async function(){try{var r=await fetch("/api/placement-search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({q:q})});var d=await r.json();if(my!==qs)return;
+  box.textContent="";
+  if(!(d.matches||[]).length){var p=document.createElement("p");p.className="mut";p.textContent="No placement found for \""+q+"\". Submit the form above first, or check the spelling.";box.appendChild(p);return}
+  d.matches.forEach(function(m){var c=document.createElement("div");c.className="card2";
+   var t=document.createElement("b");t.textContent=m.n;c.appendChild(t);
+   var l=document.createElement("div");l.className="mut";l.textContent=m.a+" - "+m.org+", "+m.town;c.appendChild(l);
+   var tr=document.createElement("p");tr.style.margin="8px 0 0";
+   if(m.trainer){tr.appendChild(document.createTextNode("Your trainer: "));var s=document.createElement("b");s.style.display="inline";s.textContent=m.trainer.name;tr.appendChild(s);tr.appendChild(document.createTextNode(" - "));var a=document.createElement("a");a.className="tel";a.href="tel:"+m.trainer.tel;a.textContent=m.trainer.tel;tr.appendChild(a)}
+   else tr.textContent="No trainer has been assigned yet. Please check again later.";
+   c.appendChild(tr);box.appendChild(c)})}
+  catch(e){if(my===qs){box.textContent="Could not search right now. Check your connection."}}},300)});
+</script><script src="/pwa.js" defer></script>
+</body></html>

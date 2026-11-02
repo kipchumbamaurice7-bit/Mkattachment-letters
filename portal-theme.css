@@ -1,0 +1,85 @@
+/* RVNP Industrial Attachment Portal — unified visual refresh */
+:root{
+  --bg:#f7f8f6 !important;--card:#ffffff !important;--ink:#203247 !important;
+  --mut:#687789 !important;--ac:#176b45 !important;--acd:#105238 !important;
+  --soft:#edf5ef !important;--bd:#e2e6e2 !important;--in:#fff !important;
+  --ok:#176b45 !important;--okb:#edf5ef !important;--er:#a52b2b !important;
+  --erb:#fff0ef !important;--on:#fff !important;--or:#e58a24 !important;
+  --orb:#fff3e5 !important;--ord:#98500d !important;
+  color-scheme:light;
+}
+*,*:before,*:after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:linear-gradient(180deg,#f2f6f2 0,#fbfbf9 260px,#fbfbf9 100%) !important;color:var(--ink);font-family:Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.55}
+body:before{content:"";display:block;height:6px;background:linear-gradient(90deg,#176b45 0 48%,#e58a24 48% 76%,#ffffff 76% 100%)}
+.wrap{width:min(100% - 32px,1180px);max-width:1180px !important;margin:0 auto;padding:30px 0 56px !important}
+.wrap:before{content:"RIFT VALLEY NATIONAL POLYTECHNIC   /   INDUSTRIAL LINKAGES OFFICE";display:block;color:#60748a;font-size:11px;font-weight:800;letter-spacing:.13em;margin:0 0 12px}
+header{padding:0 0 22px !important;margin:0 0 24px !important;border-bottom:1px solid #d9e3eb !important;position:relative}
+header:after{content:"";position:absolute;left:0;bottom:-2px;width:76px;height:4px;border-radius:8px;background:#e58a24}
+h1{color:#142f49 !important;font-size:clamp(25px,3vw,34px) !important;line-height:1.18 !important;font-weight:780 !important;letter-spacing:-.035em !important;margin:0 0 8px !important}
+header p,.lead{color:#62748a !important;max-width:75ch;font-size:15px !important}
+h2{color:#183650;font-size:20px !important;letter-spacing:-.02em}
+h3{color:#24425c}
+.panel,.card,.course{background:#fff !important;border:1px solid #dce5ed !important;border-radius:16px !important;box-shadow:0 8px 24px rgba(22,48,72,.055) !important}
+.panel,.card{padding:clamp(17px,2.5vw,26px) !important;margin-bottom:18px}
+.panel{border-top:3px solid #167346 !important}
+.card{border-top:3px solid #e58a24 !important}
+.tiles{gap:16px !important;margin:0 0 22px !important}
+.tile{background:#fff !important;border:1px solid #dce5ed !important;border-radius:15px !important;padding:19px !important;box-shadow:0 5px 18px rgba(22,48,72,.045) !important;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease !important}
+.tile:hover{transform:translateY(-2px);border-color:#9dbdac !important;box-shadow:0 12px 24px rgba(22,48,72,.09) !important}
+.tile[aria-selected="true"]{background:#f0f7f2 !important;border-color:#167346 !important}
+.tile .ic{background:#fff0dc !important;color:#b96512 !important;border-radius:13px !important}
+.tile[aria-selected="true"] .ic{background:#176b45 !important;color:#fff !important}
+.btn{background:linear-gradient(135deg,#167346,#105a37) !important;color:#fff !important;border-radius:10px !important;min-height:44px;box-shadow:0 4px 10px rgba(22,115,70,.16) !important;transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
+.btn:hover{background:linear-gradient(135deg,#105a37,#0d4b2e) !important;transform:translateY(-1px);filter:saturate(1.08)}
+.btn.sec{background:#fff2e3 !important;color:#98500d !important;border:1px solid #f0d2ad !important;box-shadow:none !important}
+.btn.sec:hover{background:#ffe8cc !important;border-color:#e8b979 !important}
+.btn.del{background:#fff0ef !important;color:#a52b2b !important;box-shadow:none !important}
+.tab{background:#fff !important;border:1px solid #dce5ed !important;border-radius:10px !important;color:#425b72 !important;transition:all .15s ease}
+.tab[aria-selected="true"]{background:#fff1df !important;border-color:#e58a24 !important;color:#98500d !important;box-shadow:inset 0 -2px #e58a24}
+.tabs{gap:8px !important;margin:0 0 18px !important;position:relative;z-index:1}
+input,select,textarea{border:1px solid #d5e0e8 !important;border-radius:9px !important;background:#fff !important;color:#172b42 !important;min-height:45px;transition:border-color .15s ease,box-shadow .15s ease}
+textarea{line-height:1.5}
+input:focus,select:focus,textarea:focus{outline:0 !important;border-color:#176b45 !important;box-shadow:0 0 0 3px rgba(23,107,69,.12) !important}
+label{color:#304a61;font-weight:700 !important}
+.hint,.badge,.tag{color:#64788c}
+.badge,.tag{background:#edf3f7 !important;border-radius:20px;padding:3px 9px;font-weight:700}
+.msg{border-radius:10px !important}
+.msg.info{background:#fff5e5 !important;color:#805713 !important}
+.msg.ok{background:#e8f5ed !important;color:#176b3b !important}
+.msg.err{background:#fff0ef !important;color:#a52b2b !important}
+.scroll{border:1px solid #dce5ed !important;border-radius:12px !important;background:#fff}
+table{font-size:14px !important}
+th{background:#f1f4f1 !important;color:#526a80 !important;font-weight:750 !important}
+th,td{padding:11px 12px !important;border-bottom:1px solid #e7edf2 !important}
+tr:hover td{background:#f8fafb}
+dialog{border:1px solid #dce5ed !important;border-radius:16px !important;box-shadow:0 24px 70px rgba(15,35,55,.22)}
+footer{color:#718397 !important;border-top:1px solid #dce5ed;padding-top:16px;margin-top:24px}
+/* Keep the official A4 attachment-letter preview and its print dimensions unchanged. */
+#L{font-family:Arial,Helvetica,sans-serif !important;color:#000 !important;box-shadow:none !important;border:0 !important;border-radius:0 !important}
+#L h1,#L h2,#L h3{color:#000 !important}
+@media(max-width:700px){
+ .wrap{width:calc(100% - 24px);padding:22px 0 38px !important}
+ .wrap:before{font-size:9px;letter-spacing:.08em}
+ .tiles{grid-template-columns:1fr !important}
+ .grid{grid-template-columns:1fr !important}
+ .full{grid-column:1}
+ .top{align-items:stretch !important;gap:8px !important}
+ .top>div{width:100%}
+ .tabs{flex-wrap:nowrap !important;overflow-x:auto;padding:2px 2px 10px;margin-right:-4px !important;scrollbar-width:thin}
+ .tab{white-space:nowrap;flex:0 0 auto}
+ .row,.actions{align-items:stretch}
+ .row .btn,.actions .btn{max-width:100%}
+ .scroll{max-width:100%;overflow:auto}
+ table{min-width:620px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none !important;animation:none !important}}
+
+/* Green, orange and white colour balance: orange highlights complement the green identity. */
+.panel:nth-of-type(even){border-top-color:#e58a24 !important}
+.tile:nth-child(3n) .ic{background:#edf5ef !important;color:#176b45 !important}
+.tile:nth-child(3n+2) .ic{background:#fff0dc !important;color:#b96512 !important}
+a:not(.btn){color:#176b45}
+a:not(.btn):hover{color:#b96512}
+.badge,.tag{background:#fff2e3 !important;color:#98500d !important}
+.msg.info{background:#fff3e5 !important;color:#98500d !important;border-left:3px solid #e58a24}

@@ -4,8 +4,8 @@
 <meta name="robots" content="noindex,nofollow">
 <title>RVNP Portal Admin</title>
 <style>
-:root{--bg:#eef2f6;--card:#fff;--ink:#12304f;--mut:#566b80;--ac:#1d5fa6;--acd:#154a85;--soft:#e4eefa;--bd:#c7d3e0;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff}
-@media (prefers-color-scheme:dark){:root{--bg:#0e1722;--card:#16222f;--ink:#e6eef7;--mut:#9db0c3;--ac:#6fb0f5;--acd:#8cc2fa;--soft:#1c3250;--bd:#2f4358;--in:#101b27;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#0b1420}}
+:root{--bg:#f3f8f4;--card:#fff;--ink:#12301f;--mut:#51675a;--ac:#17803f;--acd:#0f6330;--soft:#e3f3e8;--bd:#cfe0d4;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff;--or:#f28a1d;--orb:#fff1e0;--ord:#c2610a}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1a12;--card:#14261b;--ink:#e6f4ea;--mut:#9fb8a7;--ac:#4cc77a;--acd:#6fd99a;--soft:#1a3524;--bd:#2c4a38;--in:#0f1f16;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#08140d;--or:#ffa94d;--orb:#3a2610;--ord:#ffbf73}}
 *,*:before,*:after{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
@@ -36,8 +36,46 @@ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd)}th{colo
 .scroll{max-height:420px;overflow:auto;border:1px solid var(--bd);border-radius:10px;margin-top:10px}
 .course{border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px;background:var(--bg)}
 .radio{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}.radio label{font-weight:400;display:flex;gap:6px;align-items:center;margin:0}.radio input{width:auto;min-height:0}
+.btn.ok{background:var(--okb);color:var(--ok);min-height:34px;padding:4px 12px;font-size:14px}
+.btn svg{width:16px;height:16px;margin-right:5px;flex:none}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.tag{display:inline-block;background:var(--soft);border-radius:6px;padding:1px 7px;font-size:12px;font-weight:600;margin-left:6px}
+dialog{border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--ink);padding:20px;width:min(480px,92vw)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.chk{display:flex;gap:8px;align-items:center;font-weight:600;margin:6px 0 10px}.chk input{width:auto;min-height:0}
 .badge{display:inline-block;background:var(--soft);padding:2px 10px;border-radius:99px;font-size:13px;font-weight:600}
-</style></head><body>
+/*GREEN*/
+body{background:var(--bg) linear-gradient(180deg,var(--soft),transparent 260px) no-repeat}
+header{padding-bottom:14px;border-bottom:4px solid var(--or);position:relative}
+h1{color:var(--ac)}
+.panel,.card2,.tile{box-shadow:0 2px 10px rgba(23,128,63,.08)}
+.panel{border-top:4px solid var(--ac)}
+.tile:hover{box-shadow:0 4px 16px rgba(23,128,63,.18)}
+.btn{background:linear-gradient(135deg,var(--ac),var(--acd));box-shadow:0 2px 8px rgba(23,128,63,.28)}
+.btn.sec{background:var(--soft);box-shadow:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(23,128,63,.2)}
+/*ORANGE*/
+header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px;background:var(--or);margin-top:8px}
+.badge{background:var(--or)!important;color:#fff!important}
+.tab[aria-selected="true"]{border-color:var(--or)!important;background:var(--orb)!important;color:var(--ord)}
+.tile[aria-selected="true"] .ic{background:var(--or)!important}
+.tile:hover{border-color:var(--or)!important}
+.tile .ic{background:var(--orb)!important;color:var(--ord)!important}
+.btn:hover{background:var(--or)!important;box-shadow:0 3px 10px rgba(242,138,29,.4)}
+.btn.sec:hover{background:var(--orb)!important;border-color:var(--or)}
+.panel h2{display:inline-block;border-bottom:3px solid var(--or);padding-bottom:2px}
+.msg.info{background:var(--orb);color:var(--ord)}
+:focus-visible{outline-color:var(--or)!important}
+</style>
+<link rel="stylesheet" href="/portal-theme.css"><link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#12304a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RVNP Attachment">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/icon-192.png">
+</head><body>
 <div class="wrap">
 
 <section id="login" class="card" style="max-width:420px;margin:60px auto">
@@ -60,11 +98,23 @@ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd)}th{colo
 <div class="row"><button class="btn" id="cp">Copy link</button><a class="btn sec" id="wa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
 <div class="msg" id="ml"></div>
 </div>
+<div class="card">
+<h2>ILO representatives link</h2>
+<p class="lead">Share this link with the ILO representative of each department. They pick their department and course and send the units the students have covered. You approve each one in the <b>ILO units</b> tab before it appears on any letter.</p>
+<input id="il" readonly onclick="this.select()">
+<div class="row"><button class="btn" id="icp">Copy link</button><a class="btn sec" id="iwa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
+<div class="msg" id="mi"></div>
+</div>
 
 
 <div class="tabs" role="tablist">
 <button class="tab" id="t-ins" role="tab" aria-selected="true">Insurance covers</button>
+<button class="tab" id="t-req" role="tab" aria-selected="false">Cover requests <span class="badge" id="rcnt">0</span></button>
 <button class="tab" id="t-let" role="tab" aria-selected="false">Attachment letters</button>
+<button class="tab" id="t-ilo" role="tab" aria-selected="false">ILO units <span class="badge" id="icnt">0</span></button>
+<button class="tab" id="t-reg" role="tab" aria-selected="false">Student database <span class="badge" id="gcnt">0</span></button>
+<button class="tab" id="t-pm" role="tab" aria-selected="false">Placements <span class="badge" id="pmcnt">0</span></button>
+<button class="tab" id="t-mk" role="tab" aria-selected="false">Marks</button>
 </div>
 
 <!-- INSURANCE -->
@@ -84,8 +134,24 @@ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd)}th{colo
 </div>
 
 <div class="card">
+<h2>Other policies <span class="badge" id="pcnt">0</span></h2>
+<p class="lead">Some students are insured under a different policy (another policy number, dates or insurer). Create each extra policy once here, then give it to a whole class or to individual students. Anyone not given one uses the default policy above. If you change a policy here, every student on it updates automatically.</p>
+<div id="pol"></div>
+<div class="row"><button class="btn sec" id="padd">+ Add a policy</button></div>
+<h3 style="margin-top:18px">Give a policy to a whole class</h3>
+<div class="grid">
+<div><label for="pcl">Class</label><select id="pcl"></select></div>
+<div><label for="ppl">Policy</label><select id="ppl"></select></div>
+</div>
+<div class="row"><button class="btn" id="pgo">Apply to the whole class</button></div>
+<div class="hint" id="prl"></div>
+<div class="hint">For single students, search them below and press <b>Policy</b> under their name. Applying a policy replaces any one-off custom dates those students had. It is also remembered for the class, so students added to that class later get it automatically.</div>
+<div class="msg" id="mpl"></div>
+</div>
+
+<div class="card">
 <h2>Upload students with insurance</h2>
-<p class="lead">Upload your Excel (.xlsx) or CSV list. Columns: <b>Class code</b>, <b>Student name</b>, <b>Admission number</b>. Your current database file works as it is. A student can download a cover only if they are on this list.</p>
+<p class="lead">Upload your Excel (.xlsx) or CSV list. Columns: <b>Class code</b>, <b>Student name</b>, <b>Admission number</b>. Your current database file works as it is. Optional: a <b>Policy</b> column with the name of one of your other policies (e.g. "Policy 2 - January intake") to put that student on it. For one-off custom dates use <b>Policy number</b>, <b>Issue date</b>, <b>Start date</b>, <b>Expiry date</b> (day/month/year). Leave them blank to use the default policy. A student can download a cover only if they are on this list.</p>
 <input id="file" type="file" accept=".xlsx,.xls,.csv">
 <div class="radio">
 <label><input type="radio" name="mode" value="merge" checked> Add new students and update existing ones</label>
@@ -106,7 +172,18 @@ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd)}th{colo
 </div>
 <div class="msg" id="ma"></div>
 <div class="row"><input id="q" placeholder="Search name, admission number or class" style="max-width:340px"><button class="btn sec" id="csv">Download list (CSV)</button></div>
-<div class="scroll"><table><thead><tr><th>Class</th><th>Name</th><th>Admission no.</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>Class</th><th>Name</th><th>Admission no.</th><th>Policy</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+</div>
+
+<!-- REQUESTS -->
+<div id="s-req" hidden>
+<div class="card">
+<h2>Cover requests</h2>
+<p class="lead">Students who could not find their cover send their name, class, course and admission number here. Press <b>Approve</b> to give a student their cover: they can download it straight away and move to the students list, using the default policy unless you choose a different one. <b>Remove</b> deletes the request. You can also still upload a finished list under <b>Insurance covers</b>.</p>
+<div class="row" style="margin-top:0"><select id="rapl" aria-label="Policy for approve all" style="max-width:240px"></select><button class="btn" id="rapp">Approve all</button><button class="btn sec" id="rcsv">Download requests (CSV)</button><button class="btn sec" id="rrf">Refresh</button><button class="btn del" id="rall">Clear all</button></div>
+<div class="msg" id="mr"></div>
+<div class="scroll"><table><thead><tr><th>#</th><th>Class</th><th>Name</th><th>Admission no.</th><th>Course</th><th>Requested</th></tr></thead><tbody id="rtb"></tbody></table></div>
 </div>
 </div>
 
@@ -114,14 +191,126 @@ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd)}th{colo
 <div id="s-let" hidden>
 <div class="card">
 <h2>Courses on the attachment letter</h2>
-<p class="lead">Each course below appears in the student's course list. The letter text, layout, signature and stamp stay exactly as they are; only the course title, the percentage covered and the list of units change. Attachment periods (e.g. JANUARY to APRIL 2027) are generated automatically.</p>
+<p class="lead">Courses are grouped by department. Choose a department or type a course name to see its courses. The letter text, layout, signature and stamp stay exactly as they are; only the course title, the percentage covered and the list of units change. A course with no units yet shows as "coming soon" to students until units are added (by you, or approved from an ILO representative).</p>
+<div class="grid">
+<div><label for="cdp">Department</label><select id="cdp"><option value="">Choose a department</option></select></div>
+<div><label for="cq">Search courses</label><input id="cq" placeholder="Type at least 2 letters of a course"></div>
+</div>
+<div class="hint" id="cinfo" style="margin:8px 0"></div>
 <div id="courses"></div>
-<div class="row"><button class="btn sec" id="addc">+ Add a course</button><button class="btn" id="sc">Save courses</button></div>
+<div class="row"><button class="btn sec" id="addc">+ Add a course to this department</button><button class="btn" id="sc">Save courses</button></div>
 <div class="msg" id="mc"></div>
 </div>
+<div class="card">
+<h2>NITA form</h2>
+<p class="lead">Upload the NITA form (PDF, Word or image, up to 4 MB). Students then see a <b>NITA form</b> download button on the student page.</p>
+<div class="hint" id="nitas" style="margin-bottom:8px"></div>
+<input id="nf" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+<div class="row"><button class="btn" id="nup">Upload NITA form</button><button class="btn del" id="ndel" hidden>Remove it</button></div>
+<div class="msg" id="mn"></div>
+</div>
+</div>
+
+<!-- ILO -->
+<div id="s-ilo" hidden>
+<div class="card">
+<h2>Units sent by ILO representatives</h2>
+<p class="lead">Check each submission. For units, <b>Approve</b> puts the units and percentage on that course's letter. For an insurance policy, <b>Approve</b> applies it to every student of that class. <b>Reject</b> deletes the submission.</p>
+<div class="row" style="margin-top:0"><button class="btn sec" id="irf">Refresh</button></div>
+<div class="msg" id="mil"></div>
+<div id="ilol"></div>
 </div>
 </div>
 </div>
+
+<!-- STUDENT DATABASE -->
+<div id="s-reg" hidden>
+<div class="card">
+<h2>Student database</h2>
+<p class="lead">Students fill in their name, admission number, class and contact number on the student details link. Everything is kept here, sorted by class, so you can see the total number of students and download the full list.</p>
+<input id="gl" readonly onclick="this.select()">
+<div class="row"><button class="btn" id="gcp">Copy link</button><a class="btn sec" id="gwa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
+</div>
+<div class="card">
+<h2>Totals</h2>
+<p style="font-size:20px;margin:0 0 4px"><b id="gtot">0</b> students in <b id="gnc">0</b> classes</p>
+<div class="hint" id="gcv"></div>
+<div class="row"><button class="btn" id="gxl">Download Excel (by class)</button><button class="btn sec" id="gcs">Download CSV</button><button class="btn sec" id="grf">Refresh</button></div>
+<div class="msg" id="gm"></div>
+<div class="scroll"><table><thead><tr><th>Class</th><th>Students</th><th>With cover</th></tr></thead><tbody id="gtb"></tbody></table></div>
+<div class="hint">Tap a class to see its students.</div>
+</div>
+<div class="card">
+<h2>Find students</h2>
+<label for="gq">Search by name, admission number, class or phone</label>
+<input id="gq" placeholder="Type at least 2 letters, or tap a class above">
+<div class="hint" id="gh" style="margin:8px 0"></div>
+<div class="scroll"><table><thead><tr><th>Class</th><th>Name</th><th>Admission no. and contact</th></tr></thead><tbody id="gls"></tbody></table></div>
+</div>
+</div>
+
+<!-- PLACEMENTS -->
+<div id="s-mk" hidden><section class="panel" style="margin-top:14px"><h2>Marks</h2><p class="lead">See marks for every department. Download one class, a whole department, or everything.</p><div id="mkbox"></div></section></div>
+<div id="s-pm" hidden>
+<div class="card">
+<h2>Placement links</h2>
+<p class="lead">Students send where they were placed (organization, town, supervisor, phones). The ILO HOD / deputy HOD then assigns each student to a trainer. Students can see their trainer on the same page.</p>
+<label for="pml">Link for students</label>
+<input id="pml" readonly onclick="this.select()">
+<div class="row"><button class="btn" id="pmcp">Copy link</button><a class="btn sec" id="pmwa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
+<label for="phl" style="margin-top:14px;display:block">Link for the ILO HOD / deputy HOD (needs the access code below)</label>
+<input id="phl" readonly onclick="this.select()">
+<div class="row"><button class="btn" id="phcp">Copy HOD link</button><a class="btn sec" id="phwa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
+<div class="grid" style="margin-top:14px"><div class="full"><label for="phc">HOD access code (at least 6 characters)</label><input id="phc" type="password" autocomplete="off" placeholder="Type a new code to set or change it"><div class="hint" id="phs"></div></div></div>
+<div class="row"><button class="btn" id="phk">Save access code</button></div>
+<div class="msg" id="pmm"></div>
+</div>
+<div class="card">
+<h2>Totals</h2>
+<p style="font-size:20px;margin:0 0 4px"><b id="pmt">0</b> students placed &middot; <b id="pma">0</b> assigned &middot; <b id="pmu">0</b> waiting for a trainer</p>
+<div class="row"><button class="btn" id="pmxl">Download Excel</button><button class="btn sec" id="pmrf">Refresh</button></div>
+<div class="scroll"><table><thead><tr><th>Department</th><th>Placed</th><th>Assigned</th></tr></thead><tbody id="pmd"></tbody></table></div>
+<div class="hint">Tap a department to see its students.</div>
+<h3 style="margin-top:16px">Trainers</h3>
+<div class="scroll"><table><thead><tr><th>Trainer</th><th>Phone</th><th>Students</th></tr></thead><tbody id="pmtr"></tbody></table></div>
+</div>
+<div class="card">
+<h2>Find placements</h2>
+<label for="pmq">Search by name, admission number, organization, town or trainer</label>
+<input id="pmq" placeholder="Type at least 2 letters, or tap a department above">
+<div class="hint" id="pmh" style="margin:8px 0"></div>
+<div id="pml2"></div>
+</div>
+</div>
+
+<dialog id="pdlg">
+<h3 id="pdt">Policy</h3>
+<div class="grid">
+<div class="full"><label for="pdn">Name (so you can recognise it)</label><input id="pdn" placeholder="e.g. Policy 2 - January intake"></div>
+<div class="full"><label for="pdp">Policy number</label><input id="pdp"></div>
+<div class="full"><label for="pdi">Insurer</label><input id="pdi"></div>
+<div><label for="pds">Start date</label><input id="pds" type="date"></div>
+<div><label for="pde">Expiry date</label><input id="pde" type="date"></div>
+<div><label for="pdd">Date of issue</label><input id="pdd" type="date"></div>
+</div>
+<div class="msg" id="pdm"></div>
+<div class="row"><button class="btn" id="pdok">Save policy</button><button class="btn sec" id="pdno">Cancel</button></div>
+</dialog>
+
+<dialog id="dlg">
+<h3 id="dt"></h3><p class="lead" id="ds" style="margin-bottom:10px"></p>
+<label for="dsel" style="font-weight:600">Policy for this student</label><select id="dsel"></select>
+<div id="df" class="grid" hidden>
+<div class="full"><label for="dp">Policy number</label><input id="dp"></div>
+<div><label for="di">Date of issue</label><input id="di" type="date"></div>
+<div></div>
+<div><label for="dst">Start date</label><input id="dst" type="date"></div>
+<div><label for="de">Expiry date</label><input id="de" type="date"></div>
+</div>
+<div class="hint" id="dh"></div>
+<div class="msg" id="dm"></div>
+<div class="row"><button class="btn" id="dok">Approve</button><button class="btn sec" id="dno">Cancel</button></div>
+</dialog>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
@@ -146,12 +335,12 @@ $("out").onclick=signOut;
 async function start(){
  D=await call("GET","admin/data");$("login").hidden=true;$("app").hidden=false;
  var s=D.settings;$("pn").value=s.policyNumber;$("pi").value=s.insurer;$("ps").value=s.policyStart;$("pe").value=s.policyEnd;$("pd").value=s.issueDate;
- drawStudents();drawCourses()}
+ fillDepts();drawStudents();drawCourses();drawReqs();drawIlo();drawNita();loadReg()}
 if(TOKEN)start().catch(function(){signOut()});
 
 /* tabs */
-function tab(w){var i=w==="i";$("t-ins").setAttribute("aria-selected",i);$("t-let").setAttribute("aria-selected",!i);$("s-ins").hidden=!i;$("s-let").hidden=i}
-$("t-ins").onclick=function(){tab("i")};$("t-let").onclick=function(){tab("l")};
+var MK=null;function tab(w){["i","r","l","o","g","m","k"].forEach(function(k){var id={i:"ins",r:"req",l:"let",o:"ilo",g:"reg",m:"pm",k:"mk"}[k];$("t-"+id).setAttribute("aria-selected",k===w);$("s-"+id).hidden=k!==w});if(w==="g"&&!REG)loadReg();if(w==="m"&&!PM)loadPm();if(w==="k"&&!MK)MK=RVMarks.mount($("mkbox"),{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut})}
+$("t-ins").onclick=function(){tab("i")};$("t-req").onclick=function(){tab("r")};$("t-let").onclick=function(){tab("l")};$("t-ilo").onclick=function(){tab("o")};$("t-reg").onclick=function(){tab("g")};$("t-pm").onclick=function(){tab("m")};$("t-mk").onclick=function(){tab("k")};
 
 /* policy */
 $("sp").onclick=async function(){say("mp","");try{
@@ -160,30 +349,114 @@ $("sp").onclick=async function(){say("mp","");try{
 
 /* students */
 function drawStudents(){
+ drawPolicies();
  var q=$("q").value.trim().toUpperCase(),list=D.students.slice().sort(function(a,b){return (a.c+a.n).localeCompare(b.c+b.n)});
  $("cnt").textContent=D.students.length;
- var shown=list.filter(function(r){return !q||(r.n+" "+r.a+" "+r.c).toUpperCase().indexOf(q)>=0}).slice(0,500);
- $("tb").innerHTML=shown.map(function(r){return "<tr><td>"+esc(r.c)+"</td><td>"+esc(r.n)+"</td><td>"+esc(r.a)+"</td><td><button class=\"btn del\" data-id=\""+r.id+"\">Remove</button></td></tr>"}).join("")||"<tr><td colspan=4>No students.</td></tr>"}
+ if(q.length<2){$("tb").innerHTML="<tr><td colspan=4>Type at least 2 letters of a name, admission number or class above to search the "+D.students.length+" students.</td></tr>";return}
+ var shown=list.filter(function(r){return !q||(r.n+" "+r.a+" "+r.c).toUpperCase().indexOf(q)>=0}).slice(0,100);
+ $("tb").innerHTML=shown.map(function(r){var custom=r.p||r.i||r.s||r.e,pp=polById(r.pid),b=pp?{policyNumber:pp.policyNumber,policyStart:pp.policyStart,policyEnd:pp.policyEnd,issueDate:pp.issueDate}:D.settings;
+  var pol=custom?esc(r.p||b.policyNumber)+'<span class="tag">custom</span><div class="hint">'+esc(dmy(r.s||b.policyStart))+" - "+esc(dmy(r.e||b.policyEnd))+" &middot; issued "+esc(dmy(r.i||b.issueDate))+"</div>":pp?esc(pp.name)+'<div class="hint">'+esc(pp.policyNumber)+" &middot; "+esc(dmy(pp.policyStart))+" - "+esc(dmy(pp.policyEnd))+"</div>":'<span class="hint">Default</span>';
+  return "<tr><td>"+esc(r.c)+"</td><td>"+esc(r.n)+'<div style="margin-top:8px"><div class="acts"><button class="btn sec" data-pol="'+r.id+'" style="min-height:34px;padding:4px 12px;font-size:14px">Policy</button><button class="btn del" data-id="'+r.id+'">Remove</button></div></div></td><td>'+esc(r.a)+"</td><td>"+pol+"</td></tr>"}).join("")||"<tr><td colspan=4>No students.</td></tr>"}
+function dmy(iso){var p=String(iso).split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:iso}
 $("q").oninput=drawStudents;
-$("tb").onclick=async function(e){var id=e.target.getAttribute("data-id");if(!id)return;
+$("tb").onclick=async function(e){var pid=e.target.getAttribute("data-pol");if(pid){openDlg("edit",D.students.find(function(x){return x.id===pid}));return}
+ var id=e.target.getAttribute("data-id");if(!id)return;
  var r=D.students.find(function(x){return x.id===id});if(!confirm("Remove "+r.n+" ("+r.a+")? They will no longer be able to download a cover."))return;
  try{await call("DELETE","admin/students/"+id);D.students=D.students.filter(function(x){return x.id!==id});drawStudents()}catch(x){say("ma","err",x.message)}};
 $("add").onclick=async function(){say("ma","");try{
  var d=await call("POST","admin/students",{mode:"merge",rows:[{c:$("ac").value,n:$("an").value,a:$("aa").value}]});
  if(d.skipped)throw new Error("Enter the student name and admission number.");
- D=await call("GET","admin/data");drawStudents();say("ma","ok","Student added.");$("ac").value=$("an").value=$("aa").value=""}catch(e){say("ma","err",e.message)}};
-$("csv").onclick=function(){var l=["Class code,Student name,Admission number"].concat(D.students.map(function(r){return [r.c,r.n,r.a].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(",")}));
+ D=await call("GET","admin/data");drawStudents();drawReqs();say("ma","ok","Student added.");$("ac").value=$("an").value=$("aa").value=""}catch(e){say("ma","err",e.message)}};
+$("csv").onclick=function(){var l=["Class code,Student name,Admission number,Policy,Policy number,Issue date,Start date,Expiry date"].concat(D.students.map(function(r){return [r.c,r.n,r.a,(polById(r.pid)||{}).name||"",r.p||"",r.i?dmy(r.i):"",r.s?dmy(r.s):"",r.e?dmy(r.e):""].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(",")}));
  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([l.join("\n")],{type:"text/csv"}));a.download="students_with_cover.csv";a.click()};
 
+
+/* cover requests */
+function drawReqs(){var R=D.requests||[];$("rcnt").textContent=R.length;
+ $("rtb").innerHTML=R.map(function(r,i){var t=r.t?new Date(r.t).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}):"";
+  return "<tr><td>"+(i+1)+"</td><td>"+esc(r.c)+"</td><td>"+esc(r.n)+'<div style="margin-top:8px"><div class="acts"><button class="btn ok" data-ap="'+r.id+'" aria-label="Approve '+esc(r.n)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Approve</button><button class="btn del" data-rq="'+r.id+'" aria-label="Remove '+esc(r.n)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>Remove</button></div></div></td><td>'+esc(r.a)+"</td><td>"+esc(r.course)+"</td><td>"+esc(t)+"</td></tr>"}).join("")||"<tr><td colspan=6>No requests right now.</td></tr>"}
+async function reload(){D=await call("GET","admin/data");drawStudents();drawReqs();drawIlo()}
+$("rrf").onclick=async function(){say("mr","");try{await reload();say("mr","ok","Updated.")}catch(e){say("mr","err",e.message)}};
+$("rtb").onclick=async function(e){var ap=e.target.closest("[data-ap]");if(ap){openDlg("approve",D.requests.find(function(x){return x.id===ap.getAttribute("data-ap")}));return}
+ var rb=e.target.closest("[data-rq]");var id=rb&&rb.getAttribute("data-rq");if(!id)return;
+ var r=D.requests.find(function(x){return x.id===id});if(!confirm("Remove the request from "+r.n+" ("+r.a+")?"))return;
+ try{await call("DELETE","admin/requests/"+id);D.requests=D.requests.filter(function(x){return x.id!==id});drawReqs()}catch(x){say("mr","err",x.message)}};
+$("rall").onclick=async function(){if(!(D.requests||[]).length)return;if(!confirm("Clear all "+D.requests.length+" requests? Download the list first if you still need it."))return;
+ try{await call("DELETE","admin/requests");D.requests=[];drawReqs();say("mr","ok","List cleared.")}catch(x){say("mr","err",x.message)}};
+$("rcsv").onclick=function(){var R=D.requests||[];if(!R.length){say("mr","err","There are no requests to download.");return}
+ var l=["Class code,Student name,Admission number,Course"].concat(R.map(function(r){return [r.c,r.n,r.a,r.course].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(",")}));
+ var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+l.join("\n")],{type:"text/csv"}));a.download="cover_requests.csv";a.click()};
+
+/* policy library */
+function polById(id){return id&&(D.policies||[]).find(function(x){return x.id===id})}
+var POLSIG="";
+function drawPolicies(){var P=D.policies||[];$("pcnt").textContent=P.length;
+ var n={};D.students.forEach(function(r){if(r.pid)n[r.pid]=(n[r.pid]||0)+1});
+ $("pol").innerHTML=P.map(function(x,i){return '<div class="course"><b>'+esc(x.name)+'</b><div class="hint">'+esc(x.policyNumber)+' &middot; '+esc(x.insurer)+' &middot; '+esc(dmy(x.policyStart))+' - '+esc(dmy(x.policyEnd))+' &middot; issued '+esc(dmy(x.issueDate))+'</div>'+
+  '<p style="margin:6px 0"><b>'+(n[x.id]||0)+'</b> student'+((n[x.id]||0)===1?'':'s')+' on this policy</p>'+
+  '<div class="acts"><button class="btn sec" data-pe="'+i+'" style="min-height:34px;padding:4px 12px;font-size:14px">Edit</button><button class="btn del" data-pr="'+i+'">Remove</button></div></div>'}).join("")||'<p class="hint">No other policies yet. Everyone uses the default policy.</p>';
+ var cls={};D.students.forEach(function(r){cls[r.c]=(cls[r.c]||0)+1});
+ var rl=Object.keys(D.classpol||{}).filter(function(c){return polById(D.classpol[c])}).sort().map(function(c){return esc(c)+" &rarr; "+esc(polById(D.classpol[c]).name)});
+ $("prl").innerHTML=rl.length?"<b>Class policies:</b> "+rl.join("; ")+".":"";
+ var sig=P.map(function(x){return x.id+x.name}).join("|")+"#"+Object.keys(cls).sort().join("|");
+ if(sig!==POLSIG){var first=!POLSIG;POLSIG=sig;var po='<option value="">Default policy</option>'+P.map(function(x){return '<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>'}).join("");
+  var ov=$("ppl").value,rv=first?"auto":$("rapl").value;$("ppl").innerHTML=po;$("rapl").innerHTML='<option value="auto">Each class\'s own policy (or default)</option>'+po;$("ppl").value=ov;$("rapl").value=rv;
+  var cv=$("pcl").value;$("pcl").innerHTML='<option value="">Choose a class</option>'+Object.keys(cls).sort().map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+' ('+cls[c]+')</option>'}).join("");$("pcl").value=cv}}
+var PED=-1;
+function openPol(i){PED=i;var x=i>=0?D.policies[i]:{name:"",policyNumber:"",insurer:D.settings.insurer,policyStart:D.settings.policyStart,policyEnd:D.settings.policyEnd,issueDate:D.settings.issueDate};
+ $("pdt").textContent=i>=0?"Edit policy":"New policy";$("pdn").value=x.name;$("pdp").value=x.policyNumber;$("pdi").value=x.insurer;$("pds").value=x.policyStart;$("pde").value=x.policyEnd;$("pdd").value=x.issueDate;say("pdm","");$("pdlg").showModal()}
+$("padd").onclick=function(){openPol(-1)};
+$("pdno").onclick=function(){$("pdlg").close()};
+async function savePolicies(list){var d=await call("PUT","admin/policies",{policies:list});D.policies=d.policies;D.classpol=d.classpol;drawStudents()}
+$("pdok").onclick=async function(){var b=this,x={id:PED>=0?D.policies[PED].id:"",name:$("pdn").value,policyNumber:$("pdp").value,insurer:$("pdi").value,policyStart:$("pds").value,policyEnd:$("pde").value,issueDate:$("pdd").value};
+ var list=(D.policies||[]).slice();if(PED>=0)list[PED]=x;else list.push(x);b.disabled=true;say("pdm","");
+ try{await savePolicies(list);$("pdlg").close();say("mpl","ok","Policy saved. Students on it use it straight away.")}catch(e){say("pdm","err",e.message)}b.disabled=false};
+$("pol").onclick=async function(e){var pe=e.target.getAttribute("data-pe"),pr=e.target.getAttribute("data-pr");
+ if(pe!==null){openPol(+pe);return}
+ if(pr!==null){var x=D.policies[+pr],n=D.students.filter(function(r){return r.pid===x.id}).length;
+  if(!confirm("Remove \""+x.name+"\"?"+(n?" "+n+" students on it will go back to the default policy.":"")))return;
+  try{await savePolicies(D.policies.filter(function(_,i){return i!==+pr}));say("mpl","ok","Removed.")}catch(err){say("mpl","err",err.message)}}};
+$("pgo").onclick=async function(){say("mpl","");var c=$("pcl").value;if(!c){say("mpl","err","Choose the class first.");return}
+ var pid=$("ppl").value,pp=polById(pid),n=D.students.filter(function(r){return r.c===c}).length;
+ if(!confirm("Put all "+n+" students of "+c+" on "+(pp?pp.name:"the default policy")+"? Any one-off custom dates they have will be replaced."))return;
+ try{var d=await call("POST","admin/assign",{c:c,pid:pid});D.students=d.students;D.classpol=d.classpol;drawStudents();say("mpl","ok",d.assigned+" students of "+c+" are now on "+(pp?pp.name:"the default policy")+".")}catch(e){say("mpl","err",e.message)}};
+
+/* approve / policy dialog */
+var DLG=null;
+function dlgHint(){var v=$("dsel").value,d=D.settings,pp=polById(v);
+ $("df").hidden=v!=="__custom";
+ $("dh").textContent=v==="__custom"?"Only this student uses these details.":pp?pp.policyNumber+", "+dmy(pp.policyStart)+" - "+dmy(pp.policyEnd)+", issued "+dmy(pp.issueDate)+".":"Default policy: "+d.policyNumber+", "+dmy(d.policyStart)+" - "+dmy(d.policyEnd)+", issued "+dmy(d.issueDate)+"."}
+function openDlg(mode,r){if(!r)return;DLG={mode:mode,r:r};var d=D.settings,custom=!!(r.p||r.i||r.s||r.e),base=polById(r.pid)?{policyNumber:polById(r.pid).policyNumber,issueDate:polById(r.pid).issueDate,policyStart:polById(r.pid).policyStart,policyEnd:polById(r.pid).policyEnd}:d;
+ $("dt").textContent=mode==="approve"?"Approve cover":"Policy for this student";
+ $("ds").textContent=r.n+" ("+r.a+") - "+r.c;
+ $("dsel").innerHTML='<option value="">Default policy</option>'+(D.policies||[]).map(function(x){return '<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>'}).join("")+'<option value="__custom">Custom dates for this student only...</option>';
+ var rule=mode==="approve"&&polById((D.classpol||{})[r.c])?D.classpol[r.c]:"";
+ $("dsel").value=custom?"__custom":(polById(r.pid)?r.pid:rule);
+ $("dp").value=r.p||base.policyNumber;$("di").value=r.i||base.issueDate;$("dst").value=r.s||base.policyStart;$("de").value=r.e||base.policyEnd;
+ dlgHint();$("dok").textContent=mode==="approve"?"Approve":"Save";say("dm","");$("dlg").showModal()}
+$("dsel").onchange=dlgHint;
+$("dno").onclick=function(){$("dlg").close()};
+$("dok").onclick=async function(){if(!DLG)return;var b=this,v=$("dsel").value,body=v==="__custom"?{p:$("dp").value,i:$("di").value,s:$("dst").value,e:$("de").value}:{pid:v};
+ b.disabled=true;say("dm","");
+ try{if(DLG.mode==="approve"){body.id=DLG.r.id;var d=await call("POST","admin/approve",body);$("dlg").close();await reload();say("mr","ok",DLG.r.n+" approved. They can download their cover now.")}
+  else{await call("PUT","admin/students/"+DLG.r.id,body);$("dlg").close();await reload();say("ma","ok","Policy saved for "+DLG.r.n+".")}}
+ catch(e){say("dm","err",e.message)}b.disabled=false};
+$("rapp").onclick=async function(){var n=(D.requests||[]).length;if(!n){say("mr","err","There are no requests to approve.");return}
+ var pid=$("rapl").value,pp=polById(pid);
+ if(!confirm("Approve all "+n+" requests on "+(pid==="auto"?"each class's own policy (or the default)":pp?pp.name:"the default policy")+"? Those students can then download their covers."))return;
+ try{var d=await call("POST","admin/approve",{all:true,pid:pid});await reload();say("mr","ok",d.approved+" approved. They can download their covers now.")}catch(e){say("mr","err",e.message)}};
+
 /* file upload (Excel / CSV) */
-function pick(o,names){var k=Object.keys(o).find(function(x){return names.indexOf(x.toLowerCase().replace(/[^a-z]/g,""))>=0});return k?String(o[k]).trim():""}
+function pick(o,names){var k=Object.keys(o).find(function(x){return names.indexOf(x.toLowerCase().replace(/[^a-z]/g,""))>=0});if(!k)return "";var v=o[k];
+ if(v instanceof Date){var t=new Date(v.getTime()+12*3600000);return t.getFullYear()+"-"+("0"+(t.getMonth()+1)).slice(-2)+"-"+("0"+t.getDate()).slice(-2)}
+ return String(v).trim()}
 $("file").onchange=async function(){
  ROWS=null;$("up").disabled=true;say("mu","");var f=this.files[0];if(!f)return;
  if(!window.XLSX){say("mu","err","The spreadsheet reader did not load. Check your connection and try again.");return}
- try{var wb=XLSX.read(await f.arrayBuffer(),{type:"array"});
+ try{var wb=XLSX.read(await f.arrayBuffer(),{type:"array",cellDates:true});
   var sh=wb.Sheets["Students"]||wb.Sheets[wb.SheetNames[0]];
-  var raw=XLSX.utils.sheet_to_json(sh,{defval:"",raw:false});
-  ROWS=raw.map(function(o){return{c:pick(o,["classcode","class"]),n:pick(o,["studentname","name","fullname"]),a:pick(o,["admissionnumber","admissionno","admno","admission"])}}).filter(function(r){return r.n&&r.a});
+  var raw=XLSX.utils.sheet_to_json(sh,{defval:"",raw:true});
+  ROWS=raw.map(function(o){return{c:pick(o,["classcode","class"]),n:pick(o,["studentname","name","fullname"]),a:pick(o,["admissionnumber","admissionno","admno","admission"]),pol:pick(o,["policy","policyname","assignedpolicy"]),p:pick(o,["policynumber","policyno"]),i:pick(o,["issuedate","dateofissue","dateissued","issued"]),s:pick(o,["startdate","policystart","start","from","commencementdate"]),e:pick(o,["expirydate","enddate","policyend","expiry","end","expires","expirationdate","to"])}}).filter(function(r){return r.n&&r.a});
   if(!ROWS.length){ROWS=null;say("mu","err","No students found. Check the column names: Class code, Student name, Admission number.");return}
   say("mu","info","Found "+ROWS.length+" students in the file. Click Upload list to save them.");$("up").disabled=false
  }catch(e){say("mu","err","Could not read that file.")}};
@@ -191,25 +464,151 @@ $("up").onclick=async function(){if(!ROWS)return;
  var mode=document.querySelector("input[name=mode]:checked").value;
  if(mode==="replace"&&!confirm("Replace the whole list with this file? Students not in the file will lose access to their cover."))return;
  this.disabled=true;try{var d=await call("POST","admin/students",{mode:mode,rows:ROWS});
-  D=await call("GET","admin/data");drawStudents();ROWS=null;$("file").value="";
-  say("mu","ok","Done. Added "+d.added+", updated "+d.updated+(d.skipped?", skipped "+d.skipped+" incomplete rows":"")+". "+d.total+" students now have a cover.")}
+  D=await call("GET","admin/data");drawStudents();drawReqs();ROWS=null;$("file").value="";
+  say("mu","ok","Done. Added "+d.added+", updated "+d.updated+(d.skipped?", skipped "+d.skipped+" incomplete rows":"")+(d.unknownPolicy?" ("+d.unknownPolicy+" named a policy that does not exist yet - create it first)":"")+(d.cleared?", cleared "+d.cleared+" finished requests":"")+". "+d.total+" students now have a cover.")}
  catch(e){say("mu","err",e.message);this.disabled=false}};
 
-/* courses */
-function drawCourses(){
- $("courses").innerHTML=D.courses.map(function(c,i){return '<div class="course" data-i="'+i+'"><div class="grid">'+
-  '<div class="full"><label>Course title</label><input class="ct" value="'+esc(c.title)+'"></div>'+
+/* courses: department filter + search, nothing listed until you choose */
+function fillDepts(){var o='<option value="">Choose a department</option>'+D.departments.filter(function(n){return n!=="Other courses"||D.courses.some(function(c){return c.dept===n})}).map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>'}).join("");$("cdp").innerHTML=o}
+function syncVisible(){Array.prototype.forEach.call(document.querySelectorAll("#courses .course"),function(el){var i=+el.getAttribute("data-i");if(!D.courses[i])return;
+ D.courses[i]=Object.assign({},D.courses[i],{title:el.querySelector(".ct").value,dept:el.querySelector(".cd").value,percent:el.querySelector(".cp").value,units:el.querySelector(".cu").value.split("\n")})})}
+function drawCourses(focusLast){
+ var dept=$("cdp").value,q=$("cq").value.trim().toUpperCase();
+ if(!dept&&q.length<2){$("courses").innerHTML="";$("cinfo").textContent="Choose a department, or type at least 2 letters of a course, to see and edit courses. "+D.courses.length+" courses in total, "+D.courses.filter(function(c){return !c.units.length}).length+" still without units.";return}
+ var idx=[];D.courses.forEach(function(c,i){if((!dept||c.dept===dept)&&(q.length<2||c.title.toUpperCase().indexOf(q)>=0))idx.push(i)});
+ var miss=idx.filter(function(i){return !D.courses[i].units.length}).length;
+ $("cinfo").textContent=idx.length+" course"+(idx.length===1?"":"s")+" shown"+(miss?", "+miss+" without units yet (students see \"coming soon\")":"")+(idx.length>60?". Showing the first 60; narrow the search.":".");
+ var depts=D.departments;
+ $("courses").innerHTML=idx.slice(0,60).map(function(i){var c=D.courses[i];return '<div class="course" data-i="'+i+'"><div class="grid">'+
+  '<div class="full"><label>Course title'+(c.units.length?'':' <span class="tag">no units yet</span>')+'</label><input class="ct" value="'+esc(c.title)+'"></div>'+
+  '<div class="full"><label>Department</label><select class="cd">'+depts.map(function(n){return '<option'+(n===c.dept?' selected':'')+'>'+esc(n)+'</option>'}).join("")+'</select></div>'+
   '<div><label>Coursework covered so far (%)</label><input class="cp" type="number" min="0" max="100" value="'+esc(c.percent)+'"></div><div></div>'+
   '<div class="full"><label>Units covered (one per line)</label><textarea class="cu">'+esc(c.units.join("\n"))+'</textarea>'+
   '<div class="hint">Appears on the letter as: "...has acquired skills in the following units: ..."</div></div></div>'+
-  '<div class="row"><button class="btn del" data-rm="'+i+'">Remove this course</button></div></div>'}).join("")}
-function readCourses(){return Array.prototype.map.call(document.querySelectorAll(".course"),function(el){var i=+el.getAttribute("data-i"),old=D.courses[i]||{};
- return{key:old.key||"",title:el.querySelector(".ct").value,percent:el.querySelector(".cp").value,units:el.querySelector(".cu").value.split("\n")}})}
-$("addc").onclick=function(){D.courses=readCourses();D.courses.push({key:"",title:"",percent:100,units:[]});drawCourses()};
+  '<div class="row"><button class="btn del" data-rm="'+i+'">Remove this course</button></div></div>'}).join("");
+ if(focusLast){var els=document.querySelectorAll("#courses .course");if(els.length)els[els.length-1].scrollIntoView({behavior:"smooth",block:"center"})}}
+$("cdp").onchange=function(){syncVisible();drawCourses()};
+$("cq").oninput=function(){syncVisible();drawCourses()};
+$("addc").onclick=function(){var dept=$("cdp").value;say("mc","");if(!dept){say("mc","err","Choose the department first, then add the course to it.");return}
+ syncVisible();$("cq").value="";D.courses.push({key:"",title:"",dept:dept,percent:100,units:[]});drawCourses(true)};
 $("courses").onclick=function(e){var i=e.target.getAttribute("data-rm");if(i===null)return;
- if(!confirm("Remove this course from the student list?"))return;D.courses=readCourses();D.courses.splice(+i,1);drawCourses()};
-$("sc").onclick=async function(){say("mc","");try{
- var d=await call("PUT","admin/courses",{courses:readCourses()});D.courses=d.courses;drawCourses();say("mc","ok","Saved. Students see the updated course list now.")}catch(e){say("mc","err",e.message)}};
+ if(!confirm("Remove this course from the student list?"))return;syncVisible();D.courses.splice(+i,1);drawCourses()};
+$("sc").onclick=async function(){say("mc","");try{syncVisible();
+ var d=await call("PUT","admin/courses",{courses:D.courses});D.courses=d.courses;drawCourses();say("mc","ok","Saved. Students see the updated course list now.")}catch(e){say("mc","err",e.message)}};
+
+/* NITA form */
+function drawNita(){var n=D.nita;$("nitas").textContent=n?"Current form: "+n.name+" (students can download it now).":"No NITA form uploaded yet.";$("ndel").hidden=!n}
+$("nup").onclick=function(){say("mn","");var f=$("nf").files[0];if(!f){say("mn","err","Choose the NITA form file first.");return}
+ if(f.size>4*1024*1024){say("mn","err","The file is larger than 4 MB. Compress it and try again.");return}
+ var b=this;b.disabled=true;var r=new FileReader();
+ r.onload=async function(){try{var d=await call("POST","admin/nita",{name:f.name,type:f.type,data:String(r.result).split(",")[1]});D.nita=d.nita;drawNita();$("nf").value="";say("mn","ok","Uploaded. Students now see the NITA form button.")}catch(e){say("mn","err",e.message)}b.disabled=false};
+ r.onerror=function(){say("mn","err","Could not read that file.");b.disabled=false};r.readAsDataURL(f)};
+$("ndel").onclick=async function(){if(!confirm("Remove the NITA form? Students will no longer see the download button."))return;
+ try{var d=await call("DELETE","admin/nita");D.nita=d.nita;drawNita();say("mn","ok","Removed.")}catch(e){say("mn","err",e.message)}};
+
+/* ILO submissions */
+function policyCard(r){var np=r.newPolicy,pp=polById(r.pid),n=D.students.filter(function(x){return x.c===r.cls}).length,now=polById((D.classpol||{})[r.cls]);
+ var what=np?"New policy <b>"+esc(np.policyNumber)+"</b> ("+esc(np.insurer)+"), "+esc(dmy(np.policyStart))+" - "+esc(dmy(np.policyEnd))+", issued "+esc(dmy(np.issueDate))+". It will be added to your policies.":pp?"<b>"+esc(pp.name)+"</b> ("+esc(pp.policyNumber)+", "+esc(dmy(pp.policyStart))+" - "+esc(dmy(pp.policyEnd))+")":r.pid?"A policy that has since been removed. Reject this one.":"<b>The default policy</b> ("+esc(D.settings.policyNumber)+")";
+ return '<div class="course"><b>Insurance policy for class '+esc(r.cls)+'</b> <span class="tag">'+(n?n+" students":"no students listed yet")+'</span><div class="hint">sent by '+esc(r.rep)+(r.phone?' ('+esc(r.phone)+')':'')+' &middot; '+esc(new Date(r.t).toLocaleDateString("en-GB"))+'</div>'+
+  '<p style="margin:8px 0">Should use: '+what+'</p>'+(now?'<div class="hint" style="margin-bottom:8px">Now: '+esc(now.name)+'</div>':'')+
+  '<div class="acts"><button class="btn ok" data-ia="'+r.id+'">Approve and apply to the whole class</button><button class="btn del" data-ir="'+r.id+'">Reject</button></div></div>'}
+function drawIlo(){var l=D.ilo||[];$("icnt").textContent=l.length;
+ $("ilol").innerHTML=l.map(function(r){if(r.kind==="policy")return policyCard(r);var cur=r.key&&D.courses.find(function(c){return c.key===r.key});
+  return '<div class="course"><b>'+esc(r.title)+'</b>'+(r.key?'':' <span class="tag">new course</span>')+'<div class="hint">'+esc(r.dept)+' &middot; sent by '+esc(r.rep)+(r.phone?' ('+esc(r.phone)+')':'')+' &middot; '+esc(new Date(r.t).toLocaleDateString("en-GB"))+'</div>'+
+  '<p style="margin:8px 0">Coursework covered: <b>'+esc(r.percent)+'%</b>'+(cur?' (now '+esc(cur.percent)+'%, '+cur.units.length+' units)':'')+'</p><ol style="margin:0 0 10px;padding-left:20px">'+r.units.map(function(u){return '<li>'+esc(u)+'</li>'}).join("")+'</ol>'+
+  '<div class="acts"><button class="btn ok" data-ia="'+r.id+'">Approve</button><button class="btn del" data-ir="'+r.id+'">Reject</button></div></div>'}).join("")||'<p class="hint">No submissions waiting.</p>'}
+$("ilol").onclick=async function(e){var a=e.target.getAttribute("data-ia"),r=e.target.getAttribute("data-ir");if(!a&&!r)return;
+ try{if(a){var d=await call("POST","admin/ilo/approve",{id:a});say("mil","");if(d.courses)D.courses=d.courses;if(d.policies){D.policies=d.policies;D.classpol=d.classpol;D.students=d.students;say("mil","ok","Done. "+d.assigned+" student"+(d.assigned===1?"":"s")+" now use that policy; students added to the class later get it too.")}D.ilo=d.ilo;fillDepts();drawCourses();drawStudents();drawIlo()}
+  else{if(!confirm("Reject and delete this submission?"))return;await call("DELETE","admin/ilo/"+r);D.ilo=D.ilo.filter(function(x){return x.id!==r});drawIlo()}}
+ catch(x){alert(x.message)}};
+
+
+$("irf").onclick=async function(){say("mil","");try{await reload();fillDepts();say("mil","ok","Updated.")}catch(e){say("mil","err",e.message)}};
+
+/* student database (collected through the student details link) */
+var REG=null,GCLASS="";
+async function loadReg(){say("gm","");try{var d=await call("GET","admin/register");REG=d.list;drawReg()}catch(e){say("gm","err",e.message)}}
+function drawReg(){if(!REG)return;var by={},cov={};REG.forEach(function(r){by[r.c]=(by[r.c]||0)+1;if(r.cover)cov[r.c]=(cov[r.c]||0)+1});
+ var cl=Object.keys(by).sort(),n=REG.filter(function(r){return r.cover}).length;
+ $("gtot").textContent=REG.length;$("gnc").textContent=cl.length;$("gcnt").textContent=REG.length;
+ $("gcv").textContent=REG.length?n+" of them already have an insurance cover.":"No student has filled in their details yet. Share the link above.";
+ $("gtb").innerHTML=cl.map(function(c){return '<tr data-gc="'+esc(c)+'" style="cursor:pointer"><td><b>'+esc(c)+'</b></td><td>'+by[c]+'</td><td>'+(cov[c]||0)+'</td></tr>'}).join("")||"<tr><td colspan=3>Nothing yet.</td></tr>";
+ drawRegList()}
+function drawRegList(){if(!REG)return;var q=$("gq").value.trim().toUpperCase(),rows;
+ if(GCLASS&&q.length<2){rows=REG.filter(function(r){return r.c===GCLASS});$("gh").textContent=GCLASS+": "+rows.length+" students."}
+ else if(q.length>=2){rows=REG.filter(function(r){return (r.n+" "+r.a+" "+r.c+" "+r.tel).toUpperCase().indexOf(q)>=0});$("gh").textContent=rows.length+" found"+(rows.length>200?" (showing the first 200)":"")+"."}
+ else{$("gls").innerHTML="";$("gh").textContent="Type at least 2 letters, or tap a class above, to see students.";return}
+ $("gls").innerHTML=rows.slice(0,200).map(function(r){return "<tr><td>"+esc(r.c)+"</td><td>"+esc(r.n)+(r.cover?'<span class="tag">has cover</span>':"")+'<div style="margin-top:6px"><button class="btn del" data-gd="'+r.id+'" style="min-height:32px;padding:3px 10px;font-size:13px">Remove</button></div></td><td>'+esc(r.a)+'<div class="hint">'+esc(r.tel)+"</div></td></tr>"}).join("")||"<tr><td colspan=3>No students found.</td></tr>"}
+$("gq").oninput=function(){GCLASS=GCLASS&&this.value.trim().length<2?GCLASS:"";drawRegList()};
+$("gtb").onclick=function(e){var tr=e.target.closest("[data-gc]");if(!tr)return;GCLASS=tr.getAttribute("data-gc");$("gq").value="";drawRegList();$("gh").scrollIntoView({behavior:"smooth",block:"center"})};
+$("gls").onclick=async function(e){var id=e.target.getAttribute("data-gd");if(!id)return;if(!confirm("Remove this student from the database?"))return;
+ try{await call("DELETE","admin/register/"+id);REG=REG.filter(function(r){return r.id!==id});drawReg()}catch(x){say("gm","err",x.message)}};
+$("grf").onclick=loadReg;
+function regSorted(){return REG.slice().sort(function(a,b){return (a.c+"|"+a.n).localeCompare(b.c+"|"+b.n)})}
+$("gcs").onclick=function(){if(!REG||!REG.length){say("gm","err","There is nothing to download yet.");return}
+ var l=["Class,Student name,Admission number,Contact number,Has insurance cover"].concat(regSorted().map(function(r){return [r.c,r.n,r.a,r.tel,r.cover?"Yes":"No"].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(",")}));
+ var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+l.join("\n")],{type:"text/csv"}));a.download="RVNP_students_by_class.csv";a.click()};
+$("gxl").onclick=function(){if(!REG||!REG.length){say("gm","err","There is nothing to download yet.");return}
+ if(!window.XLSX){say("gm","err","The spreadsheet tool did not load. Check your connection and try again.");return}
+ var rows=regSorted(),by={};rows.forEach(function(r){(by[r.c]=by[r.c]||[]).push(r)});var cl=Object.keys(by).sort();
+ var wb=XLSX.utils.book_new(),head=["Class","Student name","Admission number","Contact number","Has insurance cover"],line=function(r){return [r.c,r.n,r.a,r.tel,r.cover?"Yes":"No"]};
+ var sum=[["Class","Students"]].concat(cl.map(function(c){return [c,by[c].length]}));sum.push(["TOTAL",rows.length]);
+ var add=function(name,aoa,w){var ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=w.map(function(x){return{wch:x}});XLSX.utils.book_append_sheet(wb,ws,name)};
+ add("Summary",sum,[26,12]);add("All students",[head].concat(rows.map(line)),[22,34,20,16,18]);
+ var used={"Summary":1,"All students":1};
+ cl.forEach(function(c){var nm=c.replace(/[\\\/\?\*\[\]:]/g,"-").slice(0,28)||"Class",k=nm,i=2;while(used[k])k=nm.slice(0,26)+"-"+i++;used[k]=1;add(k,[head.slice(1)].concat(by[c].map(function(r){return line(r).slice(1)})),[34,20,16,18])});
+ XLSX.writeFile(wb,"RVNP_students_by_class.xlsx")};
+(function(){var u=location.origin+"/register.html";$("gl").value=u;
+ $("gwa").href="https://wa.me/?text="+encodeURIComponent("Please fill in your student details here (name, admission number, class, contact number): "+u);
+ $("gcp").onclick=function(){var ok=function(){say("gm","ok","Link copied.")};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok,function(){$("gl").select();document.execCommand("copy");ok()});
+  else{$("gl").select();document.execCommand("copy");ok()}}})();
+
+/* placements (students' attachment places) and trainers */
+var PM=null,PDEPT="";
+async function loadPm(){say("pmm","");try{PM=await call("GET","hod/data");drawPm()}catch(e){say("pmm","err",e.message)}}
+function trOf(id){return (PM.trainers||[]).find(function(t){return t.id===id})}
+function drawPm(){if(!PM)return;var P=PM.placements,as=P.filter(function(p){return p.tid}).length,by={},ba={};
+ P.forEach(function(p){by[p.dept]=(by[p.dept]||0)+1;if(p.tid)ba[p.dept]=(ba[p.dept]||0)+1});
+ $("pmt").textContent=P.length;$("pma").textContent=as;$("pmu").textContent=P.length-as;$("pmcnt").textContent=P.length;
+ $("pmd").innerHTML=Object.keys(by).sort().map(function(d){return '<tr data-pd="'+esc(d)+'" style="cursor:pointer"><td><b>'+esc(d)+'</b></td><td>'+by[d]+'</td><td>'+(ba[d]||0)+'</td></tr>'}).join("")||"<tr><td colspan=3>No placements yet. Share the student link above.</td></tr>";
+ $("pmtr").innerHTML=PM.trainers.map(function(t){return "<tr><td>"+esc(t.name)+"</td><td>"+esc(t.tel)+"</td><td><b>"+t.count+"</b></td></tr>"}).join("")||"<tr><td colspan=3>No trainers yet. The HOD adds them on the HOD link.</td></tr>";
+ $("phs").textContent=D.hodSet?"An access code is set. Type a new one only if you want to change it.":"No access code yet. Set one before you send the HOD link.";
+ drawPmList()}
+function drawPmList(){if(!PM)return;var q=$("pmq").value.trim().toUpperCase(),rows;
+ if(PDEPT&&q.length<2){rows=PM.placements.filter(function(p){return p.dept===PDEPT});$("pmh").textContent=PDEPT+": "+rows.length+" students."}
+ else if(q.length>=2){rows=PM.placements.filter(function(p){var t=trOf(p.tid);return (p.n+" "+p.a+" "+p.org+" "+p.town+" "+p.course+" "+(t?t.name:"")).toUpperCase().indexOf(q)>=0});$("pmh").textContent=rows.length+" found"+(rows.length>100?" (showing the first 100)":"")+"."}
+ else{$("pml2").innerHTML="";$("pmh").textContent="Type at least 2 letters, or tap a department above, to see students.";return}
+ $("pml2").innerHTML=rows.slice(0,100).map(function(p){var t=trOf(p.tid);return '<div class="course"><b>'+esc(p.n)+'</b> <span class="hint">'+esc(p.a)+'</span><div class="hint">'+esc(p.course)+'</div><div>'+esc(p.org)+', '+esc(p.town)+'</div><div class="hint">'+esc(p.loc)+' &middot; Supervisor: '+esc(p.sup)+' &middot; '+esc(p.tel1)+(p.tel2?' / '+esc(p.tel2):"")+'</div><p style="margin:6px 0">'+(t?'Trainer: <b>'+esc(t.name)+'</b> ('+esc(t.tel)+')':'<i>Waiting for a trainer</i>')+'</p><button class="btn del" data-pdx="'+p.id+'" style="min-height:32px;padding:3px 10px;font-size:13px">Remove</button></div>'}).join("")||'<p class="hint">No students found.</p>'}
+$("pmq").oninput=function(){if(this.value.trim().length>=2)PDEPT="";drawPmList()};
+$("pmd").onclick=function(e){var tr=e.target.closest("[data-pd]");if(!tr)return;PDEPT=tr.getAttribute("data-pd");$("pmq").value="";drawPmList();$("pmh").scrollIntoView({behavior:"smooth",block:"center"})};
+$("pml2").onclick=async function(e){var id=e.target.getAttribute("data-pdx");if(!id)return;if(!confirm("Remove this placement?"))return;
+ try{await call("DELETE","admin/placements/"+id);PM.placements=PM.placements.filter(function(p){return p.id!==id});drawPm()}catch(x){say("pmm","err",x.message)}};
+$("pmrf").onclick=loadPm;
+$("phk").onclick=async function(){say("pmm","");try{await call("POST","admin/hodcode",{code:$("phc").value});D.hodSet=true;$("phc").value="";drawPm();say("pmm","ok","Access code saved. Give the code to the HOD together with the HOD link.")}catch(e){say("pmm","err",e.message)}};
+function pmHead(){return ["Student name","Admission number","Department","Course","Organization","Where (landmark)","Town","Supervisor at organization","Phone 1","Phone 2","College trainer","Trainer phone"]}
+function pmRow(p){var t=trOf(p.tid)||{name:"",tel:""};return [p.n,p.a,p.dept,p.course,p.org,p.loc,p.town,p.sup,p.tel1,p.tel2||"",t.name,t.tel]}
+$("pmxl").onclick=function(){if(!PM||!PM.placements.length){say("pmm","err","Nothing to download yet.");return}
+ if(!window.XLSX){say("pmm","err","The spreadsheet tool did not load. Check your connection and try again.");return}
+ var P=PM.placements,by={},wb=XLSX.utils.book_new(),used={};P.forEach(function(p){(by[p.dept]=by[p.dept]||[]).push(p)});
+ var add=function(nm,aoa){nm=nm.replace(/[\\\/\?\*\[\]:]/g,"-").slice(0,28)||"Sheet";var k=nm,i=2;while(used[k])k=nm.slice(0,26)+"-"+i++;used[k]=1;var ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=[30,20,28,34,28,36,14,24,14,14,24,14].map(function(x){return{wch:x}});XLSX.utils.book_append_sheet(wb,ws,k)};
+ var sum=[["Department","Placed","Assigned to a trainer"]].concat(Object.keys(by).sort().map(function(d){return [d,by[d].length,by[d].filter(function(p){return p.tid}).length]}));sum.push(["TOTAL",P.length,P.filter(function(p){return p.tid}).length]);sum.push([]);sum.push(["Trainer","Phone","Students"]);PM.trainers.forEach(function(t){sum.push([t.name,t.tel,t.count])});
+ add("Summary",sum);add("All placements",[pmHead()].concat(P.map(pmRow)));
+ Object.keys(by).sort().forEach(function(d){add(d,[pmHead()].concat(by[d].map(pmRow)))});
+ XLSX.writeFile(wb,"RVNP_placements.xlsx")};
+(function(){var o=location.origin,u1=o+"/placement.html",u2=o+"/hod.html";$("pml").value=u1;$("phl").value=u2;
+ $("pmwa").href="https://wa.me/?text="+encodeURIComponent("Secured an attachment place? Tell us where you are, and see your trainer, here: "+u1);
+ $("phwa").href="https://wa.me/?text="+encodeURIComponent("ILO: assign trainers to students here (you need the access code): "+u2);
+ var cp=function(id,u,m){$(id).onclick=function(){var ok=function(){say("pmm","ok",m)};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok,ok);else ok()}};
+ cp("pmcp",u1,"Student link copied.");cp("phcp",u2,"HOD link copied.")})();
+
+/* ILO link */
+(function(){var u=location.origin+"/ilo.html";$("il").value=u;
+ $("iwa").href="https://wa.me/?text="+encodeURIComponent("ILO representatives: send the units covered by your students here: "+u);
+ $("icp").onclick=function(){var done=function(){say("mi","ok","Link copied.")};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done,function(){$("il").select();document.execCommand("copy");done()});
+  else{$("il").select();document.execCommand("copy");done()}}})();
 
 /* share link */
 (function(){var u=location.origin+"/";$("sl").value=u;
@@ -218,4 +617,5 @@ $("sc").onclick=async function(){say("mc","");try{
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done,function(){$("sl").select();document.execCommand("copy");done()});
   else{$("sl").select();document.execCommand("copy");done()}}})();
 </script>
+<script src="/marks.js"></script><script src="/pwa.js" defer></script>
 </body></html>
