@@ -98,6 +98,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="stylesheet" href="/shell.css">
 </head><body>
 <div class="wrap" style="max-width:640px;margin:0 auto;padding:20px 16px 40px">
 <header><h1>ILO representatives</h1>
@@ -239,4 +240,16 @@ $("irf").onclick=loadIR; loadIR();
  }})();
 $("signout").onclick=function(){sessionStorage.removeItem("rvnp_user");sessionStorage.removeItem("rvnp_user_role");location.href="/auth.html?role=staff"};
 </script><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="/marks.js"></script><script src="/portal-v2.js"></script><script src="/pwa.js" defer></script>
+<script src="/shell.js"></script><script>
+(function(){var t=RVShell.tokenInfo(),root=document.querySelector(".wrap"),secs=[].slice.call(root.children).filter(function(n){return n.tagName==="SECTION"&&n.classList.contains("panel")});
+RVShell.mount({root:root,brand:{letter:"I",name:"ILO Representative",sub:"Industrial Liaison Office"},title:"Units covered",
+ hide:["header",".rolebar",".dashboard-subtitle",".wrap > .actions"],
+ userLine:"<b>ILO Representative</b>"+(t.dept||"Your department"),
+ signOut:function(){document.getElementById("signout").click()},
+ groups:[
+  {label:"Attachment",items:[{view:secs[0],key:"units",icon:"list",label:"Units covered"}]},
+  {label:"Insurance",items:[{view:secs[1],key:"class-cover",icon:"shield",label:"Class insurance"},{view:secs[2],key:"requests",icon:"inbox",label:"Student requests"}]},
+  {label:"Results",items:[{view:secs[3],key:"marks",icon:"chart",label:"Student marks"}]}
+ ]});})();
+</script>
 </body></html>

@@ -103,6 +103,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="stylesheet" href="/shell.css">
 </head><body>
 <div class="wrap" style="max-width:900px;margin:0 auto;padding:20px 16px 40px">
 <header><h1>Assign trainers</h1>
@@ -256,4 +257,16 @@ $("rx").onclick=function(){if(!D.placements.length){say("rm","err","Nothing to d
  add("Summary",sum);add("All responses",[RHEAD].concat(P.map(rrow)));
  Object.keys(by).sort().forEach(function(d){add(d,[RHEAD].concat(by[d].map(rrow)))});
  XLSX.writeFile(wb,"RVNP_placement_responses.xlsx")};
-</script><script src="/marks.js"></script><script src="/portal-v2.js"></script><script src="/pwa.js" defer></script></body></html>
+</script><script src="/marks.js"></script><script src="/portal-v2.js"></script><script src="/pwa.js" defer></script><script src="/shell.js"></script><script>
+(function(){var t=RVShell.tokenInfo(),secs=[].slice.call(document.querySelectorAll("#app > section.panel"));
+RVShell.mount({root:document.querySelector(".wrap"),brand:{letter:"H",name:"HOD / Deputy HOD",sub:"Industrial Liaison Office"},title:"Overview",
+ hide:["header",".rolebar",".dashboard-subtitle","#app > .actions"],unlockedWhen:"#app",
+ userLine:"<b>"+(t.role==="deputy"?"Deputy HOD":"Head of Department")+"</b>"+(t.dept||"Placements and marks"),
+ signOut:function(){document.getElementById("signout").click()},
+ groups:[
+  {label:"Dashboard",items:[{view:secs[0],key:"overview",icon:"home",label:"Overview"}]},
+  {label:"Placements",items:[{view:secs[4],extra:[document.getElementById("bar")],key:"students",icon:"users",label:"Students"},{view:secs[3],key:"trainers",icon:"wrench",label:"Trainers"},{view:secs[1],key:"responses",icon:"list",label:"All responses"}]},
+  {label:"Results",items:[{view:secs[2],key:"marks",icon:"chart",label:"Marks"}]}
+ ]});})();
+</script>
+</body></html>

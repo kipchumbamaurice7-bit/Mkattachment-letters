@@ -1,0 +1,60 @@
+/* RVNP portal app shell: sidebar + top bar for Admin, HOD / Deputy and ILO accounts, and the student top bar used on the placement page. */
+:root{--sh-side:#0f3a28;--sh-side2:#0b2d1f;--sh-ac:#e58a24;--sh-w:272px}
+.sh{display:flex;min-height:100vh;background:var(--bg)}
+body.sh-on{background:#f4f7f4!important}body.sh-on:before{display:none!important}
+.sh-side{position:fixed;inset:0 auto 0 0;width:var(--sh-w);display:flex;flex-direction:column;background:linear-gradient(180deg,var(--sh-side),var(--sh-side2));color:#e8f3ec;z-index:90;overflow-y:auto;transition:transform .22s ease}
+.sh-brand{display:flex;align-items:center;gap:12px;padding:20px 18px 16px}
+.sh-mark{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--sh-ac);color:#fff;font-weight:800;font-size:20px;flex:none}
+.sh-brand b{display:block;font-size:16px;line-height:1.2;color:#fff}.sh-brand small{display:block;color:#a9c9b7;font-size:12px;margin-top:2px}
+.sh-user{margin:0 14px 10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.08);font-size:13px;color:#cfe5d8;line-height:1.35}
+.sh-user b{display:block;color:#fff;font-size:14px}
+.sh-nav{padding:6px 10px 16px;flex:1}
+.sh-grp{padding:16px 10px 6px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7fa992}
+.sh-item,.sh-nav .tab{all:unset;box-sizing:border-box;display:flex!important;align-items:center;gap:12px;width:100%;padding:11px 12px!important;margin:2px 0;border-radius:10px!important;color:#d6e9dd!important;font:inherit!important;font-size:15px!important;font-weight:600!important;cursor:pointer;background:transparent!important;border:0!important;box-shadow:none!important;transition:background .15s}
+.sh-item:hover,.sh-nav .tab:hover{background:rgba(255,255,255,.09)!important;color:#fff!important}
+.sh-item:focus-visible,.sh-nav .tab:focus-visible{outline:2px solid var(--sh-ac)!important;outline-offset:1px}
+.sh-item[aria-selected="true"],.sh-nav .tab[aria-selected="true"]{background:#fff!important;color:#0f3a28!important;box-shadow:inset 4px 0 var(--sh-ac)!important}
+.sh-item svg,.sh-nav .tab svg.sh-ic{width:20px;height:20px;flex:none;opacity:.95}
+.sh-nav .badge,.sh-item .badge{margin-left:auto;background:var(--sh-ac)!important;color:#fff!important;min-width:22px;text-align:center;font-size:12px;padding:1px 7px!important}
+.sh-nav .badge:empty,.sh-nav .badge[data-zero]{display:none}
+.sh-foot{padding:14px 18px 18px;border-top:1px solid rgba(255,255,255,.1);font-size:12px;color:#8fb5a0}
+.sh-main{flex:1;min-width:0;margin-left:var(--sh-w);display:flex;flex-direction:column}
+.sh-top{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:12px;padding:12px 24px;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid #dce5ed}
+.sh-title{min-width:0;flex:1}.sh-title small{display:block;font-size:12px;color:#718397;letter-spacing:.04em;text-transform:uppercase;font-weight:700}
+.sh-title b{display:block;font-size:20px;line-height:1.2;color:#142f49;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sh-ib.sh-burger{display:none}
+.sh-ib,.ib{position:relative;width:44px;height:44px;display:grid;place-items:center;border:1px solid #dce5ed;border-radius:12px;background:#edf5ef;color:#176b45;cursor:pointer;padding:0;text-decoration:none}
+.sh-ib:hover,.ib:hover,.dd.open>.ib{background:#176b45;color:#fff;border-color:#176b45}
+.sh-ib svg,.ib svg{width:22px;height:22px}
+.sh-content{width:100%!important;max-width:1180px!important;margin:0 auto!important;padding:26px 28px 60px!important}
+.sh-content:before{display:none!important}
+.sh-content>.panel,.sh-content #app>.panel{margin-top:0!important}
+.sh-scrim{display:none}
+/* pop-over menus in the top bar (share link, etc.) */
+.dd{position:relative}
+.menu{display:none;position:absolute;right:0;top:calc(100% + 10px);width:340px;max-width:calc(100vw - 24px);background:#fff;border:1px solid #dce5ed;border-radius:14px;box-shadow:0 16px 38px rgba(0,0,0,.18);padding:12px;z-index:80;color:var(--ink)}
+.menu:before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px}
+.dd.open>.menu{display:block}
+@media (hover:hover){.dd:hover>.menu{display:block}}
+.menu .card{box-shadow:none!important;border:0!important;padding:4px!important;margin:0!important}
+/* locked (signed out / access code) state */
+.sh.sh-locked .sh-side,.sh.sh-locked .sh-top .sh-ib,.sh.sh-locked .sh-top .dd,.sh.sh-locked .sh-burger{display:none!important}
+.sh.sh-locked .sh-main{margin-left:0}
+@media (max-width:980px){
+ .sh-side{transform:translateX(-102%);box-shadow:none}
+ .sh.sh-open .sh-side{transform:none;box-shadow:0 0 40px rgba(0,0,0,.35)}
+ .sh.sh-open .sh-scrim{display:block;position:fixed;inset:0;background:rgba(10,25,18,.5);z-index:85}
+ .sh-main{margin-left:0}
+ .sh-ib.sh-burger{display:grid}
+ .sh-top{padding:10px 14px}.sh-title b{font-size:17px}
+ .sh-content{padding:18px 14px 48px!important}
+ .dd{position:static}.menu{left:10px;right:10px;width:auto;max-width:none}
+}
+/* student top bar (used on the placement page; the student dashboard has the same rules inline) */
+.tb{position:sticky;top:8px;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin:0 0 20px;background:#fff;border:1px solid #dce5ed;border-radius:16px;box-shadow:0 6px 22px rgba(0,0,0,.07)}
+.tb-brand{display:flex;align-items:center;gap:11px;min-width:0}
+.tb-mark{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:#176b45;color:#fff;font-weight:800;font-size:18px;flex:none}
+.tb-brand b{display:block;font-size:15px;line-height:1.15}.tb-brand small{display:block;color:#718397;font-size:12px}
+.tb-icons{display:flex;align-items:center;gap:8px}
+@media(max-width:620px){.tb-brand small{display:none}}
+.sh.sh-locked .sh-top{display:none!important}

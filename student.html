@@ -88,6 +88,34 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 .panel h2{display:inline-block;border-bottom:3px solid var(--or);padding-bottom:2px}
 .msg.info{background:var(--orb);color:var(--ord)}
 :focus-visible{outline-color:var(--or)!important}
+
+/* top bar: dashboard, notifications, sign out */
+.tb{position:sticky;top:8px;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin:0 0 20px;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:0 6px 22px rgba(0,0,0,.07)}
+.tb-brand{display:flex;align-items:center;gap:11px;min-width:0}
+.tb-mark{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--ac);color:var(--on);font-weight:800;font-size:18px;flex:none}
+.tb-brand b{display:block;font-size:15px;line-height:1.15}.tb-brand small{display:block;color:var(--mut);font-size:12px}
+.tb-icons{display:flex;align-items:center;gap:8px}
+.dd{position:relative}
+.ib{position:relative;width:46px;height:46px;display:grid;place-items:center;border:1px solid var(--bd);border-radius:12px;background:var(--soft);color:var(--ac);cursor:pointer;padding:0}
+.ib:hover,.dd.open .ib{background:var(--ac);color:var(--on);border-color:var(--ac)}
+.ib svg{width:24px;height:24px}
+.nb{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--er);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+.menu{display:none;position:absolute;right:0;top:calc(100% + 10px);width:310px;max-width:calc(100vw - 24px);background:var(--card);border:1px solid var(--bd);border-radius:14px;box-shadow:0 16px 38px rgba(0,0,0,.18);padding:8px;z-index:70}
+.menu:before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px}
+.dd.open .menu{display:block}
+@media (hover:hover){.dd:hover .menu{display:block}}
+.mh{padding:6px 12px 8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.menu button.mi,.menu a.mi{display:flex;gap:12px;align-items:center;width:100%;padding:10px 12px;border:0;background:transparent;color:var(--ink);text-align:left;font:inherit;border-radius:10px;cursor:pointer;text-decoration:none}
+.menu .mi:hover,.menu .mi:focus-visible{background:var(--soft)}
+.menu .mi svg{width:22px;height:22px;flex:none;color:var(--ac)}
+.menu .mi b{display:block;font-size:15px}.menu .mi small{display:block;color:var(--mut);font-size:12.5px;line-height:1.3}
+.ni{display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer;line-height:1.35}
+.ni:hover{background:var(--soft)}.ni.new{font-weight:700;background:var(--soft)}
+.empty{padding:14px 12px;color:var(--mut);font-size:14px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}
+.kv div{padding:10px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--in)}
+.kv small{display:block;color:var(--mut);font-size:12px}.kv b{display:block;font-size:15px;word-break:break-word}
+@media(max-width:620px){.dd{position:static}.menu{left:8px;right:8px;width:auto;max-width:none}.tb-brand small{display:none}}
 </style>
 <link rel="stylesheet" href="/portal-theme.css"><link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#12304a">
@@ -99,53 +127,63 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <link rel="icon" type="image/png" href="/icon-192.png">
 </head><body>
 <div class="wrap">
-<header>
-<h1>Industrial Attachment Portal</h1>
-<p id="who" style="font-weight:700;color:var(--ac)"></p>
-<p>Rift Valley National Polytechnic. Access your industrial attachment letter, insurance cover and placement services.</p>
-</header>
-<div class="rolebar"><div class="role-id"><div class="role-icon">S</div><div><strong>STUDENT</strong><small>Student Dashboard</small></div></div><div class="role-actions"><a class="current" href="/student.html">Dashboard</a><a href="/placement.html">Placement</a><button type="button" onclick="sessionStorage.removeItem('rvnp_user');localStorage.removeItem('rvnp_student');location.href='/auth.html?role=student'">Sign out</button></div></div>
-<div class="dashboard-subtitle">Manage placement, insurance, trainer and attachment information.</div>
+<span id="who" hidden></span>
+<nav class="tb" aria-label="Student menu">
+<div class="tb-brand"><span class="tb-mark">R</span><span><b>RVNP</b><small>Industrial Attachment</small></span></div>
+<div class="tb-icons">
+<div class="dd" id="ddDash">
+<button class="ib" id="bDash" type="button" aria-label="Dashboard" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></button>
+<div class="menu" id="mDash" role="menu"><div class="mh">Dashboard</div>
+<button class="mi" id="mi-letter" type="button" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg><span><b>Attachment letter</b><small>Choose your period and download</small></span></button>
+<button class="mi" id="mi-ins" type="button" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg><span><b>Insurance cover</b><small>Download your personal accident cover</small></span></button>
+<a class="mi" id="plc" href="/placement.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span><b>Attachment placement</b><small>Where you were placed and your trainer</small></span></a>
+<button class="mi" id="mi-marks" type="button" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-8"/></svg><span><b>View marks</b><small>Your attachment score out of 100</small></span></button>
+<a class="mi" id="nita" href="/api/nita" download hidden role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4"/><path d="M5 20h14"/></svg><span><b>NITA form</b><small>Download the NITA attachment form</small></span></a>
+</div></div>
+<div class="dd" id="ddNote">
+<button class="ib" id="bNote" type="button" aria-label="Notifications" aria-haspopup="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="nb" id="nBadge" hidden>0</span></button>
+<div class="menu" id="mNote"><div class="mh">Notifications</div><div id="nList"><div class="empty">You are all caught up.</div></div></div></div>
+<button class="ib" id="bOut" type="button" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></button>
+</div></nav>
 
-<section class="panel" id="mine" hidden style="margin-bottom:16px">
-<h2>Your attachment</h2>
-<div id="mineBody"></div>
-</section>
-
-<div class="tiles" role="tablist" aria-label="Choose a document">
-<button class="tile" id="tl-letter" role="tab" aria-selected="true" aria-controls="p-letter" type="button">
-<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></span>
-<span><b>Attachment letter</b><span class="d">Pick your course and download your letter.</span></span></button>
-<button class="tile" id="tl-ins" role="tab" aria-selected="false" aria-controls="p-ins" type="button">
-<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg></span>
-<span><b>Insurance cover</b><span class="d">Download your personal accident cover.</span></span></button>
-<a class="tile" id="plc" href="/placement.html">
-<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
-<span><b>Attachment placement</b><span class="d">Tell us where you were placed and see your trainer.</span></span></a>
-<button class="tile" id="tl-marks" role="tab" aria-selected="false" aria-controls="p-marks" type="button">
-<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-8"/></svg></span>
-<span><b>View marks</b><span class="d">See your attachment score out of 100.</span></span></button>
-<a class="tile" id="nita" href="/api/nita" download hidden>
-<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4"/><path d="M5 20h14"/></svg></span>
-<span><b>NITA form</b><span class="d">Download the NITA attachment form.</span></span></a>
+<main id="home">
+<section class="panel" id="welcome"><h2 id="hi" style="font-size:24px">Welcome</h2>
+<p class="lead" style="margin-bottom:0">Point at or tap the dashboard icon above to open the attachment letter, insurance cover, placement, marks and NITA form. Your details below are saved, so you do not need to type them again.</p>
+<div class="kv" id="kv"></div></section>
+<section class="panel" id="prof" hidden style="margin-top:16px"><h2>Your saved details</h2>
+<p class="lead" id="profLead">Choose your department, course and intake once. They are saved to your account.</p>
+<div class="grid">
+<div class="full"><label for="pdept">Department</label><select id="pdept"><option value="">Select department</option></select></div>
+<div class="full" id="pcoW" hidden><label for="pco">Course</label><select id="pco"></select></div>
+<div class="full" id="pinW" hidden><label for="pin">Intake (month you joined)</label><select id="pin"></select></div>
+<div class="full" id="pcsW" hidden><label for="pcs">Class</label><select id="pcs"></select><div class="hint" id="pcsNote"></div></div>
+<div><label for="pg">Gender</label><select id="pg"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
+<div><label for="pid">ID number</label><input id="pid" autocomplete="off" inputmode="numeric"></div>
 </div>
+<div class="actions"><button class="btn" id="psave" type="button"><span>Save details</span></button></div>
+<div class="msg" id="pm" role="status"></div></section>
+<section class="panel" id="mine" hidden style="margin-top:16px"><h2>Your attachment</h2><div id="mineBody"></div></section>
+</main>
 
-<section class="panel" id="p-letter" role="tabpanel" aria-labelledby="tl-letter">
+<section class="panel" id="p-letter" role="tabpanel" hidden>
 <h2>Attachment letter</h2>
 <p class="lead">Fill in your details exactly as you want them on the letter.</p>
 <div class="grid">
+<div class="full" id="letterWhoW" hidden><div class="msg info" id="letterWho" style="margin:0"></div><div class="hint"><a href="#" id="editDet">Something wrong? Update your saved details</a></div></div>
+<div class="full"><label for="pr">Period of attachment</label>
+<select id="pr"><option value="">Select the period</option></select></div>
+<div class="full"><div class="grid" id="detGrid">
 <div class="full"><label for="dp">Department</label>
 <select id="dp"><option value="">Select your department</option></select></div>
 <div class="full"><label for="co">Course</label>
 <select id="co" disabled><option value="">Select your department first</option></select>
 <div class="hint" id="cn" hidden></div></div>
-<div class="full"><label for="pr">Period of attachment</label>
-<select id="pr"><option value="">Select the period</option></select></div>
 <div class="full"><label for="ln">Full name</label><input id="ln" autocomplete="name" placeholder="e.g. KABIRU ELIUD GATHUTHI"></div>
-<div class="full"><label for="la">Admission number</label><input id="la" autocomplete="off" placeholder="e.g. EIL4/26J/306761">
+<div class="full"><label for="la">Admission number</label><input id="la" autocomplete="off" placeholder="e.g. EETL6/24S/2456677">
 <div class="hint">Enter your full admission number, as on your student ID.</div></div>
 <div><label for="lt">Telephone number</label><input id="lt" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XX XXX XXX"></div>
 <div><label for="le">Email address</label><input id="le" type="email" autocomplete="email" placeholder="you@example.com"></div>
+</div></div>
 </div>
 <div class="msg" id="lm" role="status"></div>
 <div class="actions"><button class="btn" id="ld" type="button">
@@ -172,7 +210,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 </div></div></div>
 </section>
 
-<section class="panel" id="p-ins" role="tabpanel" aria-labelledby="tl-ins" hidden>
+<section class="panel" id="p-ins" role="tabpanel" hidden>
 <h2>Insurance cover</h2>
 <p class="lead">You are signed in. Enter your name or admission number to confirm your student record and download your cover.</p>
 <div class="full"><label for="iq">Your name or admission number</label>
@@ -200,7 +238,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 </section>
 
 
-<section class="panel" id="p-marks" role="tabpanel" aria-labelledby="tl-marks" hidden>
+<section class="panel" id="p-marks" role="tabpanel" hidden>
 <h2>Attachment marks</h2>
 <p class="lead">Your ILO Representative records your attachment mark out of 100. This result is automatically linked to your student account.</p>
 <div id="marksCard" style="border:1px solid var(--bd);border-radius:16px;padding:22px;text-align:center;margin-top:16px">
@@ -211,7 +249,6 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 </div>
 </section>
 
-<div class="actions" style="justify-content:center"><button class="btn sec" id="signout" type="button">Sign out</button></div>
 <footer>Group personal accident cover. Problems with your details? See the Industrial Liaison Office.</footer>
 </div>
 
@@ -238,7 +275,7 @@ function note(){var n=document.getElementById("cn"),t=C[document.getElementById(
  ALLC.forEach(function(c){C[c.key]=[c.title,c.percent,c.units]});
  if(d.nita||(d.nitas&&Object.keys(d.nitas).length))document.getElementById("nita").hidden=false;
  dsel.addEventListener("change",fillCourses);document.getElementById("co").addEventListener("change",note);
- render()}).catch(function(){var m=document.getElementById("lm");m.className="msg err";m.textContent="Could not load the course list. Check your connection and refresh the page."})})();
+ render();COURSES_READY=true;applyProfile()}).catch(function(){var m=document.getElementById("lm");m.className="msg err";m.textContent="Could not load the course list. Check your connection and refresh the page."})})();
 var $=function(i){return document.getElementById(i)},te=new TextEncoder();
 function list(a){return a.length<2?a.join("")+".":a.length===2?a[0]+" and "+a[1]+".":a.slice(0,-1).join(", ")+", and "+a[a.length-1]+"."}
 function cleanName(n){return n.toUpperCase().split(/\s+/).filter(Boolean).join(" ")}
@@ -263,14 +300,13 @@ function busy(b,on,t){b.disabled=on;b.querySelector("span").textContent=on?"Prep
 function log(doc,ins,nm,ad,co,tl,em){try{var d=new URLSearchParams({"form-name":"attachment-log",document:doc,insurance:ins,name:nm,admission:ad,course:co,tel:tl,email:em});fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:d.toString()}).catch(function(){})}catch(x){}}
 
 /* tabs */
-function tab(w){var l=w==="l",i=w==="i",m=w==="m";$("tl-letter").setAttribute("aria-selected",l);$("tl-ins").setAttribute("aria-selected",i);$("tl-marks").setAttribute("aria-selected",m);$("p-letter").hidden=!l;$("p-ins").hidden=!i;$("p-marks").hidden=!m;if(l)fit();if(m)loadMarks()}
-$("tl-letter").onclick=function(){tab("l")};$("tl-ins").onclick=function(){tab("i")};$("tl-marks").onclick=function(){tab("m")};
+/* tabs are now opened from the dashboard menu (see the top bar script below) */
 async function loadMarks(){
  try{
   $("marksStatus").className="msg info";$("marksStatus").textContent="Loading your mark…";$("marksScore").textContent="—";
   var r=await api("marks-me");
   if(!r.found){$("marksStatus").className="msg info";$("marksStatus").textContent="Your attachment mark has not been entered yet.";$("marksMeta").textContent="Please check again after your ILO Representative records the mark.";return}
-  $("marksStatus").className="msg ok";$("marksStatus").textContent="Mark recorded";$("marksScore").textContent=Number(r.score).toFixed(r.score%1?1:0);$("marksMeta").textContent=(r.name||"")+" • "+(r.adm||"")+" • "+(r.cls||"");
+  $("marksStatus").className="msg ok";$("marksStatus").textContent="Mark recorded";$("marksScore").textContent=Number(r.score).toFixed(r.score%1?1:0);addNote("mark:"+r.score,"Your attachment mark has been recorded: "+Number(r.score).toFixed(r.score%1?1:0)+" out of 100.","m");$("marksMeta").textContent=(r.name||"")+" • "+(r.adm||"")+" • "+(r.cls||"");
  }catch(e){$("marksStatus").className="msg err";$("marksStatus").textContent="Could not load your mark. Please refresh and try again.";}
 }
 
@@ -309,7 +345,7 @@ function loadMine(){api("placement-me").then(function(d){
  var a=document.createElement("b");a.style.display="block";a.textContent=(p.org||"")+(p.town?", "+p.town:"");box.appendChild(a);
  var l=document.createElement("div");l.style.cssText="color:var(--mut);font-size:14px;margin-bottom:10px";l.textContent=(p.loc||"")+(p.sup?" - Supervisor: "+p.sup:"");box.appendChild(l);
  var t=document.createElement("div");
- if(d.trainer){t.className="msg ok";t.appendChild(document.createTextNode("Your college trainer: "));var n=document.createElement("b");n.textContent=d.trainer.name;t.appendChild(n);t.appendChild(document.createTextNode(" - "));var c=document.createElement("a");c.href="tel:"+d.trainer.tel;c.textContent=d.trainer.tel;c.style.cssText="color:inherit;font-weight:700";t.appendChild(c)}
+ if(d.trainer){addNote("trainer:"+d.trainer.name,"Your college trainer has been assigned: "+d.trainer.name+".","h");t.className="msg ok";t.appendChild(document.createTextNode("Your college trainer: "));var n=document.createElement("b");n.textContent=d.trainer.name;t.appendChild(n);t.appendChild(document.createTextNode(" - "));var c=document.createElement("a");c.href="tel:"+d.trainer.tel;c.textContent=d.trainer.tel;c.style.cssText="color:inherit;font-weight:700";t.appendChild(c)}
  else{t.className="msg info";t.textContent="Waiting for the Industrial Liaison Office to assign your trainer. It will appear here automatically."}
  box.appendChild(t)}).catch(function(){})}
 loadMine();setInterval(loadMine,45000);document.addEventListener("visibilitychange",function(){if(!document.hidden)loadMine()});
@@ -402,7 +438,7 @@ async function makeCover(rec){
  return pd.output("blob");
 }
 var qTimer,qSeq=0;
-function pick(r,auto){INS={r:r};if(!auto){$("iq").value=r.n.toUpperCase()+" ("+r.a+")";$("isg").hidden=true;$("iq").setAttribute("aria-expanded","false")}
+function pick(r,auto){INS={r:r};if(r.e&&r.e<new Date().toISOString().slice(0,10))addNote("insexp:"+r.e,"Your insurance cover has expired. Open Insurance cover to get the new one.","i");else addNote("ins:"+(r.p||r.e||"on"),"Your insurance cover is ready to download.","i");if(!auto){$("iq").value=r.n.toUpperCase()+" ("+r.a+")";$("isg").hidden=true;$("iq").setAttribute("aria-expanded","false")}
  say("im","ok","Cover found for "+r.n.toUpperCase()+".");$("id").hidden=false}
 function showSug(list){var g=$("isg");g.textContent="";
  list.forEach(function(r){var b=document.createElement("button");b.type="button";b.setAttribute("role","option");
@@ -428,6 +464,7 @@ $("rqo").addEventListener("click",function(){
  var sel=$("rco");sel.textContent="";var o0=document.createElement("option");o0.value="";o0.textContent="Select your course";sel.appendChild(o0);
  ALLC.forEach(function(c){var x=document.createElement("option");x.value=c.title;x.textContent=c.title;sel.appendChild(x)});
  var q=$("iq").value.trim();if(q&&!$("rn").value&&!$("ra").value){if(/\d/.test(q))$("ra").value=q.toUpperCase();else $("rn").value=q.toUpperCase()}
+ if(ME){if(!$("rn").value)$("rn").value=ME.name;if(!$("rc").value)$("rc").value=ME.cls;if(!$("ra").value)$("ra").value=ME.adm;var rcx=ALLC.filter(function(c){return normT(c.title)===normT(ME.course)})[0];if(rcx)$("rco").value=rcx.title}
  $("rn").focus()});
 $("rqs").addEventListener("click",async function(){
  var n=cleanName($("rn").value),c=cleanName($("rc").value),co=$("rco").value,a=cleanAdm($("ra").value);say("rqm","");
@@ -446,7 +483,7 @@ $("rqs").addEventListener("click",async function(){
 
 document.getElementById("nita").addEventListener("click",async function(ev){ev.preventDefault();
  var k=stampKey($("pr").value);
- if(!k){say("lm","err","Select the period of attachment first, then press NITA form.");$("pr").scrollIntoView({block:"center"});return}
+ if(!k){tab("l");say("lm","err","Select the period of attachment first, then open the NITA form from the dashboard menu again.");$("pr").scrollIntoView({block:"center"});closeMenus();return}
  try{var r=await fetch("/api/nita?k="+k);if(!r.ok)throw 0;var bl=await r.blob();save(bl,r.headers.get("X-Filename")||"NITA_form")}catch(x){say("lm","err","The NITA form for this period is not available yet. Please ask the Industrial Liaison Office.")}});
 $("id").addEventListener("click",async function(){
  if(!INS)return;var b=this;busy(b,true);
@@ -459,6 +496,73 @@ $("id").addEventListener("click",async function(){
  }catch(x){say("im","err","Could not create the insurance cover. Check your connection and try again.")}
  busy(b,false,"Download insurance cover");
 });
+
+/* ---------- top bar, saved details, notifications ---------- */
+var ME=null,COURSES_READY=false,INFO={courses:[],intakes:[],classcodes:[],departments:[]},NOTES=[];
+function normT(t){return String(t).toUpperCase().replace(/[^A-Z0-9]/g,"")}
+function closeMenus(){["ddDash","ddNote"].forEach(function(i){$(i).classList.remove("open")});$("bDash").setAttribute("aria-expanded","false")}
+function tab(w){var v=w==="l"||w==="i"||w==="m"?w:"h";$("home").hidden=v!=="h";$("p-letter").hidden=v!=="l";$("p-ins").hidden=v!=="i";$("p-marks").hidden=v!=="m";closeMenus();if(v==="l")fit();if(v==="m")loadMarks();window.scrollTo(0,0)}
+function signOut(){sessionStorage.removeItem("rvnp_user");localStorage.removeItem("rvnp_student");location.href="/auth.html?role=student"}
+$("bDash").onclick=function(e){e.stopPropagation();var d=$("ddDash"),was=d.classList.contains("open");tab("h");if(!was){d.classList.add("open");this.setAttribute("aria-expanded","true")}};
+$("bNote").onclick=function(e){e.stopPropagation();var d=$("ddNote"),was=d.classList.contains("open");closeMenus();if(!was){d.classList.add("open");markSeen()}};
+$("ddNote").addEventListener("mouseenter",function(){if(window.matchMedia("(hover:hover)").matches)markSeen()});
+document.addEventListener("click",function(e){if(!e.target.closest(".dd"))closeMenus()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeMenus()});
+$("mi-letter").onclick=function(){tab("l")};$("mi-ins").onclick=function(){tab("i")};$("mi-marks").onclick=function(){tab("m")};
+$("bOut").onclick=signOut;
+function seenKey(){return "rvnp_seen_"+(ME?ME.id:"x")}
+function seenList(){try{return JSON.parse(localStorage.getItem(seenKey())||"[]")}catch(e){return[]}}
+function addNote(id,text,go){if(NOTES.some(function(n){return n.id===id}))return;NOTES.push({id:id,text:text,go:go});drawNotes()}
+function dropNote(id){NOTES=NOTES.filter(function(n){return n.id!==id});drawNotes()}
+function drawNotes(){var seen=seenList(),box=$("nList"),unseen=0;box.textContent="";
+ if(!NOTES.length){var e=document.createElement("div");e.className="empty";e.textContent="You are all caught up.";box.appendChild(e)}
+ NOTES.forEach(function(n){var fresh=seen.indexOf(n.id)<0;if(fresh)unseen++;var b=document.createElement("button");b.type="button";b.className="ni"+(fresh?" new":"");b.textContent=n.text;b.onclick=function(){tab(n.go||"h")};box.appendChild(b)});
+ $("nBadge").hidden=!unseen;$("nBadge").textContent=unseen}
+function markSeen(){var s=seenList();NOTES.forEach(function(n){if(s.indexOf(n.id)<0)s.push(n.id)});try{localStorage.setItem(seenKey(),JSON.stringify(s.slice(-200)))}catch(e){}$("nBadge").hidden=true}
+function tcase(t){return String(t||"").toLowerCase().replace(/(^|[\s(\/-])([a-z])/g,function(m,a,b){return a+b.toUpperCase()})}
+function profNeeded(){return !ME||!ME.course||!ME.gender||!ME.idno||!ME.intake}
+/* fills every form from the saved account, so the student only chooses the attachment period */
+function applyProfile(){
+ if(!ME||!COURSES_READY)return;
+ var first=String(ME.name||"").split(" ")[0];$("hi").textContent="Welcome, "+tcase(first);
+ var rows=[["Name",ME.name],["Admission number",ME.adm],["Class",(ME.cls||"")+(ME.clsPending?" (code not assigned yet)":"")],["Course",tcase(ME.course)],["Department",ME.dept],["Intake",ME.intake]].filter(function(r){return r[1]});
+ $("kv").textContent="";rows.forEach(function(r){var d=document.createElement("div"),sm=document.createElement("small"),b=document.createElement("b");sm.textContent=r[0];b.textContent=r[1];d.appendChild(sm);d.appendChild(b);$("kv").appendChild(d)});
+ $("ln").value=ME.name||"";$("la").value=ME.adm||"";$("lt").value=ME.phone||"";$("le").value=ME.email||"";
+ var cr=ALLC.filter(function(c){return c.dept===ME.dept&&normT(c.title)===normT(ME.course)})[0];
+ if(cr){$("dp").value=ME.dept;fillCourses();$("co").value=cr.key;note()}
+ var done=!!(cr&&ME.phone&&ME.email);
+ $("detGrid").hidden=done;$("letterWhoW").hidden=!done;
+ if(done)$("letterWho").textContent="Letter for "+ME.name+" ("+ME.adm+"), "+cr.title+". Your details are saved. Just choose the attachment period.";
+ render();check();
+ if(ME.adm){$("iq").value=ME.adm;$("iq").dispatchEvent(new Event("input"))}
+ if(profNeeded()){$("prof").hidden=false;addNote("prof","Please complete your saved details: course, intake, gender and ID number.","h")}else{$("prof").hidden=true;dropNote("prof")}
+ drawNotes()}
+$("editDet").onclick=function(e){e.preventDefault();tab("h");$("prof").hidden=false;pPrefill();$("prof").scrollIntoView({behavior:"smooth",block:"start"})};
+/* saved-details form (department, then course, then intake) */
+function pCourses(){var d=$("pdept").value,sel=$("pco");sel.innerHTML='<option value="">Select your course</option>';
+ INFO.courses.filter(function(c){return c.dept===d}).forEach(function(c){var o=document.createElement("option");o.value=c.title;o.textContent=c.title;sel.appendChild(o)});
+ $("pcoW").hidden=!d;$("pinW").hidden=!$("pco").value;pClass()}
+function pClass(){var m=ME&&/\/(\d{2})[A-Z]?\//.exec(ME.adm||""),yr=m?2000+Number(m[1]):0,sel=$("pcs");sel.innerHTML="";
+ var ok=$("pco").value&&$("pin").value&&yr;$("pcsW").hidden=!ok;if(!ok)return;
+ var hit=INFO.classcodes.filter(function(c){return normT(c.course)===normT($("pco").value)&&c.intake===$("pin").value&&Number(c.year)===yr});
+ sel.hidden=hit.length<2;
+ if(hit.length===1)$("pcsNote").textContent="Your class: "+hit[0].code;
+ else if(hit.length>1){sel.innerHTML='<option value="">Select your class</option>'+hit.map(function(c){return "<option>"+c.code+"</option>"}).join("");$("pcsNote").textContent="Your course has more than one class for this intake. Choose yours."}
+ else $("pcsNote").textContent="Your class code has not been set up yet. It is added to your account once the administrator assigns it."}
+function pPrefill(){if(!ME)return;if(ME.dept){$("pdept").value=ME.dept;pCourses();if(ME.course)$("pco").value=INFO.courses.filter(function(c){return normT(c.title)===normT(ME.course)}).map(function(c){return c.title})[0]||"";$("pinW").hidden=!$("pco").value;if(ME.intake)$("pin").value=ME.intake;pClass()}$("pg").value=ME.gender||"";$("pid").value=ME.idno||""}
+$("pdept").onchange=pCourses;$("pco").onchange=function(){$("pinW").hidden=!$("pco").value;pClass()};$("pin").onchange=pClass;
+$("psave").onclick=async function(){var b=this;say("pm","");busy(b,true);
+ try{var d=await api("profile/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({dept:$("pdept").value,course:$("pco").value,intake:$("pin").value,cls:$("pcs").hidden?"":$("pcs").value,gender:$("pg").value,idno:$("pid").value})});
+  if(d.error){say("pm","err",d.error)}else{ME=await api("me");say("pm","ok","Saved. You will not need to type these again.");applyProfile();$("prof").hidden=false;setTimeout(function(){$("prof").hidden=true;say("pm","")},2500)}}
+ catch(x){say("pm","err","Could not save. Check your connection and try again.")}
+ busy(b,false,"Save details")};
+fetch("/api/auth-info").then(function(r){return r.json()}).then(function(d){
+ INFO={courses:d.courses||[],intakes:d.intakes||[],classcodes:d.classcodes||[],departments:d.departments||[]};
+ var ds=$("pdept");INFO.departments.forEach(function(n){var o=document.createElement("option");o.value=n;o.textContent=n;ds.appendChild(o)});
+ var ins=$("pin");ins.innerHTML='<option value="">Select intake month</option>';INFO.intakes.forEach(function(n){var o=document.createElement("option");o.value=n;o.textContent=n;ins.appendChild(o)});
+ pPrefill()}).catch(function(){});
+api("me").then(function(p){if(p&&p.error&&/sign in/i.test(p.error)){signOut();return}ME=p;applyProfile();pPrefill()}).catch(function(){});
+tab("h");drawNotes();
 window.addEventListener("load",fit);
 </script>
 <script src="/pwa.js" defer></script>

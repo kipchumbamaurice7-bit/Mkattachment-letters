@@ -184,6 +184,73 @@ async function loadCourses(s) {
   return c || DEFAULT_COURSES;
 }
 function deptList(courses) { return courses.some((c) => c.dept === OTHER) ? [...DEPTS, OTHER] : DEPTS; }
+
+/* ---------- intakes and class codes ---------- */
+/* intake letter as printed in the admission number (EETL6/24S/2456677 = September 2024); "Other" has no fixed letter */
+const INTAKES = [["January","J"],["May","M"],["September","S"],["October","O"],["February","F"],["Other",""]];
+const intakeNames = () => INTAKES.map((x) => x[0]);
+const intakeLetter = (name) => (INTAKES.find((x) => x[0] === name) || [])[1] || "";
+/* reads prefix, year and intake letter out of an admission number such as EETL6/24S/2456677 */
+function parseAdm(adm) {
+  const m = /^([A-Z0-9]{2,8})\/(?:(\d{2})([A-Z])?\/)?(\d{4,8})$/.exec(adm);
+  if (!m) return null;
+  return { prefix: m[1], year: m[2] ? 2000 + Number(m[2]) : 0, letter: m[3] || "" };
+}
+const codeKey = (course, intake, year) => normT(course) + "|" + intake + "|" + year;
+function cleanCode(v) {
+  return String(v || "").toUpperCase().replace(/[\s_]+/g, "").replace(/[^A-Z0-9-]/g, "").replace(/-{2,}/g, "-").replace(/^-|-$/g, "").slice(0, 30);
+}
+async function loadClassCodes(s) { const l = await getJSON(s, "classcodes", []); return Array.isArray(l) ? l : []; }
+/* works out the class of a student: chosen code, the only code for that course/intake/year, or a provisional code until the Admin assigns one */
+function resolveClass(codes, course, intake, adm, chosen) {
+  const a = parseAdm(adm) || { prefix: "", year: 0, letter: "" };
+  const year = a.year || 0;
+  const match = codes.filter((c) => codeKey(c.course, c.intake, c.year) === codeKey(course, intake, year));
+  if (chosen) {
+    const c = cleanCode(chosen);
+    if (match.some((x) => x.code === c)) return { cls: c, pending: false, match };
+    throw new Bad("Choose your class from the list.");
+  }
+  if (match.length === 1) return { cls: match[0].code, pending: false, match };
+  if (match.length > 1) throw new Bad("Your course has more than one class for that intake. Choose your class from the list.");
+  const prov = a.prefix ? a.prefix + (year ? "-" + String(year).slice(2) + (a.letter || intakeLetter(intake)) : "") : "PENDING";
+  return { cls: prov, pending: true, match };
+}
+/* after the Admin saves class codes: students waiting for a code get it when exactly one code fits */
+async function applyClassCodes(s) {
+  const codes = await loadClassCodes(s), all = await getJSON(s, "accounts", {}), reg = await getJSON(s, "register", {});
+  let n = 0;
+  for (const a of Object.values(all)) {
+    if (a.role !== "student" || !a.course || !a.intake) continue;
+    const info = parseAdm(a.adm); if (!info || !info.year) continue;
+    const match = codes.filter((c) => codeKey(c.course, c.intake, c.year) === codeKey(a.course, a.intake, info.year));
+    if (a.clsPending && match.length === 1) {
+      a.cls = match[0].code; a.clsPending = false; n++;
+      for (const r of Object.values(reg)) if (r.accountId === a.id) r.c = a.cls;
+    } else if (!a.clsPending && a.cls && !match.some((c) => c.code === a.cls) && match.length === 1) {
+      /* a code the Admin removed or changed: move the student to the code that now fits */
+      a.cls = match[0].code; n++;
+      for (const r of Object.values(reg)) if (r.accountId === a.id) r.c = a.cls;
+    }
+  }
+  if (n) { await s.setJSON("accounts", all); await s.setJSON("register", reg); }
+  return n;
+}
+function cleanClassCodes(list, courses) {
+  if (!Array.isArray(list)) throw new Bad("Nothing to save.");
+  if (list.length > 3000) throw new Bad("Too many class codes.");
+  const titles = new Set(courses.map((c) => normT(c.title))), seen = new Set(), out = [];
+  for (const x of list) {
+    const course = clean(x.course, 120).toUpperCase(), intake = clean(x.intake, 20), year = Number(x.year), code = cleanCode(x.code);
+    if (!titles.has(normT(course))) throw new Bad("\"" + course + "\" is not a course in the list.");
+    if (!intakeNames().includes(intake)) throw new Bad("Choose an intake for " + code + ".");
+    if (!(year >= 2000 && year <= 2100)) throw new Bad("Enter a year such as 2026 for " + code + ".");
+    if (code.length < 4 || !/[A-Z]/.test(code)) throw new Bad("Class code \"" + code + "\" is too short. Use the format EETL6-26S-RS.");
+    if (seen.has(code)) throw new Bad("The class code " + code + " is entered twice.");
+    seen.add(code); out.push({ course, intake, year, code });
+  }
+  return out.sort((a, b) => a.course.localeCompare(b.course) || a.year - b.year || a.code.localeCompare(b.code));
+}
 class Bad extends Error {}
 /* named policies (a library): each student can be on the default policy, on one of these, or have one-off custom dates */
 function cleanPolicies(list) {
@@ -277,7 +344,13 @@ export default async (req) => {
 
     /* ----- account registration/login ----- */
     if (method === "GET" && path === "auth-info") {
-      return json({ departments: DEPTS.concat(OTHER) });
+      const cs = await loadCourses(s);
+      return json({
+        departments: DEPTS.concat(OTHER),
+        courses: cs.map((c) => ({ dept: c.dept, title: c.title })),
+        intakes: intakeNames(),
+        classcodes: await loadClassCodes(s),
+      });
     }
     if (method === "POST" && path === "auth/register-staff") {
       const role=clean(body.role,20).toLowerCase();
@@ -304,11 +377,18 @@ export default async (req) => {
     }
     if (method === "POST" && path === "auth/register-student") {
       const name=clean(body.name,120).toUpperCase(), adm=clean(body.adm,60).toUpperCase().replace(/\s+/g,"");
-      const cls=clean(body.cls,40).toUpperCase(), dept=clean(body.dept,80), phone=digits(body.phone), pin=String(body.pin||"");
+      const dept=clean(body.dept,80), phone=digits(body.phone), pin=String(body.pin||"");
+      const course=clean(body.course,120).toUpperCase(), intake=clean(body.intake,20), gender=clean(body.gender,10), idno=clean(body.idno,20).toUpperCase().replace(/[\s-]/g,"");
       if(name.length<3) throw new Bad("Enter your full name.");
-      if(!/^[A-Z0-9]{2,6}\/(\d{2}[A-Z]?\/)?\d{4,6}$/.test(adm)) throw new Bad("Enter your admission number as printed on your ID, with the slashes, e.g. EPL6/24S/404930");
-      if(cls.length<2) throw new Bad("Enter your class.");
       if(!DEPTS.includes(dept) && dept !== OTHER) throw new Bad("Choose your department.");
+      const courses=await loadCourses(s);
+      if(!courses.some(c=>c.dept===dept && normT(c.title)===normT(course))) throw new Bad("Choose your course.");
+      if(!intakeNames().includes(intake)) throw new Bad("Choose your intake month.");
+      const info=parseAdm(adm);
+      if(!info) throw new Bad("Enter your admission number as printed on your ID, with the slashes, e.g. EETL6/24S/2456677");
+      if(info.letter && intakeLetter(intake) && info.letter!==intakeLetter(intake)) throw new Bad("Your admission number has the letter "+info.letter+" but you chose "+intake+". Check the intake month or the admission number.");
+      if(!["Male","Female"].includes(gender)) throw new Bad("Choose your gender.");
+      if(!/^[A-Z0-9]{6,12}$/.test(idno)) throw new Bad("Enter your ID number (6 to 12 letters or digits).");
       if(phone.replace(/\D/g,"").length<9) throw new Bad("Enter a valid phone number.");
       if(pin.length<6 || pin.length>12 || !/^\d+$/.test(pin)) throw new Bad("Use a 6-12 digit PIN.");
       const nokN=clean(body.nokName,100), nokR=clean(body.nokRel,40), nokT=digits(body.nokTel), emN=clean(body.emName,100), emT=digits(body.emTel);
@@ -320,21 +400,42 @@ export default async (req) => {
       if(body.consent!==true) throw new Bad("You must accept the privacy notice to register.");
       const email=clean(body.email,200).toLowerCase();
       if(!EMAIL_RE.test(email)) throw new Bad("Enter a valid email address. It is used to reset your PIN if you forget it.");
+      const rc=resolveClass(await loadClassCodes(s),course,intake,adm,body.cls), cls=rc.cls;
       const all=await getJSON(s,"accounts",{});
       const old=Object.values(all).find(a=>a.role==="student" && a.adm===adm);
       if(old && old.consentAt) throw new Bad("This admission number is already registered. Sign in, or ask your ILO Representative or the HOD to reset your PIN.");
       const id=old?old.id:"S"+Date.now().toString(36)+randomBytes(3).toString("hex");
       const salt=randomBytes(16).toString("hex");
       if(Object.values(all).some(x=>x.email===email&&x.id!==id)) throw new Bad("That email is already used by another account.");
-      all[id]={id,role:"student",name,adm,cls,dept,phone,email,salt,pinHash:pinHash(pin,salt),status:"approved",nokName:nokN,nokRel:nokR,nokTel:nokT,emName:emN,emTel:emT,consentAt:Date.now(),createdAt:old?.createdAt||Date.now(),updatedAt:Date.now()};
+      all[id]={id,role:"student",name,adm,cls,clsPending:rc.pending,dept,course,intake,gender,idno,phone,email,salt,pinHash:pinHash(pin,salt),status:"approved",nokName:nokN,nokRel:nokR,nokTel:nokT,emName:emN,emTel:emT,consentAt:Date.now(),createdAt:old?.createdAt||Date.now(),updatedAt:Date.now()};
       await s.setJSON("accounts",all);
       const reg=await getJSON(s,"register",{});
       const rid=sid(name,adm);
       reg[rid]={id:rid,n:name,a:adm,c:cls,tel:phone,accountId:id,t:Date.now()};
       await s.setJSON("register",reg);
-      return json({ok:true,updated:!!old});
+      return json({ok:true,updated:!!old,cls,classPending:rc.pending});
     }
-    /* ----- forgot PIN: emailed one-time link (30 minutes), same answer whether or not the email is known ----- */
+    /* a signed-in student completes or corrects the saved profile (older accounts have no course, gender or ID number) */
+    if (method === "POST" && path === "profile/complete") {
+      const acct = await currentAccount(req,s); if(!acct || acct.role!=="student") return fail("Please sign in again.",401);
+      const dept=clean(body.dept,80), course=clean(body.course,120).toUpperCase(), intake=clean(body.intake,20), gender=clean(body.gender,10), idno=clean(body.idno,20).toUpperCase().replace(/[\s-]/g,"");
+      if(!DEPTS.includes(dept) && dept !== OTHER) throw new Bad("Choose your department.");
+      const courses=await loadCourses(s);
+      if(!courses.some(c=>c.dept===dept && normT(c.title)===normT(course))) throw new Bad("Choose your course.");
+      if(!intakeNames().includes(intake)) throw new Bad("Choose your intake month.");
+      if(!["Male","Female"].includes(gender)) throw new Bad("Choose your gender.");
+      if(!/^[A-Z0-9]{6,12}$/.test(idno)) throw new Bad("Enter your ID number (6 to 12 letters or digits).");
+      const info=parseAdm(acct.adm);
+      if(info && info.letter && intakeLetter(intake) && info.letter!==intakeLetter(intake)) throw new Bad("Your admission number has the letter "+info.letter+" but you chose "+intake+".");
+      const rc=resolveClass(await loadClassCodes(s),course,intake,acct.adm,body.cls);
+      const all=await getJSON(s,"accounts",{}), a=all[acct.id];
+      Object.assign(a,{dept,course,intake,gender,idno,cls:rc.cls,clsPending:rc.pending,updatedAt:Date.now()});
+      await s.setJSON("accounts",all);
+      const reg=await getJSON(s,"register",{});
+      for(const r of Object.values(reg)) if(r.accountId===a.id) r.c=a.cls;
+      await s.setJSON("register",reg);
+      return json({ok:true,cls:a.cls});
+    }
     if (method === "POST" && path === "auth/forgot") {
       const email = clean(body.email, 200).toLowerCase();
       const generic = { ok: true, message: "If that email is registered, a reset link has been sent. Check your inbox and spam folder. The link works for 30 minutes." };
@@ -387,7 +488,7 @@ export default async (req) => {
     /* ----- public ----- */
     if (method === "GET" && path === "me") {
       const acct = await currentAccount(req,s); if(!acct) return fail("Please sign in again.",401);
-      return json({ id:acct.id, role:acct.role, name:acct.name, adm:acct.adm||"", cls:acct.cls||"", dept:acct.dept||"", phone:acct.phone||"" });
+      return json({ id:acct.id, role:acct.role, name:acct.name, adm:acct.adm||"", cls:acct.cls||"", clsPending:!!acct.clsPending, dept:acct.dept||"", course:acct.course||"", intake:acct.intake||"", gender:acct.gender||"", idno:acct.idno||"", phone:acct.phone||"", email:acct.email||"" });
     }
     if (method === "GET" && path === "courses") {
       const courses = await loadCourses(s);
@@ -1030,6 +1131,8 @@ export default async (req) => {
         return json({
           settings: await getJSON(s, "settings", DEFAULT_SETTINGS),
           courses: await loadCourses(s),
+          classcodes: await loadClassCodes(s),
+          intakes: intakeNames(),
           departments: DEPTS.concat(OTHER),
           policies: await getJSON(s, "policies", []),
           classpol: await getJSON(s, "classpol", {}),
@@ -1160,6 +1263,15 @@ export default async (req) => {
       if (method === "DELETE" && path === "admin/nita") {
         await s.setJSON("nitafile", {}); await s.setJSON("nitameta", null);
         return json({ nita: null });
+      }
+      if (method === "GET" && path === "admin/classcodes") {
+        return json({ list: await loadClassCodes(s), intakes: intakeNames() });
+      }
+      if (method === "PUT" && path === "admin/classcodes") {
+        const v = cleanClassCodes(body.list, await loadCourses(s));
+        await s.setJSON("classcodes", v);
+        const moved = await applyClassCodes(s);
+        return json({ list: v, moved });
       }
       if (method === "PUT" && path === "admin/courses") {
         const v = cleanCourses(body.courses); await s.setJSON("courses", v); await s.setJSON("seeded", true); return json({ courses: v });

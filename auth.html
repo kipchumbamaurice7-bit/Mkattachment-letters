@@ -21,7 +21,7 @@ a{color:#17803f;font-weight:600}
 <h2 id="loginTitle">Sign in</h2>
 <p class="hint" id="loginHint">Enter your admission number and PIN.</p>
 <div class="grid" style="margin-top:16px">
-<div class="full"><label id="idLabel">Admission number</label><input id="identifier" autocomplete="username" placeholder=""><div class="hint" id="idFormatHint" hidden>Type it as on your ID, e.g. <b>EPL6/24S/404930</b></div></div>
+<div class="full"><label id="idLabel">Admission number</label><input id="identifier" autocomplete="username" placeholder=""><div class="hint" id="idFormatHint" hidden>Type it as on your ID, e.g. <b>EETL6/24S/2456677</b></div></div>
 <div class="full"><label>PIN</label><input id="pin" type="password" inputmode="numeric" autocomplete="current-password"></div>
 </div>
 <button class="primary" id="loginBtn">Sign in</button><div class="msg" id="msg"></div>
@@ -56,8 +56,13 @@ a{color:#17803f;font-weight:600}
 <div id="studentForm" hidden>
 <div class="grid">
 <div class="full"><label>Full name</label><input id="sn"></div>
-<div><label>Admission number</label><input id="sa" placeholder="EPL6/24S/404930" autocapitalize="characters"><div class="hint">Type it as on your ID, e.g. <b>EPL6/24S/404930</b></div></div><div><label>Class</label><input id="sc"></div>
 <div class="full"><label>Department</label><select id="sdept"><option value="">Select department</option></select></div>
+<div class="full" id="scoW" hidden><label>Course</label><select id="sco"><option value="">Select your course</option></select></div>
+<div class="full" id="sinW" hidden><label>Intake (month you joined)</label><select id="sin"><option value="">Select intake month</option></select></div>
+<div class="full" id="saW" hidden><label>Admission number</label><input id="sa" placeholder="EETL6/24S/2456677" autocapitalize="characters" autocomplete="off"><div class="hint">Type it as on your ID, in this order: <b>COURSE/YEAR+INTAKE/NUMBER</b>, e.g. <b>EETL6/24S/2456677</b></div></div>
+<div class="full" id="scW" hidden><label>Class</label><select id="scs" hidden></select><div class="hint" id="scNote"></div></div>
+<div><label>Gender</label><select id="sg"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
+<div><label>ID number</label><input id="sid" inputmode="numeric" autocomplete="off" placeholder="National ID number"></div>
 <div class="full"><label>Phone number</label><input id="st" type="tel"></div>
 <div class="full"><label>Email address</label><input id="stemail" type="email" autocomplete="email"><div class="hint">Used only to send you a PIN reset link.</div></div>
 <div class="full"><label>Next of kin (full name)</label><input id="nokn" autocomplete="off"></div>
@@ -77,18 +82,38 @@ const q=new URLSearchParams(location.search), mode=q.get("role")==="staff"?"staf
 const $=id=>document.getElementById(id);
 const DEFAULT_DEPARTMENTS=["Agriculture and Environmental Studies","Agricultural and Mechanical Engineering","Building and Civil Engineering","Business Studies","Electrical and Electronics Engineering","Health and Applied Sciences","Hospitality and Tourism","Information Communication Technology","Liberal Studies","Other courses"];
 function fillDepartmentSelect(sel,names){if(!sel)return;sel.innerHTML="<option value=\"\">Select department</option>";names.forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n;sel.appendChild(o)});}
-function loadDepartments(){return fetch("/api/auth-info",{headers:{Accept:"application/json"}}).then(r=>{if(!r.ok)throw new Error("department load failed");return r.json()}).then(d=>{const names=(d.departments||[]).filter(Boolean);if(!names.length)throw new Error("no departments");fillDepartmentSelect($("sdept"),names);if($("dept"))fillDepartmentSelect($("dept"),names);return names}).catch(()=>{fillDepartmentSelect($("sdept"),DEFAULT_DEPARTMENTS);if($("dept"))fillDepartmentSelect($("dept"),DEFAULT_DEPARTMENTS);return DEFAULT_DEPARTMENTS;});}
+function loadDepartments(){return fetch("/api/auth-info",{headers:{Accept:"application/json"}}).then(r=>{if(!r.ok)throw new Error("department load failed");return r.json()}).then(d=>{INFO={courses:d.courses||[],intakes:d.intakes||[],classcodes:d.classcodes||[]};fillIntakes();const names=(d.departments||[]).filter(Boolean);if(!names.length)throw new Error("no departments");fillDepartmentSelect($("sdept"),names);if($("dept"))fillDepartmentSelect($("dept"),names);return names}).catch(()=>{fillDepartmentSelect($("sdept"),DEFAULT_DEPARTMENTS);if($("dept"))fillDepartmentSelect($("dept"),DEFAULT_DEPARTMENTS);return DEFAULT_DEPARTMENTS;});}
 loadDepartments();
-let depts=[];
+let depts=[],INFO={courses:[],intakes:[],classcodes:[]};
 $("title").textContent=mode==="staff"?"Staff portal access":"Student portal access";
 $("sub").textContent=mode==="staff"?"HOD, Deputy HOD and ILO representatives must register and wait for administrator approval.":"Register once, then use your admission number and PIN whenever you return.";
 $("loginTitle").textContent=mode==="staff"?"Staff sign in":"Student sign in";
 $("loginHint").textContent=mode==="staff"?"Use your ID number or PF number and PIN.":"Use your admission number and PIN.";
-$("idLabel").textContent=mode==="staff"?"ID number or PF number":"Admission number";$("idFormatHint").hidden=mode!=="student";if(mode==="student")$("identifier").placeholder="EPL6/24S/404930";
+$("idLabel").textContent=mode==="staff"?"ID number or PF number":"Admission number";$("idFormatHint").hidden=mode!=="student";if(mode==="student")$("identifier").placeholder="EETL6/24S/2456677";
 $("staffForm").hidden=mode!=="staff";$("studentForm").hidden=mode==="staff";
 $("regTitle").textContent=mode==="staff"?"Staff registration":"Student registration";
 $("regHint").textContent=mode==="staff"?"Your account stays pending until the administrator approves it.":"Your details and PIN are stored securely in the portal database.";
 if(mode==="staff"){loadDepartments().then(d=>{depts=d;});}
+
+const INTAKE_FALLBACK=["January","May","September","October","February","Other"];
+function fillIntakes(){const sel=$("sin");if(!sel)return;const v=sel.value;sel.innerHTML="<option value=\"\">Select intake month</option>";(INFO.intakes.length?INFO.intakes:INTAKE_FALLBACK).forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;sel.appendChild(o)});sel.value=v}
+fillIntakes();
+function admInfo(v){const m=/^([A-Z0-9]{2,8})\/(?:(\d{2})([A-Z])?\/)?(\d{4,8})$/.exec(String(v||"").toUpperCase().replace(/\s+/g,""));return m?{year:m[2]?2000+Number(m[2]):0}:null}
+function normT(t){return String(t).toUpperCase().replace(/[^A-Z0-9]/g,"")}
+function classMatches(){const a=admInfo($("sa").value);if(!a||!a.year)return [];return INFO.classcodes.filter(c=>normT(c.course)===normT($("sco").value)&&c.intake===$("sin").value&&Number(c.year)===a.year)}
+function refreshClass(){
+ const ready=$("sco").value&&$("sin").value&&$("sa").value.trim().length>=8;$("scW").hidden=!ready;if(!ready)return;
+ const m=classMatches(),sel=$("scs"),note=$("scNote");sel.hidden=true;sel.innerHTML="";
+ if(m.length===1){note.textContent="Your class: "+m[0].code}
+ else if(m.length>1){sel.hidden=false;sel.innerHTML="<option value=\"\">Select your class</option>"+m.map(c=>"<option>"+c.code+"</option>").join("");note.textContent="Your course has more than one class for this intake. Choose yours."}
+ else note.textContent="Your class code has not been set up yet. You can still register. It is added to your account automatically once the administrator assigns it."}
+function fillCourses(){const d=$("sdept").value,sel=$("sco");sel.innerHTML="<option value=\"\">Select your course</option>";
+ INFO.courses.filter(c=>c.dept===d).forEach(c=>{const o=document.createElement("option");o.value=c.title;o.textContent=c.title;sel.appendChild(o)});
+ $("scoW").hidden=!d;$("sinW").hidden=true;$("saW").hidden=true;$("sin").value="";refreshClass()}
+$("sdept").onchange=fillCourses;
+$("sco").onchange=()=>{$("sinW").hidden=!$("sco").value;if(!$("sco").value){$("saW").hidden=true}refreshClass()};
+$("sin").onchange=()=>{$("saW").hidden=!$("sin").value;refreshClass()};
+$("sa").oninput=refreshClass;
 function show(box){$("loginBox").hidden=box!=="login";$("regBox").hidden=box!=="reg";$("loginTab").classList.toggle("on",box==="login");$("regTab").classList.toggle("on",box==="reg")}
 $("loginTab").onclick=()=>show("login");$("regTab").onclick=()=>show("reg");
 $("role").onchange=()=>{$("deptWrap").hidden=$("role").value!=="rep"};
@@ -96,7 +121,7 @@ async function send(path,body){let r=await fetch("/api/"+path,{method:"POST",hea
 $("loginBtn").onclick=async()=>{let b=$("loginBtn");$("msg").className="msg";$("msg").textContent="";b.disabled=true;try{let d=await send("auth/login",{role:mode==="staff"?"staff":"student",identifier:$("identifier").value,pin:$("pin").value});sessionStorage.setItem("rvnp_user",d.token);if(d.role==="student")localStorage.setItem("rvnp_student",d.token);sessionStorage.setItem("rvnp_user_role",d.role);location.href=d.role==="student"?"/student.html":d.role==="rep"?"/ilo.html":"/hod.html"}catch(e){$("msg").className="msg err";$("msg").textContent=e.message}b.disabled=false};
 $("regBtn").onclick=async()=>{let b=$("regBtn");$("regMsg").className="msg";$("regMsg").textContent="";b.disabled=true;try{
  if(mode==="staff"){let d=await send("auth/register-staff",{role:$("role").value,dept:$("dept").value,name:$("name").value,idno:$("idno").value,pf:$("pf").value,phone:$("phone").value,email:$("semail").value,pin:$("regPin").value});$("regMsg").className="msg ok";$("regMsg").textContent=d.message;show("login")}
- else {let d=await send("auth/register-student",{name:$("sn").value,adm:$("sa").value,cls:$("sc").value,dept:$("sdept").value,phone:$("st").value,email:$("stemail").value,pin:$("sp").value,nokName:$("nokn").value,nokRel:$("nokr").value,nokTel:$("nokt").value,emName:$("emn").value,emTel:$("emt").value,consent:$("consent").checked});$("regMsg").className="msg ok";$("regMsg").textContent=d.updated?"Your account was updated. You can now sign in.":"Registration complete. You can now sign in.";show("login")}
+ else {let d=await send("auth/register-student",{name:$("sn").value,adm:$("sa").value,dept:$("sdept").value,course:$("sco").value,intake:$("sin").value,cls:$("scs").hidden?"":$("scs").value,gender:$("sg").value,idno:$("sid").value,phone:$("st").value,email:$("stemail").value,pin:$("sp").value,nokName:$("nokn").value,nokRel:$("nokr").value,nokTel:$("nokt").value,emName:$("emn").value,emTel:$("emt").value,consent:$("consent").checked});$("regMsg").className="msg ok";$("regMsg").textContent=(d.updated?"Your account was updated. ":"Registration complete. ")+(d.classPending?"Your class code will be added once the administrator assigns it. ":"Your class is "+d.cls+". ")+"You can now sign in. Your details are saved, so you will not need to type them again.";show("login")}
 }catch(e){$("regMsg").className="msg err";$("regMsg").textContent=e.message}b.disabled=false};
 
 const resetTok=q.get("reset");

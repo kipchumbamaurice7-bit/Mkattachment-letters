@@ -1,5 +1,22 @@
 # RVNP Industrial Attachment Portal
 
+## Version 3.1: one consistent layout for every account
+
+- **Staff accounts (Admin, HOD / Deputy HOD, ILO Representative)** now share one app layout: a dark-green sidebar with grouped sections, a top bar showing where you are, and one section on screen at a time. On phones the sidebar opens from the menu button. Counts (for example pending accounts) show as badges, and zero counts are hidden.
+  - Admin: People (Accounts, ILO units), Students (Student database, Class codes, Placements, Marks), Insurance (Insurance covers, Cover requests), Letters and forms (Attachment letters). The student link and "Open student page" moved to icons in the top bar.
+  - HOD / Deputy: Dashboard (Overview), Placements (Students, Trainers, All responses), Results (Marks).
+  - ILO Rep: Attachment (Units covered), Insurance (Class insurance, Student requests), Results (Student marks).
+- **Students** keep the top-bar layout (Dashboard, Notifications, Sign out). The placement page now has the same top bar.
+- New files: `shell.css`, `shell.js`. Changed: `admin.html`, `hod.html`, `ilo.html`, `placement.html`, `sw.js` (cache v20). Nothing in the data or API changed, and every existing button and form works as before.
+
+## Version 3: departments, courses, intakes and class codes (newest, replaces older notes where they differ)
+
+- **Student registration** now goes Department, then Course, then Intake month (January, May, September, October, February, Other), then the admission number in the order `COURSE/YEAR+INTAKE/NUMBER`, for example `EETL6/24S/2456677`. It also asks for gender and ID number, besides name, phone, email, next of kin and emergency contact. The intake letter in the admission number must match the month chosen.
+- **Class codes (Admin, "Class codes" tab).** Pick department, course, intake and year, then type the code (for example `EETL6-26S-RS` = Electrical Engineering Technology Level 6, September 2026). The start of the code is suggested. A course can have several classes in one intake; students then pick theirs from a list. Codes are stored permanently. When a student registers before their code exists they are given a temporary class (for example `EETL6-24S`); saving the code moves them into it automatically.
+- **Saved details.** After registering, the student's details are kept. Signed-in students only choose the attachment period for the letter. The insurance cover is found automatically. Students registered before this update see a "Your saved details" card to add course, intake, gender and ID number once.
+- **Student dashboard.** After sign-in the page shows a top bar with three icons: Dashboard, Notifications and Sign out. Point at (or tap) the Dashboard icon for Attachment letter, Insurance cover, Placement, Marks and the NITA form. The notification bell shows a badge for new updates: mark recorded, trainer assigned, cover ready or expired, details to complete.
+- Changed: `api.mjs`, `auth.html`, `student.html`, `admin.html`, `sw.js` (cache v19). New API paths: `GET/PUT admin/classcodes`, `POST profile/complete`; `auth-info` and `me` return more fields.
+
 ## Version 2: current rules (these replace anything older below)
 
 - **One mark per student, out of 100.** Entered by the ILO Rep from the trainer's paper sheet Blank = Pending. Only placed students are assessed. The date a mark is saved is recorded automatically and shown on the marksheets.

@@ -102,13 +102,12 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="stylesheet" href="/shell.css">
 </head><body>
 <div class="wrap" style="max-width:640px;margin:0 auto;padding:20px 16px 40px">
+<nav class="tb" aria-label="Student menu"><div class="tb-brand"><span class="tb-mark">R</span><span><b>RVNP</b><small>Industrial Attachment</small></span></div><div class="tb-icons"><a class="ib" href="/student.html" aria-label="Dashboard" title="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></a><button class="ib" type="button" aria-label="Sign out" title="Sign out" onclick="sessionStorage.removeItem('rvnp_user');localStorage.removeItem('rvnp_student');location.href='/auth.html?role=student'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></button></div></nav>
 <header><h1>Attachment placement</h1>
 <p>Rift Valley National Polytechnic. Once you have secured an attachment place, tell the Industrial Liaison Office where you are. You can also check which college trainer was assigned to you.</p></header>
-<div class="rolebar"><div class="role-id"><div class="role-icon">S</div><div><strong>STUDENT</strong><small>Placement Workspace</small></div></div><div class="role-actions"><a class="current" href="/student.html">My Dashboard</a><a href="/student.html">My Dashboard</a><button type="button" onclick="sessionStorage.removeItem('rvnp_user');localStorage.removeItem('rvnp_student');location.href='/auth.html?role=student'">Sign out</button></div></div>
-<div class="dashboard-subtitle">Complete your placement response and track your assigned trainer.</div>
-
 <section class="panel" style="margin-top:18px">
 <h2>Where were you placed?</h2>
 <div class="grid">
