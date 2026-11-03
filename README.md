@@ -261,3 +261,14 @@ The portal uses a balanced green, orange and white palette: green remains the in
 ## If sign-in shows "Unexpected end of JSON input" or "Unexpected response"
 
 This means the server function (`api.mjs`) is not running on Netlify. Keep `api.mjs` and `netlify.toml` at the top level of the repository (there is no build step and no `netlify/functions` folder). In Netlify open **Site configuration, Build and deploy**, clear the **Build command** and **Functions directory** if they are filled in, and check **Environment variables** has `ADMIN_PASSWORD`. Then **Deploys, Trigger deploy, Clear cache and deploy site**. Open `your-site/api/auth-info`: it should show a list of departments. If it shows "Page not found", the function was not deployed; check **Functions** in the Netlify menu for one named `api`.
+
+
+## Interface refresh (November 2026)
+
+- Refined the public access gateway with clearer role selection and stronger visual hierarchy.
+- Standardised staff, HOD/Deputy, student, placement and administration workspaces with a consistent RVNP green, navy and amber design system.
+- Improved responsive navigation, spacing, form controls, tables, cards, status messages and dashboard section treatments for mobile and desktop.
+- Refined the staff/student authentication screen while preserving existing registration and approval flows.
+- Existing attachment letter and print-preview styling is intentionally preserved.
+
+No API, data model, authentication logic, or role permissions were intentionally changed as part of this visual refresh.
