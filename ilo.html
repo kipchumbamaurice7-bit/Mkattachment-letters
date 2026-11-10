@@ -225,12 +225,6 @@ function drawIR(){
 async function loadIR(){try{sayIR('','Loading...');var r=await fetch('/api/ilo/requests');var d=await r.json();if(!r.ok)throw new Error(d.error||'Could not load requests.');IR=d.requests||[];drawIR();if(!IR.length)sayIR('','')}catch(e){sayIR('err',e.message)}}
 $("irf").onclick=loadIR; loadIR();
 
-/* ---------- link for students to fill their details ---------- */
-(function(){if(!$("rl")||!$("rwa")||!$("rcp"))return;var u=location.origin+"/register.html";$("rl").value=u;
- $("rwa").href="https://wa.me/?text="+encodeURIComponent("Please fill in your student details here (name, admission number, class, contact number): "+u);
- $("rcp").onclick=function(){var ok=function(){var m=$("m3");m.className="msg ok";m.textContent="Link copied."};
-  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok,function(){$("rl").select();document.execCommand("copy");ok()});
-  else{$("rl").select();document.execCommand("copy");ok()}}})();
 /* ---------- student marks (department code) ---------- */
 (function(){fetch("/api/courses").then(function(r){return r.json()}).then(function(d){(d.departments||[]).forEach(function(n){var o=document.createElement("option");o.value=n;o.textContent=n;if($("md"))$("md").appendChild(o)})}).catch(function(){});
  var mk=null;
@@ -245,6 +239,7 @@ $("signout").onclick=function(){sessionStorage.removeItem("rvnp_user");sessionSt
 RVShell.mount({root:root,brand:{letter:"I",name:"ILO Representative",sub:"Industrial Liaison Office"},title:"Units covered",
  hide:["header",".rolebar",".dashboard-subtitle",".wrap > .actions"],
  userLine:"<b>ILO Representative</b>"+(t.dept||"Your department"),
+ top:[{href:"/feedback.html",icon:"inbox",label:"Student feedback"}],
  signOut:function(){document.getElementById("signout").click()},
  groups:[
   {label:"Attachment",items:[{view:secs[0],key:"units",icon:"list",label:"Units covered"}]},

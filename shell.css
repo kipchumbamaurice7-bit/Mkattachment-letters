@@ -58,3 +58,44 @@ body.sh-on{background:#f4f7f4!important}body.sh-on:before{display:none!important
 .tb-icons{display:flex;align-items:center;gap:8px}
 @media(max-width:620px){.tb-brand small{display:none}}
 .sh.sh-locked .sh-top{display:none!important}
+
+/* RVNP unified modern workspace theme */
+:root{--sh-side:#102f27;--sh-side2:#0b241e;--sh-ac:#d98a2b;--sh-w:264px;--rv-ink:#172b3a;--rv-muted:#667789;--rv-border:#e4eaf0;--rv-bg:#f4f7fa;--rv-card:#fff}
+body.sh-on{background:var(--rv-bg)!important;color:var(--rv-ink)!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important}
+.sh{background:var(--rv-bg)!important}
+.sh-side{background:linear-gradient(180deg,#123b31 0%,#0b2923 100%)!important;box-shadow:5px 0 24px rgba(18,42,35,.08)}
+.sh-brand{padding:24px 20px 20px}.sh-mark{border-radius:14px;background:linear-gradient(135deg,#e6a044,#c9781c);box-shadow:0 6px 16px rgba(217,138,43,.25)}
+.sh-brand b{letter-spacing:-.02em}.sh-user{margin:4px 14px 12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.07)}
+.sh-grp{padding-top:20px;color:#91b8a8;letter-spacing:.1em}
+.sh-item,.sh-nav .tab{padding:12px 13px!important;border-radius:11px!important;font-size:14px!important;font-weight:550!important}
+.sh-item[aria-selected="true"],.sh-nav .tab[aria-selected="true"]{color:#14382e!important;background:#f2f7f4!important;box-shadow:inset 3px 0 #e6a044!important}
+.sh-top{min-height:76px;padding:14px 30px!important;background:rgba(255,255,255,.92)!important;border-bottom:1px solid var(--rv-border)!important;box-shadow:0 3px 18px rgba(20,40,60,.035)}
+.sh-title small{color:#8392a1!important;font-size:10px!important;letter-spacing:.13em!important}
+.sh-title b{color:#172b3a!important;font-size:21px!important;letter-spacing:-.025em}
+.sh-ib,.ib{width:42px;height:42px;border-radius:12px;background:#f5f8fa!important;border-color:#e1e8ed!important;color:#375c50!important}
+.sh-ib:hover,.ib:hover,.dd.open>.ib{background:#174c3c!important;color:#fff!important;border-color:#174c3c!important}
+.sh-content{max-width:1440px!important;padding:30px 34px 64px!important}
+.sh-content .card,.sh-content .panel,.sh-content .course{background:#fff!important;border:1px solid var(--rv-border)!important;border-radius:16px!important;box-shadow:0 5px 22px rgba(25,48,68,.045)!important;padding:22px!important;margin:0 0 18px!important}
+.sh-content h1,.sh-content h2,.sh-content h3{color:#1b3445!important;letter-spacing:-.02em}
+.sh-content h2{font-size:18px!important;margin-bottom:8px!important}
+.sh-content .lead,.sh-content .hint{color:#718092!important}
+.sh-content input,.sh-content select,.sh-content textarea{border:1px solid #dce5eb!important;border-radius:10px!important;background:#fff!important;color:#243746!important;min-height:44px}
+.sh-content input:focus,.sh-content select:focus,.sh-content textarea:focus{border-color:#39866a!important;box-shadow:0 0 0 3px rgba(57,134,106,.12)!important}
+.sh-content .btn{border-radius:10px!important;background:#176b4d!important;box-shadow:none!important;font-weight:650!important}
+.sh-content .btn:hover{background:#10583e!important;transform:translateY(-1px)}
+.sh-content .btn.sec{background:#f0f5f3!important;color:#285542!important;border:1px solid #dce9e2!important}
+.sh-content .scroll{border:1px solid var(--rv-border)!important;border-radius:12px!important}
+.sh-content table{font-size:13px!important}.sh-content th{background:#f7f9fb!important;color:#637587!important;font-size:11px!important;text-transform:uppercase;letter-spacing:.055em}
+.sh-content td,.sh-content th{padding:11px 12px!important;border-bottom:1px solid #edf1f4!important}
+.sh-content .badge{border-radius:999px!important;background:#edf4f0!important;color:#2d694e!important}
+.sh-content .msg{border-radius:11px!important}
+.sh-content .grid{gap:16px!important}
+.sh-foot{color:#91b8a8!important}
+/* Keep authentication screens centred and uncluttered before a user signs in. */
+.sh.sh-locked .sh-content{max-width:560px!important;padding-top:8vh!important}
+.sh.sh-locked .sh-content .card{box-shadow:0 18px 50px rgba(25,48,68,.10)!important;padding:30px!important}
+/* Student and placement pages share the same visual language. */
+.tb{position:sticky;top:0!important;border:0!important;border-bottom:1px solid var(--rv-border)!important;border-radius:0 0 16px 16px!important;box-shadow:0 4px 18px rgba(25,48,68,.055)!important;padding:13px max(18px,calc((100vw - 1280px)/2))!important;background:rgba(255,255,255,.96)!important}
+.tb-mark{background:linear-gradient(135deg,#176b4d,#123b31)!important;border-radius:12px!important}
+@media(max-width:980px){.sh-content{padding:20px 16px 48px!important}.sh-top{padding:12px 16px!important}}
+@media(max-width:620px){.sh-content .card,.sh-content .panel{padding:16px!important}.sh-title b{font-size:17px!important}.tb{padding:10px 14px!important}}

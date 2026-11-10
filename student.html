@@ -117,7 +117,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 .kv small{display:block;color:var(--mut);font-size:12px}.kv b{display:block;font-size:15px;word-break:break-word}
 @media(max-width:620px){.dd{position:static}.menu{left:8px;right:8px;width:auto;max-width:none}.tb-brand small{display:none}}
 </style>
-<link rel="stylesheet" href="/portal-theme.css"><link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/portal-theme.css"><link rel="stylesheet" href="/shell.css"><link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#12304a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -137,6 +137,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <button class="mi" id="mi-letter" type="button" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg><span><b>Attachment letter</b><small>Choose your period and download</small></span></button>
 <button class="mi" id="mi-ins" type="button" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg><span><b>Insurance cover</b><small>Download your personal accident cover</small></span></button>
 <a class="mi" id="plc" href="/placement.html" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span><b>Attachment placement</b><small>Where you were placed and your trainer</small></span></a>
+<a class="mi" id="mi-feedback" href="/feedback.html" role="menuitem"><span><b>Attachment feedback</b><small>Submit feedback and view follow-up</small></span></a>
 <button class="mi" id="mi-marks" type="button" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-8"/></svg><span><b>View marks</b><small>Your attachment score out of 100</small></span></button>
 <a class="mi" id="nita" href="/api/nita" download hidden role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4"/><path d="M5 20h14"/></svg><span><b>NITA form</b><small>Download the NITA attachment form</small></span></a>
 </div></div>
@@ -149,10 +150,15 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <main id="home">
 <section class="panel" id="welcome"><h2 id="hi" style="font-size:24px">Welcome</h2>
 <p class="lead" style="margin-bottom:0">Point at or tap the dashboard icon above to open the attachment letter, insurance cover, placement, marks and NITA form. Your details below are saved, so you do not need to type them again.</p>
-<div class="kv" id="kv"></div></section>
+<div class="kv" id="kv"></div><div class="actions"><button class="btn sec" id="editProfile" type="button">Update my profile</button></div></section>
 <section class="panel" id="prof" hidden style="margin-top:16px"><h2>Your saved details</h2>
 <p class="lead" id="profLead">Choose your department, course and intake once. They are saved to your account.</p>
 <div class="grid">
+<div><label for="pname">Full name</label><input id="pname" autocomplete="name" required></div>
+<div><label for="padm">Admission number</label><input id="padm" autocomplete="off" autocapitalize="characters" required><div class="hint">Changes are checked against existing student records.</div></div>
+<div><label for="pemail">Email address</label><input id="pemail" type="email" autocomplete="email" required></div>
+<div><label for="pphone">Primary phone number</label><input id="pphone" type="tel" autocomplete="tel" required></div>
+<div><label for="paltphone">Alternative phone number</label><input id="paltphone" type="tel" autocomplete="tel"></div>
 <div class="full"><label for="pdept">Department</label><select id="pdept"><option value="">Select department</option></select></div>
 <div class="full" id="pcoW" hidden><label for="pco">Course</label><select id="pco"></select></div>
 <div class="full" id="pinW" hidden><label for="pin">Intake (month you joined)</label><select id="pin"></select></div>
@@ -525,7 +531,7 @@ function profNeeded(){return !ME||!ME.course||!ME.gender||!ME.idno||!ME.intake}
 function applyProfile(){
  if(!ME||!COURSES_READY)return;
  var first=String(ME.name||"").split(" ")[0];$("hi").textContent="Welcome, "+tcase(first);
- var rows=[["Name",ME.name],["Admission number",ME.adm],["Class",(ME.cls||"")+(ME.clsPending?" (code not assigned yet)":"")],["Course",tcase(ME.course)],["Department",ME.dept],["Intake",ME.intake]].filter(function(r){return r[1]});
+ var rows=[["Name",ME.name],["Admission number",ME.adm],["Email",ME.email],["Phone",ME.phone],["Alternative phone",ME.altPhone],["Class",(ME.cls||"")+(ME.clsPending?" (code not assigned yet)":"")],["Course",tcase(ME.course)],["Department",ME.dept],["Intake",ME.intake]].filter(function(r){return r[1]});
  $("kv").textContent="";rows.forEach(function(r){var d=document.createElement("div"),sm=document.createElement("small"),b=document.createElement("b");sm.textContent=r[0];b.textContent=r[1];d.appendChild(sm);d.appendChild(b);$("kv").appendChild(d)});
  $("ln").value=ME.name||"";$("la").value=ME.adm||"";$("lt").value=ME.phone||"";$("le").value=ME.email||"";
  var cr=ALLC.filter(function(c){return c.dept===ME.dept&&normT(c.title)===normT(ME.course)})[0];
@@ -537,6 +543,7 @@ function applyProfile(){
  if(ME.adm){$("iq").value=ME.adm;$("iq").dispatchEvent(new Event("input"))}
  if(profNeeded()){$("prof").hidden=false;addNote("prof","Please complete your saved details: course, intake, gender and ID number.","h")}else{$("prof").hidden=true;dropNote("prof")}
  drawNotes()}
+$("editProfile").onclick=function(){tab("h");$("prof").hidden=false;pPrefill();$("prof").scrollIntoView({behavior:"smooth",block:"start"})};
 $("editDet").onclick=function(e){e.preventDefault();tab("h");$("prof").hidden=false;pPrefill();$("prof").scrollIntoView({behavior:"smooth",block:"start"})};
 /* saved-details form (department, then course, then intake) */
 function pCourses(){var d=$("pdept").value,sel=$("pco");sel.innerHTML='<option value="">Select your course</option>';
@@ -549,10 +556,10 @@ function pClass(){var m=ME&&/\/(\d{2})[A-Z]?\//.exec(ME.adm||""),yr=m?2000+Numbe
  if(hit.length===1)$("pcsNote").textContent="Your class: "+hit[0].code;
  else if(hit.length>1){sel.innerHTML='<option value="">Select your class</option>'+hit.map(function(c){return "<option>"+c.code+"</option>"}).join("");$("pcsNote").textContent="Your course has more than one class for this intake. Choose yours."}
  else $("pcsNote").textContent="Your class code has not been set up yet. It is added to your account once the administrator assigns it."}
-function pPrefill(){if(!ME)return;if(ME.dept){$("pdept").value=ME.dept;pCourses();if(ME.course)$("pco").value=INFO.courses.filter(function(c){return normT(c.title)===normT(ME.course)}).map(function(c){return c.title})[0]||"";$("pinW").hidden=!$("pco").value;if(ME.intake)$("pin").value=ME.intake;pClass()}$("pg").value=ME.gender||"";$("pid").value=ME.idno||""}
+function pPrefill(){if(!ME)return;$("pname").value=ME.name||"";$("padm").value=ME.adm||"";$("pemail").value=ME.email||"";$("pphone").value=ME.phone||"";$("paltphone").value=ME.altPhone||"";if(ME.dept){$("pdept").value=ME.dept;pCourses();if(ME.course)$("pco").value=INFO.courses.filter(function(c){return normT(c.title)===normT(ME.course)}).map(function(c){return c.title})[0]||"";$("pinW").hidden=!$("pco").value;if(ME.intake)$("pin").value=ME.intake;pClass()}$("pg").value=ME.gender||"";$("pid").value=ME.idno||""}
 $("pdept").onchange=pCourses;$("pco").onchange=function(){$("pinW").hidden=!$("pco").value;pClass()};$("pin").onchange=pClass;
 $("psave").onclick=async function(){var b=this;say("pm","");busy(b,true);
- try{var d=await api("profile/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({dept:$("pdept").value,course:$("pco").value,intake:$("pin").value,cls:$("pcs").hidden?"":$("pcs").value,gender:$("pg").value,idno:$("pid").value})});
+ try{var d=await api("profile/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:$("pname").value,adm:$("padm").value,email:$("pemail").value,phone:$("pphone").value,altPhone:$("paltphone").value,dept:$("pdept").value,course:$("pco").value,intake:$("pin").value,cls:$("pcs").hidden?"":$("pcs").value,gender:$("pg").value,idno:$("pid").value})});
   if(d.error){say("pm","err",d.error)}else{ME=await api("me");say("pm","ok","Saved. You will not need to type these again.");applyProfile();$("prof").hidden=false;setTimeout(function(){$("prof").hidden=true;say("pm","")},2500)}}
  catch(x){say("pm","err","Could not save. Check your connection and try again.")}
  busy(b,false,"Save details")};

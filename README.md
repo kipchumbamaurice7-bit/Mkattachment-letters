@@ -3,7 +3,7 @@
 ## Version 3.1: one consistent layout for every account
 
 - **Staff accounts (Admin, HOD / Deputy HOD, ILO Representative)** now share one app layout: a dark-green sidebar with grouped sections, a top bar showing where you are, and one section on screen at a time. On phones the sidebar opens from the menu button. Counts (for example pending accounts) show as badges, and zero counts are hidden.
-  - Admin: People (Accounts, ILO units), Students (Student database, Class codes, Placements, Marks), Insurance (Insurance covers, Cover requests), Letters and forms (Attachment letters). The student link and "Open student page" moved to icons in the top bar.
+  - Admin: People (Accounts, ILO units), Students (Student database, Class codes, Placements, Marks), Insurance (Insurance covers, Cover requests), Letters and forms (Attachment letters). Student registration is accessed through the portal registration page; staff dashboards do not provide student-link sharing controls.
   - HOD / Deputy: Dashboard (Overview), Placements (Students, Trainers, All responses), Results (Marks).
   - ILO Rep: Attachment (Units covered), Insurance (Class insurance, Student requests), Results (Student marks).
 - **Students** keep the top-bar layout (Dashboard, Notifications, Sign out). The placement page now has the same top bar.
@@ -96,7 +96,7 @@ To update later: open the repository, **Add file**, then **Upload files**. Files
 3. **Insurance covers**: check the default policy number, insurer, start and end dates and issue date. Upload the student list (Class code, Student name, Admission number). "Add new and update existing" keeps what is already there. "Replace the whole list" removes anyone not in the file.
 4. **Attachment letters**: check each course's title, percentage and units. Use **+ Add a course** for a new course, then **Save courses**.
 5. Test on a phone: download a letter and compare it with the preview, search a student and download a cover, and send a test cover request.
-6. Share the student link (copy or WhatsApp button on the admin page).
+6. Students access registration through the portal registration page. Admin and ILO dashboards do not provide copy-link or WhatsApp sharing controls.
 
 ## Students and insurance covers
 
@@ -163,7 +163,7 @@ The student's cover (and the policy number and insurer in their attachment lette
 
 ## Student database (details filled in by students)
 
-1. Share the **student details link** (`your-site/register.html`). You can copy it from the admin page (**Student database** tab) or from the ILO page, so ILO representatives can send it to their classes too.
+1. Students use the portal registration page to create their accounts. The Admin and ILO dashboards do not include student-link sharing tools.
 2. Students enter their full name, admission number, class, contact number and a private PIN. The PIN is stored as a secure password hash, not as plain text. If they submit again with the same name and admission number, their details are updated, not duplicated.
 3. In the admin page, **Student database** tab, you see the **total number of students**, the number per class, and how many already have an insurance cover. Tap a class to list its students, or search by name, admission number, class or phone (the list stays hidden until you do).
 4. **Download Excel (by class)** gives one file with a Summary sheet (students per class and the total), an "All students" sheet sorted by class, and a separate sheet for each class. **Download CSV** gives the same list as one sorted file.
@@ -289,3 +289,30 @@ This means the server function (`api.mjs`) is not running on Netlify. Keep `api.
 - Existing attachment letter and print-preview styling is intentionally preserved.
 
 No API, data model, authentication logic, or role permissions were intentionally changed as part of this visual refresh.
+
+
+## Attachment feedback module (added in this update)
+
+- Students can submit structured attachment feedback at `/feedback.html`: overall rating, course relevance, workplace supervision, safety, challenges, comments and an urgent flag.
+- Students can view only their own submissions and the follow-up status.
+- Departmental ILO Representatives can view and manage feedback from their own department only. HOD, Deputy HOD and Admin can view institution-wide feedback.
+- Authorised staff can track each item as New, In progress, Referred or Resolved and record a follow-up note. Status changes are added to the audit log.
+- Student feedback is private to the student and authorised ILO personnel; it is not visible to other students or unrelated departmental representatives.
+
+## Important deployment checks
+
+- Set `ADMIN_PASSWORD` in Netlify environment variables before deployment. Never put it in source files or commit it to GitHub.
+- Netlify Blobs is the current persistence layer (`rvnp-portal` store); it is not a relational database. Configure and verify Netlify Blobs persistence on the production site before real student use.
+- Configure `RESEND_API_KEY`, `MAIL_FROM` and optionally `SITE_URL` if email PIN resets are required.
+- Test role-based access, student registration, letter and cover downloads, class-code mapping, trainer assignment, marks locking/unlocking, feedback visibility, memo visibility, and insurance renewal on a staging deployment before production.
+- The project still requires an institutional decision on formal approval of attachment letters and the authoritative insurance verification process. The current portal issues student-generated letters and Admin-managed cover policies; it does not yet implement a multi-step HOD approval workflow for each letter.
+
+## Student profile and placement updates
+
+- Students can open **Update my profile** after signing in with admission number and PIN.
+- Profile changes (full name, admission number, email, primary and alternative phone numbers, department, course, intake, class, gender and ID number) are validated and stored in the central Netlify Blobs database.
+- Admission numbers and email addresses are checked for uniqueness. Profile changes are recorded in the audit log; existing placement identity keys are migrated when a student's name or admission number is corrected.
+- Placement submission reuses the saved student identity and class. Students provide organisation, physical location, supervisor name and contact, town and county. Primary and alternative phone numbers are prefilled from the saved profile.
+- Placement records retain supervisor contact and county as structured fields.
+
+Student profile and placement data are persistent server-side records, not browser-only local storage. Production operation still requires the Netlify Blobs store and the site's existing environment variables to be correctly configured.

@@ -89,15 +89,8 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 
 <div id="app" hidden>
 <div class="top">
-<div><h1>Portal admin</h1><p class="lead" style="margin:0">Changes here show on the student link straight away. No rebuilding or re-uploading.</p></div>
+<div><h1>Portal admin</h1><p class="lead" style="margin:0">Manage portal accounts, student records, insurance, letters and attachment progress from one secure workspace.</p></div>
 <div class="row" style="margin:0"><a class="btn sec" href="/student.html" target="_blank" rel="noopener">Open student page</a><button class="btn sec" id="out">Sign out</button></div>
-</div>
-<div class="card">
-<h2>Student link</h2>
-<p class="lead">Share this link with students. It opens the attachment letter and insurance cover page.</p>
-<input id="sl" readonly onclick="this.select()">
-<div class="row"><button class="btn" id="cp">Copy link</button><a class="btn sec" id="wa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
-<div class="msg" id="ml"></div>
 </div>
 <div class="tabs" role="tablist">
 <button class="tab" id="t-ac" role="tab" aria-selected="false">Accounts <span class="badge" id="acnt">0</span></button>
@@ -259,12 +252,6 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <!-- STUDENT DATABASE -->
 <div id="s-reg" hidden>
 <div class="card">
-<h2>Student database</h2>
-<p class="lead">Students fill in their name, admission number, class and contact number on the student details link. Everything is kept here, sorted by class, so you can see the total number of students and download the full list.</p>
-<input id="gl" readonly onclick="this.select()">
-<div class="row"><button class="btn" id="gcp">Copy link</button><a class="btn sec" id="gwa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
-</div>
-<div class="card">
 <h2>Totals</h2>
 <p style="font-size:20px;margin:0 0 4px"><b id="gtot">0</b> students in <b id="gnc">0</b> classes</p>
 <div class="hint" id="gcv"></div>
@@ -285,14 +272,6 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <!-- PLACEMENTS -->
 <div id="s-mk" hidden><section class="panel" style="margin-top:14px"><h2>Marks</h2><p class="lead">See marks for every department. Download one class, a whole department, or everything.</p><div id="mkbox"></div></section></div>
 <div id="s-pm" hidden>
-<div class="card">
-<h2>Placement links</h2>
-<p class="lead">Students send where they were placed (organization, town, supervisor, phones). The ILO HOD / deputy HOD then assigns each student to a trainer. Students can see their trainer on the same page.</p>
-<label for="pml">Link for students</label>
-<input id="pml" readonly onclick="this.select()">
-<div class="row"><button class="btn" id="pmcp">Copy link</button><a class="btn sec" id="pmwa" target="_blank" rel="noopener">Share on WhatsApp</a></div>
-<div class="msg" id="pmm"></div>
-</div>
 <div class="card">
 <h2>Totals</h2>
 <p style="font-size:20px;margin:0 0 4px"><b id="pmt">0</b> students placed &middot; <b id="pma">0</b> assigned &middot; <b id="pmu">0</b> waiting for a trainer</p>
@@ -604,13 +583,13 @@ $("ilol").onclick=async function(e){var a=e.target.getAttribute("data-ia"),r=e.t
 
 $("irf").onclick=async function(){say("mil","");try{await reload();fillDepts();say("mil","ok","Updated.")}catch(e){say("mil","err",e.message)}};
 
-/* student database (collected through the student details link) */
+/* student database (registered through the portal registration page) */
 var REG=null,GCLASS="";
 async function loadReg(){say("gm","");try{var d=await call("GET","admin/register");REG=d.list;drawReg()}catch(e){say("gm","err",e.message)}}
 function drawReg(){if(!REG)return;var by={},cov={};REG.forEach(function(r){by[r.c]=(by[r.c]||0)+1;if(r.cover)cov[r.c]=(cov[r.c]||0)+1});
  var cl=Object.keys(by).sort(),n=REG.filter(function(r){return r.cover}).length;
  $("gtot").textContent=REG.length;$("gnc").textContent=cl.length;$("gcnt").textContent=REG.length;
- $("gcv").textContent=REG.length?n+" of them already have an insurance cover.":"No student has filled in their details yet. Share the link above.";
+ $("gcv").textContent=REG.length?n+" of them already have an insurance cover.":"No student has filled in their details yet.";
  $("gtb").innerHTML=cl.map(function(c){return '<tr data-gc="'+esc(c)+'" style="cursor:pointer"><td><b>'+esc(c)+'</b></td><td>'+by[c]+'</td><td>'+(cov[c]||0)+'</td></tr>'}).join("")||"<tr><td colspan=3>Nothing yet.</td></tr>";
  drawRegList()}
 function drawRegList(){if(!REG)return;var q=$("gq").value.trim().toUpperCase(),rows;
@@ -637,12 +616,6 @@ $("gxl").onclick=function(){if(!REG||!REG.length){say("gm","err","There is nothi
  var used={"Summary":1,"All students":1};
  cl.forEach(function(c){var nm=c.replace(/[\\\/\?\*\[\]:]/g,"-").slice(0,28)||"Class",k=nm,i=2;while(used[k])k=nm.slice(0,26)+"-"+i++;used[k]=1;add(k,[head.slice(1)].concat(by[c].map(function(r){return line(r).slice(1)})),[34,20,16,18])});
  XLSX.writeFile(wb,"RVNP_students_by_class.xlsx")};
-(function(){var u=location.origin+"/register.html";$("gl").value=u;
- $("gwa").href="https://wa.me/?text="+encodeURIComponent("Please fill in your student details here (name, admission number, class, contact number): "+u);
- $("gcp").onclick=function(){var ok=function(){say("gm","ok","Link copied.")};
-  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok,function(){$("gl").select();document.execCommand("copy");ok()});
-  else{$("gl").select();document.execCommand("copy");ok()}}})();
-
 /* placements (students' attachment places) and trainers */
 var PM=null,PDEPT="";
 async function loadPm(){say("pmm","");try{PM=await call("GET","hod/data");drawPm()}catch(e){say("pmm","err",e.message)}}
@@ -650,7 +623,7 @@ function trOf(id){return (PM.trainers||[]).find(function(t){return t.id===id})}
 function drawPm(){if(!PM)return;var P=PM.placements,as=P.filter(function(p){return p.tid}).length,by={},ba={};
  P.forEach(function(p){by[p.dept]=(by[p.dept]||0)+1;if(p.tid)ba[p.dept]=(ba[p.dept]||0)+1});
  $("pmt").textContent=P.length;$("pma").textContent=as;$("pmu").textContent=P.length-as;$("pmcnt").textContent=P.length;
- $("pmd").innerHTML=Object.keys(by).sort().map(function(d){return '<tr data-pd="'+esc(d)+'" style="cursor:pointer"><td><b>'+esc(d)+'</b></td><td>'+by[d]+'</td><td>'+(ba[d]||0)+'</td></tr>'}).join("")||"<tr><td colspan=3>No placements yet. Share the student link above.</td></tr>";
+ $("pmd").innerHTML=Object.keys(by).sort().map(function(d){return '<tr data-pd="'+esc(d)+'" style="cursor:pointer"><td><b>'+esc(d)+'</b></td><td>'+by[d]+'</td><td>'+(ba[d]||0)+'</td></tr>'}).join("")||"<tr><td colspan=3>No placements have been submitted yet.</td></tr>";
  $("pmtr").innerHTML=PM.trainers.map(function(t){return "<tr><td>"+esc(t.name)+"</td><td>"+esc(t.tel)+"</td><td><b>"+t.count+"</b></td></tr>"}).join("")||"<tr><td colspan=3>No trainers yet. The HOD adds them on the HOD link.</td></tr>";
  
  drawPmList()}
@@ -675,19 +648,6 @@ $("pmxl").onclick=function(){if(!PM||!PM.placements.length){say("pmm","err","Not
  add("Summary",sum);add("All placements",[pmHead()].concat(P.map(pmRow)));
  Object.keys(by).sort().forEach(function(d){add(d,[pmHead()].concat(by[d].map(pmRow)))});
  XLSX.writeFile(wb,"RVNP_placements.xlsx")};
-(function(){var o=location.origin,u1=o+"/placement.html",u2=o+"/hod.html";$("pml").value=u1;
- $("pmwa").href="https://wa.me/?text="+encodeURIComponent("Secured an attachment place? Tell us where you are, and see your trainer, here: "+u1);
- 
- var cp=function(id,u,m){$(id).onclick=function(){var ok=function(){say("pmm","ok",m)};
-  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(ok,ok);else ok()}};
- cp("pmcp",u1,"Student link copied.")})();
-
-/* share link */
-(function(){var u=location.origin+"/";$("sl").value=u;
- $("wa").href="https://wa.me/?text="+encodeURIComponent("Download your industrial attachment letter and insurance cover here: "+u);
- $("cp").onclick=function(){var done=function(){say("ml","ok","Link copied.")};
-  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done,function(){$("sl").select();document.execCommand("copy");done()});
-  else{$("sl").select();document.execCommand("copy");done()}}})();
 </script>
 <script src="/marks.js"></script><script src="/portal-v2.js"></script><script src="/pwa.js" defer></script>
 <script src="/shell.js"></script><script>
@@ -695,7 +655,7 @@ $("pmxl").onclick=function(){if(!PM||!PM.placements.length){say("pmm","err","Not
 RVShell.mount({root:document.querySelector(".wrap"),brand:{letter:"A",name:"Portal Admin",sub:"Industrial Liaison Office"},title:"Portal admin",
  hide:[".top",".tabs"],unlockedWhen:"#app",
  userLine:"<b>Administrator</b>Full access",
- top:[{panel:$("sl").closest(".card"),icon:"link",label:"Share student link"},{href:"/student.html",icon:"eye",label:"Open student page",newtab:true}],
+ top:[{href:"/feedback.html",icon:"inbox",label:"Student feedback"},{href:"/student.html",icon:"eye",label:"Open student page",newtab:true}],
  signOut:function(){$("out").click()},
  groups:[
   {label:"People",items:[{tab:$("t-ac"),icon:"users",label:"Accounts"},{tab:$("t-ilo"),icon:"wrench",label:"ILO units"}]},

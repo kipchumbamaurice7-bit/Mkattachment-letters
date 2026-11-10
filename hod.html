@@ -262,6 +262,7 @@ $("rx").onclick=function(){if(!D.placements.length){say("rm","err","Nothing to d
 RVShell.mount({root:document.querySelector(".wrap"),brand:{letter:"H",name:"HOD / Deputy HOD",sub:"Industrial Liaison Office"},title:"Overview",
  hide:["header",".rolebar",".dashboard-subtitle","#app > .actions"],unlockedWhen:"#app",
  userLine:"<b>"+(t.role==="deputy"?"Deputy HOD":"Head of Department")+"</b>"+(t.dept||"Placements and marks"),
+ top:[{href:"/feedback.html",icon:"inbox",label:"Student feedback"}],
  signOut:function(){document.getElementById("signout").click()},
  groups:[
   {label:"Dashboard",items:[{view:secs[0],key:"overview",icon:"home",label:"Overview"}]},

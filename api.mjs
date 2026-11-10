@@ -418,6 +418,16 @@ export default async (req) => {
     /* a signed-in student completes or corrects the saved profile (older accounts have no course, gender or ID number) */
     if (method === "POST" && path === "profile/complete") {
       const acct = await currentAccount(req,s); if(!acct || acct.role!=="student") return fail("Please sign in again.",401);
+      const name=clean(body.name,120).toUpperCase(), adm=clean(body.adm,60).toUpperCase().replace(/\s+/g,""), email=clean(body.email,200).toLowerCase(), phone=digits(body.phone), altPhone=digits(body.altPhone);
+      if(name.length<3) throw new Bad("Enter your full name.");
+      if(!parseAdm(adm)) throw new Bad("Enter a valid admission number as printed on your student ID.");
+      if(!EMAIL_RE.test(email)) throw new Bad("Enter a valid email address.");
+      if(phone.replace(/\D/g,"").length<9) throw new Bad("Enter a valid primary phone number.");
+      if(altPhone && altPhone.replace(/\D/g,"").length<9) throw new Bad("Enter a valid alternative phone number, or leave it empty.");
+      const all=await getJSON(s,"accounts",{}), a=all[acct.id];
+      if(Object.values(all).some(x=>x.id!==a.id && x.role==="student" && x.adm===adm)) throw new Bad("That admission number is already registered to another student.");
+      if(Object.values(all).some(x=>x.id!==a.id && x.email===email)) throw new Bad("That email address is already used by another account.");
+      const oldAdm=a.adm, oldName=a.name;
       const dept=clean(body.dept,80), course=clean(body.course,120).toUpperCase(), intake=clean(body.intake,20), gender=clean(body.gender,10), idno=clean(body.idno,20).toUpperCase().replace(/[\s-]/g,"");
       if(!DEPTS.includes(dept) && dept !== OTHER) throw new Bad("Choose your department.");
       const courses=await loadCourses(s);
@@ -425,15 +435,19 @@ export default async (req) => {
       if(!intakeNames().includes(intake)) throw new Bad("Choose your intake month.");
       if(!["Male","Female"].includes(gender)) throw new Bad("Choose your gender.");
       if(!/^[A-Z0-9]{6,12}$/.test(idno)) throw new Bad("Enter your ID number (6 to 12 letters or digits).");
-      const info=parseAdm(acct.adm);
+      const info=parseAdm(adm);
       if(info && info.letter && intakeLetter(intake) && info.letter!==intakeLetter(intake)) throw new Bad("Your admission number has the letter "+info.letter+" but you chose "+intake+".");
-      const rc=resolveClass(await loadClassCodes(s),course,intake,acct.adm,body.cls);
-      const all=await getJSON(s,"accounts",{}), a=all[acct.id];
-      Object.assign(a,{dept,course,intake,gender,idno,cls:rc.cls,clsPending:rc.pending,updatedAt:Date.now()});
+      const rc=resolveClass(await loadClassCodes(s),course,intake,adm,body.cls);
+      Object.assign(a,{name,adm,email,phone,altPhone,dept,course,intake,gender,idno,cls:rc.cls,clsPending:rc.pending,updatedAt:Date.now()});
       await s.setJSON("accounts",all);
       const reg=await getJSON(s,"register",{});
-      for(const r of Object.values(reg)) if(r.accountId===a.id) r.c=a.cls;
+      for(const [k,r] of Object.entries(reg)) if(r.accountId===a.id){r.n=name;r.a=adm;r.tel=phone;r.c=a.cls;if(k!==sid(name,adm)){delete reg[k];reg[sid(name,adm)]=r;}}
       await s.setJSON("register",reg);
+      if(oldAdm!==adm || oldName!==name){
+        const pls=await getJSON(s,"placements",{}), oldKey=sid(oldName,oldAdm), newKey=sid(name,adm);
+        if(pls[oldKey]){const record=pls[oldKey];delete pls[oldKey];record.n=name;record.a=adm;record.cls=a.cls;record.dept=dept;record.course=course;record.tel1=phone;record.tel2=altPhone;pls[newKey]=record;await s.setJSON("placements",pls);}
+      }
+      await audit(s,{type:"student-profile-updated",studentId:a.id,oldAdm,newAdm:adm,oldName,newName:name,by:"student",role:"student"});
       return json({ok:true,cls:a.cls});
     }
     if (method === "POST" && path === "auth/forgot") {
@@ -488,7 +502,7 @@ export default async (req) => {
     /* ----- public ----- */
     if (method === "GET" && path === "me") {
       const acct = await currentAccount(req,s); if(!acct) return fail("Please sign in again.",401);
-      return json({ id:acct.id, role:acct.role, name:acct.name, adm:acct.adm||"", cls:acct.cls||"", clsPending:!!acct.clsPending, dept:acct.dept||"", course:acct.course||"", intake:acct.intake||"", gender:acct.gender||"", idno:acct.idno||"", phone:acct.phone||"", email:acct.email||"" });
+      return json({ id:acct.id, role:acct.role, name:acct.name, adm:acct.adm||"", cls:acct.cls||"", clsPending:!!acct.clsPending, dept:acct.dept||"", course:acct.course||"", intake:acct.intake||"", gender:acct.gender||"", idno:acct.idno||"", phone:acct.phone||"", altPhone:acct.altPhone||"", email:acct.email||"" });
     }
     if (method === "GET" && path === "courses") {
       const courses = await loadCourses(s);
@@ -511,8 +525,8 @@ export default async (req) => {
       const acct = await currentAccount(req,s); if(!requireRole(acct,["student"])) return fail("Please sign in as a student.",401);
       const n = acct.name, a = acct.adm, cls = acct.cls, dept = acct.dept, tel1 = acct.phone,
         course = clean(body.course, 120).toUpperCase(), org = clean(body.org, 120),
-        loc = clean(body.loc, 200), sup = clean(body.sup, 100), town = clean(body.town, 60),
-        tel2 = digits(body.tel2);
+        loc = clean(body.loc, 200), sup = clean(body.sup, 100), supTel = digits(body.supTel), town = clean(body.town, 60), county = clean(body.county, 50),
+        tel2 = digits(body.tel2 || acct.altPhone);
       if (n.length < 3) throw new Bad("Enter your full name.");
       if (a.length < 6) throw new Bad("Your account is missing a valid admission number.");
       if (cls.length < 2) throw new Bad("Your account is missing a class. Please update your student account.");
@@ -521,12 +535,14 @@ export default async (req) => {
       if (org.length < 2) throw new Bad("Enter the name of the organization.");
       if (loc.length < 5) throw new Bad("Describe where the organization is, e.g. \"near Naivas, Njoro Road\".");
       if (sup.length < 3) throw new Bad("Enter your supervisor's name.");
+      if (supTel.replace(/\D/g, "").length < 9) throw new Bad("Enter a valid supervisor contact number.");
       if (town.length < 2) throw new Bad("Enter the town.");
+      if (county.length < 2) throw new Bad("Select the county.");
       if (tel1.replace(/\D/g, "").length < 9) throw new Bad("Enter phone number 1 (at least 9 digits).");
       if (tel2 && tel2.replace(/\D/g, "").length < 9) throw new Bad("Phone number 2 must have at least 9 digits, or leave it empty.");
       const all = await getJSON(s, "placements", {}), id = sid(n, a), old = all[id];
       if (!old && Object.keys(all).length >= 20000) throw new Bad("The list is full. Please contact the Industrial Liaison Office.");
-      all[id] = { n, a, cls, dept, course, org, loc, sup, town: town.toUpperCase(), tel1, tel2, t: old ? old.t : Date.now(), u: Date.now(), ...(old && old.tid && { tid: old.tid }), ...(old && old.sd && { sd: old.sd }), ...(old && old.ed && { ed: old.ed }) };
+      all[id] = { n, a, cls, dept, course, org, loc, sup, supTel, town: town.toUpperCase(), county, tel1, tel2, t: old ? old.t : Date.now(), u: Date.now(), ...(old && old.tid && { tid: old.tid }), ...(old && old.sd && { sd: old.sd }), ...(old && old.ed && { ed: old.ed }) };
       await s.setJSON("placements", all);
       return json({ ok: true, updated: !!old });
     }
@@ -534,7 +550,7 @@ export default async (req) => {
       const acct = await currentAccount(req,s); if(!requireRole(acct,["student"])) return fail("Please sign in as a student.",401);
       const all = await getJSON(s,"placements",{}), trainers = await getJSON(s,"trainers",{}), r = all[sid(acct.name,acct.adm)];
       const t = r && r.tid ? trainers[r.tid] : null;
-      return json({ hasPlacement:!!r, placement:r?{org:r.org,town:r.town,loc:r.loc,sup:r.sup,course:r.course}:null, trainer:t?{name:t.name,tel:t.tel}:null });
+      return json({ hasPlacement:!!r, placement:r?{org:r.org,town:r.town,county:r.county,loc:r.loc,sup:r.sup,supTel:r.supTel,course:r.course}:null, trainer:t?{name:t.name,tel:t.tel}:null });
     }
     if (method === "POST" && path === "placement-search") {
       const q = clean(body.q, 60).toUpperCase(), compact = q.replace(/[^A-Z0-9]/g, "");
@@ -1057,6 +1073,49 @@ export default async (req) => {
     }
 
     /* ----- memos: HOD / Deputy / Admin send; ILO Reps reply; replies are read-only once sent ----- */
+    /* ----- student attachment feedback and ILO intervention tracking ----- */
+    if (path === "feedback" || path.startsWith("feedback/")) {
+      const acct = await currentAccount(req, s);
+      const staffCtx = acct ? null : await staff(req, s);
+      const role = acct ? acct.role : staffCtx.role;
+      if (!role) return fail("Please sign in with an approved portal account.", 401);
+      const all = await getJSON(s, "feedback", []);
+      if (method === "POST" && path === "feedback") {
+        if (role !== "student") return fail("Only students can submit attachment feedback.", 403);
+        const rating = Number(body.rating), relevance = clean(body.relevance, 30), supervision = clean(body.supervision, 30), safety = clean(body.safety, 30);
+        const challenge = clean(body.challenge, 1200), comment = clean(body.comment, 2000), urgent = body.urgent === true;
+        if (![1,2,3,4,5].includes(rating)) throw new Bad("Choose an overall rating from 1 to 5.");
+        if (!relevance || !supervision || !safety) throw new Bad("Complete the training, supervision and safety questions.");
+        if (challenge.length > 1200 || comment.length > 2000) throw new Bad("Your feedback is too long.");
+        const placement = (await getJSON(s, "placements", {}))[sid(acct.name, acct.adm)];
+        const entry = { id:"F" + Date.now().toString(36) + randomBytes(3).toString("hex"), studentId:acct.id, name:acct.name, adm:acct.adm, dept:acct.dept || "", course:acct.course || "", cls:acct.cls || "", org:placement?.org || "", rating, relevance, supervision, safety, challenge, comment, urgent, status:"new", submittedAt:Date.now(), history:[] };
+        all.push(entry); await s.setJSON("feedback", all.slice(-20000));
+        await audit(s, { type:"student attachment feedback submitted", adm:acct.adm, by:acct.name, role:"student", urgent });
+        return json({ ok:true, id:entry.id });
+      }
+      if (method === "GET" && path === "feedback") {
+        if (role === "student") return json({ list:all.filter(x => x.studentId === acct.id).slice(-100).reverse() });
+        const isAdmin = !!(staffCtx && staffCtx.isAdmin), isLeader = isAdmin || ["hod","deputy"].includes(role), dept = isLeader ? "" : (acct.dept || "");
+        const list = all.filter(x => !dept || x.dept === dept).slice(-1000).reverse();
+        return json({ list, canTriage:true, scope:dept || "All departments" });
+      }
+      if (method === "POST" && path === "feedback/triage") {
+        if (role === "student") return fail("Students cannot change feedback handling status.", 403);
+        const isAdmin = !!(staffCtx && staffCtx.isAdmin), isLeader = isAdmin || ["hod","deputy"].includes(role);
+        const id = clean(body.id, 60), item = all.find(x => x.id === id);
+        if (!item) throw new Bad("Feedback record not found.");
+        if (!isLeader && item.dept !== acct.dept) return fail("You can only manage feedback from your department.", 403);
+        const status = clean(body.status, 20);
+        if (!["new","in_progress","resolved","referred"].includes(status)) throw new Bad("Choose a valid feedback status.");
+        const note = clean(body.note, 1000);
+        item.status = status; item.history = Array.isArray(item.history) ? item.history : [];
+        item.history.push({ status, note, by:staffCtx ? staffCtx.who : acct.name, at:Date.now() });
+        await s.setJSON("feedback", all); await audit(s, { type:"feedback status updated", by:staffCtx ? staffCtx.who : acct.name, role, adm:item.adm, status });
+        return json({ ok:true });
+      }
+      return fail("Not found", 404);
+    }
+
     if (path.startsWith("memo")) {
       const c = await staff(req, s); if (!c.role) return fail("Please sign in with an approved portal account.", 401);
       const memos = await getJSON(s, "memos", []), replies = await getJSON(s, "memoreplies", {});

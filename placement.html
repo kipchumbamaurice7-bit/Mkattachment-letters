@@ -114,14 +114,16 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div class="full"><label>Full name</label><input id="n" readonly></div>
 <div><label>Admission number</label><input id="a" readonly></div><div><label>Class</label><input id="cl" readonly></div>
 <div class="full"><label>Department</label><input id="dp" readonly></div>
-<div><label>Phone number</label><input id="t1" type="tel" readonly></div>
+<div><label>Primary phone number</label><input id="t1" type="tel" readonly></div>
+<div><label for="t2">Alternative phone number</label><input id="t2" type="tel" inputmode="tel" readonly></div>
 <div class="full"><label for="co">Course</label><select id="co"><option value="">Select your course</option></select></div>
 <div class="full" id="cw" hidden><label for="ct">Your course (with its level)</label><input id="ct" placeholder="e.g. ELECTRICAL ENGINEERING TECHNOLOGY LEVEL 6"></div>
-<div><label for="t2">Phone number 2 (optional)</label><input id="t2" type="tel" inputmode="tel" placeholder="07XX XXX XXX"></div>
 <div class="full"><label for="og">Organization</label><input id="og" placeholder="Name of the company or institution"></div>
 <div class="full"><label for="lc">Where exactly is it?</label><input id="lc" placeholder="e.g. Njoro Road, near Naivas supermarket"><div class="hint">Give a clear description so a trainer can find it: the road or area and a landmark (near ...).</div></div>
-<div class="full"><label for="sp">Your supervisor at the organization</label><input id="sp" placeholder="Name of your supervisor"></div>
-<div class="full"><label for="tw">Town</label><input id="tw" placeholder="e.g. Nakuru"></div>
+<div><label for="sp">Supervisor full name</label><input id="sp" placeholder="Name of your supervisor"></div>
+<div><label for="spt">Supervisor contact</label><input id="spt" type="tel" inputmode="tel" placeholder="07XX XXX XXX"></div>
+<div><label for="tw">Town</label><input id="tw" placeholder="e.g. Nakuru"></div>
+<div><label for="county">County</label><select id="county"><option value="">Select county</option><option>Baringo</option><option>Bomet</option><option>Bungoma</option><option>Busia</option><option>Elgeyo-Marakwet</option><option>Embu</option><option>Garissa</option><option>Homa Bay</option><option>Isiolo</option><option>Kajiado</option><option>Kakamega</option><option>Kericho</option><option>Kiambu</option><option>Kilifi</option><option>Kirinyaga</option><option>Kisii</option><option>Kisumu</option><option>Kitui</option><option>Kwale</option><option>Laikipia</option><option>Lamu</option><option>Machakos</option><option>Makueni</option><option>Mandera</option><option>Marsabit</option><option>Meru</option><option>Migori</option><option>Mombasa</option><option>Murang’a</option><option>Nairobi</option><option>Nakuru</option><option>Nandi</option><option>Narok</option><option>Nyamira</option><option>Nyandarua</option><option>Nyeri</option><option>Samburu</option><option>Siaya</option><option>Taita-Taveta</option><option>Tana River</option><option>Tharaka-Nithi</option><option>Trans Nzoia</option><option>Turkana</option><option>Uasin Gishu</option><option>Vihiga</option><option>Wajir</option><option>West Pokot</option></select></div>
 </div>
 <div class="msg" id="m" role="status"></div>
 <div class="actions"><button class="btn" id="go" type="button">Submit my placement</button></div>
@@ -141,21 +143,23 @@ function say(c,t){var m=$("m");m.className="msg"+(c?" "+c:"");m.textContent=t||"
 function api(path,opt){opt=opt||{};opt.headers=Object.assign({"Authorization":"Bearer "+USER_TOKEN},opt.headers||{});return fetch("/api/"+path,opt).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||"Request failed");return d})})}
 if(!USER_TOKEN){location.replace("/auth.html?role=student")}
 Promise.all([api("me"),fetch("/api/courses").then(function(r){return r.json()})]).then(function(x){var u=x[0],d=x[1];
- $("n").value=u.name;$("a").value=u.adm;$("cl").value=u.cls;$("dp").value=u.dept;$("t1").value=u.phone;ALL=d.courses||[];
+ $("n").value=u.name;$("a").value=u.adm;$("cl").value=u.cls;$("dp").value=u.dept;$("t1").value=u.phone;$("t2").value=u.altPhone||"";ALL=d.courses||[];
  ALL.filter(function(c){return c.dept===u.dept}).forEach(function(c){var o=document.createElement("option");o.value=c.title;o.textContent=c.title;$("co").appendChild(o)});
  if(!ALL.some(function(c){return c.dept===u.dept})){say("err","No courses are configured for your department yet.")}
  loadTrainer();
 }).catch(function(e){say("err",e.message||"Could not load your student account.")});
-$("go").addEventListener("click",async function(){say("");var b=this,course=$("co").value;var f={course:course,org:$("og").value,loc:$("lc").value,sup:$("sp").value,town:$("tw").value,tel2:$("t2").value};
+$("go").addEventListener("click",async function(){say("");var b=this,course=$("co").value;var f={course:course,org:$("og").value,loc:$("lc").value,sup:$("sp").value,supTel:$("spt").value,town:$("tw").value,county:$("county").value,tel2:$("t2").value};
  if(course.length<3){say("err","Select your course.");return}
  if(f.tel2.trim()&&f.tel2.replace(/\D/g,"").length<9){say("err","Phone number 2 must have at least 9 digits, or leave it empty.");return}
  if(f.org.trim().length<2){say("err","Enter the name of the organization.");return}
  if(f.loc.trim().length<5){say("err","Describe where the organization is, e.g. near Naivas, Njoro Road.");return}
  if(f.sup.trim().length<3){say("err","Enter your supervisor's name.");return}
+ if(f.supTel.replace(/\D/g,"").length<9){say("err","Enter a valid supervisor contact number.");return}
  if(f.town.trim().length<2){say("err","Enter the town.");return}
+ if(!f.county){say("err","Select the county.");return}
  b.disabled=true;try{var d=await api("placement",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(f)});say("ok",d.updated?"Your placement details were updated. Thank you.":"Thank you. Your placement was saved.");loadTrainer()}catch(e){say("err",e.message)}b.disabled=false});
-async function loadTrainer(){var box=$("fr");try{var d=await api("placement-me");box.textContent="";var c=document.createElement("div");c.className="card2";if(d.trainer){c.innerHTML="<b>"+esc(d.trainer.name)+"</b><div class=mut>College trainer</div>";var a=document.createElement("a");a.className="tel";a.href="tel:"+d.trainer.tel;a.textContent=d.trainer.tel;c.appendChild(a)}else{c.textContent=d.hasPlacement?"No trainer has been assigned yet. Please check again later.":"Submit your placement above first."}box.appendChild(c)}catch(e){box.textContent="Could not load trainer details."}}
+async function loadTrainer(){var box=$("fr");try{var d=await api("placement-me");if(d.placement){var p=d.placement;$("og").value=$("og").value||p.org||"";$("lc").value=$("lc").value||p.loc||"";$("sp").value=$("sp").value||p.sup||"";$("spt").value=$("spt").value||p.supTel||"";$("tw").value=$("tw").value||p.town||"";$("county").value=$("county").value||p.county||"";if(p.course)$("co").value=p.course;}box.textContent="";var c=document.createElement("div");c.className="card2";if(d.trainer){c.innerHTML="<b>"+esc(d.trainer.name)+"</b><div class=mut>College trainer</div>";var a=document.createElement("a");a.className="tel";a.href="tel:"+d.trainer.tel;a.textContent=d.trainer.tel;c.appendChild(a)}else{c.textContent=d.hasPlacement?"No trainer has been assigned yet. Please check again later.":"Submit your placement above first."}box.appendChild(c)}catch(e){box.textContent="Could not load trainer details."}}
 function esc(s){return String(s??"").replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
-</script><script src="/pwa.js" defer>setInterval(function(){if(typeof loadTrainer==="function"&&!document.hidden)loadTrainer()},45000);document.addEventListener("visibilitychange",function(){if(!document.hidden&&typeof loadTrainer==="function")loadTrainer()});
-</script>
+setInterval(function(){if(typeof loadTrainer==="function"&&!document.hidden)loadTrainer()},45000);document.addEventListener("visibilitychange",function(){if(!document.hidden&&typeof loadTrainer==="function")loadTrainer()});
+</script><script src="/pwa.js" defer></script>
 </body></html>
