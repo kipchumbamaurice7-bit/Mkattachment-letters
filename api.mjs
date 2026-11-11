@@ -1395,6 +1395,34 @@ export default async (req) => {
         a.status="rejected"; a.rejectedAt=Date.now(); await s.setJSON("accounts",all);
         return json({ok:true});
       }
+      if (method === "POST" && path === "admin/accounts/delete") {
+        const all=await getJSON(s,"accounts",{}), id=clean(body.id,100), a=all[id];
+        if(!a) throw new Bad("Account not found.");
+        if(a.role==="student") throw new Bad("Student accounts are managed in the Student database tab, not here.");
+        delete all[id]; await s.setJSON("accounts",all);
+        return json({ok:true});
+      }
+      if (method === "GET" && path === "admin/overview") {
+        const accs = Object.values(await getJSON(s, "accounts", {})), reg = await getJSON(s, "register", {}), stu = await getJSON(s, "students", {});
+        const pls = await getJSON(s, "placements", {}), mk = await getJSON(s, "marks", {}), trs = await getJSON(s, "trainers", {});
+        const sts = accs.filter((x) => x.role === "student"), ilo = accs.filter((x) => x.role !== "student");
+        const by = {}; let responded = 0, marks = 0;
+        for (const a of sts) {
+          const id = sid(a.name, a.adm), d = (a.dept || "Not set"), r = (by[d] = by[d] || { d, students: 0, placed: 0, marked: 0 });
+          r.students++; if (pls[id]) { r.placed++; responded++; } if (mk[id]) { r.marked++; marks++; }
+        }
+        const people = new Set([...Object.keys(reg), ...Object.keys(stu)]);
+        const label = (e) => String(e.type || "activity").replace(/-/g, " ") + (e.adm ? " - " + e.adm : "");
+        return json({
+          registered: sts.length, database: people.size, responded, awaiting: Math.max(0, sts.length - responded), marks,
+          ilo: { approved: ilo.filter((x) => x.status === "approved").length, pending: ilo.filter((x) => x.status === "pending").length,
+            hod: ilo.filter((x) => x.role === "hod").length, deputy: ilo.filter((x) => x.role === "deputy").length, rep: ilo.filter((x) => x.role === "rep").length },
+          covers: Object.keys(stu).length, requests: Object.keys(await getJSON(s, "requests", {})).length,
+          trainers: Object.keys(trs).length, unassigned: Object.values(pls).filter((p) => !p.tid).length,
+          depts: Object.values(by).sort((x, y) => y.students - x.students),
+          recent: (await getJSON(s, "audit", [])).slice(-10).reverse().map((e) => ({ t: e.t, by: e.by || "", text: label(e) })),
+        });
+      }
       if (method === "GET" && path === "admin/data") {
         const students = await getJSON(s, "students", {});
         return json({

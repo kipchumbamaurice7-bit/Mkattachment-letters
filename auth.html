@@ -44,8 +44,8 @@ a{color:#17803f;font-weight:600}
 <h2 id="regTitle">Create account</h2><p class="hint" id="regHint"></p>
 <div id="staffForm">
 <div class="grid">
-<div class="full"><label>Account type</label><select id="role"><option value="rep">ILO Representative</option><option value="hod">ILO HOD</option><option value="deputy">Deputy HOD</option></select></div>
-<div class="full" id="deptWrap"><label>Department</label><select id="dept"><option value="">Select department</option></select></div>
+<div class="full"><label>Your role in ILO</label><select id="role"><option value="">Select your role</option><option value="hod">HOD</option><option value="deputy">Deputy HOD</option><option value="rep">ILO Representative</option></select></div>
+<div class="full" id="deptWrap" hidden><label>Department you represent</label><select id="dept"><option value="">Select department</option></select><div class="hint">ILO Representatives must choose their department.</div></div>
 <div class="full"><label>Full name</label><input id="name"></div>
 <div><label>ID number</label><input id="idno"></div><div><label>PF number</label><input id="pf"></div>
 <div class="full"><label>Phone number</label><input id="phone" type="tel"></div>
@@ -87,14 +87,14 @@ function fillDepartmentSelect(sel,names){if(!sel)return;sel.innerHTML="<option v
 function loadDepartments(){return fetch("/api/auth-info",{headers:{Accept:"application/json"}}).then(r=>{if(!r.ok)throw new Error("department load failed");return r.json()}).then(d=>{INFO={courses:d.courses||[],intakes:d.intakes||[],classcodes:d.classcodes||[]};fillIntakes();const names=(d.departments||[]).filter(Boolean);if(!names.length)throw new Error("no departments");fillDepartmentSelect($("sdept"),names);if($("dept"))fillDepartmentSelect($("dept"),names);return names}).catch(()=>{fillDepartmentSelect($("sdept"),DEFAULT_DEPARTMENTS);if($("dept"))fillDepartmentSelect($("dept"),DEFAULT_DEPARTMENTS);return DEFAULT_DEPARTMENTS;});}
 loadDepartments();
 let depts=[],INFO={courses:[],intakes:[],classcodes:[]};
-$("title").textContent=mode==="staff"?"Staff portal access":"Student portal access";
-$("sub").textContent=mode==="staff"?"HOD, Deputy HOD and ILO representatives must register and wait for administrator approval.":"Register once, then use your admission number and PIN whenever you return.";
-$("loginTitle").textContent=mode==="staff"?"Staff sign in":"Student sign in";
+$("title").textContent=mode==="staff"?"ILO portal access":"Student portal access";
+$("sub").textContent=mode==="staff"?"ILO members (HOD, Deputy HOD and ILO Representatives) register once and wait for administrator approval.":"Register once, then use your admission number and PIN whenever you return.";
+$("loginTitle").textContent=mode==="staff"?"ILO sign in":"Student sign in";
 $("loginHint").textContent=mode==="staff"?"Use your ID number or PF number and PIN.":"Use your admission number and PIN.";
 $("idLabel").textContent=mode==="staff"?"ID number or PF number":"Admission number";$("idFormatHint").hidden=mode!=="student";if(mode==="student")$("identifier").placeholder="EETL6/24S/2456677";
 $("staffForm").hidden=mode!=="staff";$("studentForm").hidden=mode==="staff";
-$("regTitle").textContent=mode==="staff"?"Staff registration":"Student registration";
-$("regHint").textContent=mode==="staff"?"Your account stays pending until the administrator approves it.":"Your details and PIN are stored securely in the portal database.";
+$("regTitle").textContent=mode==="staff"?"ILO registration":"Student registration";
+$("regHint").textContent=mode==="staff"?"Pick your role first. Your account stays pending until the administrator approves it.":"Your details and PIN are stored securely in the portal database.";
 if(mode==="staff"){loadDepartments().then(d=>{depts=d;});}
 if(mode==="staff"&&DOOR){$("title").textContent=DOOR_NAME[DOOR]+" access";$("sub").textContent="Only "+DOOR_NAME[DOOR]+" accounts sign in here. Register once and wait for administrator approval.";$("loginTitle").textContent=DOOR_NAME[DOOR]+" sign in";$("role").value=DOOR;$("deptWrap").hidden=DOOR!=="rep";$("role").parentElement.hidden=true;}
 
@@ -123,7 +123,7 @@ $("role").onchange=()=>{$("deptWrap").hidden=$("role").value!=="rep"};
 async function send(path,body){let r=await fetch("/api/"+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),d=await r.json().catch(()=>({error:"The server is not answering (code "+r.status+"). Please tell the ILO office."}));if(!r.ok)throw Error(d.error||"Something went wrong.");return d}
 $("loginBtn").onclick=async()=>{let b=$("loginBtn");$("msg").className="msg";$("msg").textContent="";b.disabled=true;try{let d=await send("auth/login",{role:mode==="staff"?"staff":"student",as:DOOR,identifier:$("identifier").value,pin:$("pin").value});sessionStorage.setItem("rvnp_user",d.token);if(d.role==="student")localStorage.setItem("rvnp_student",d.token);sessionStorage.setItem("rvnp_user_role",d.role);location.href=d.role==="student"?"/student.html":d.role==="rep"?"/ilo.html":d.role==="deputy"?"/deputy.html":"/hod.html"}catch(e){$("msg").className="msg err";$("msg").textContent=e.message}b.disabled=false};
 $("regBtn").onclick=async()=>{let b=$("regBtn");$("regMsg").className="msg";$("regMsg").textContent="";b.disabled=true;try{
- if(mode==="staff"){let d=await send("auth/register-staff",{role:$("role").value,dept:$("dept").value,name:$("name").value,idno:$("idno").value,pf:$("pf").value,phone:$("phone").value,email:$("semail").value,pin:$("regPin").value});$("regMsg").className="msg ok";$("regMsg").textContent=d.message;show("login")}
+ if(mode==="staff"){if(!$("role").value)throw Error("Select your role: HOD, Deputy HOD or ILO Representative.");if($("role").value==="rep"&&!$("dept").value)throw Error("ILO Representatives must select their department.");let d=await send("auth/register-staff",{role:$("role").value,dept:$("role").value==="rep"?$("dept").value:"",name:$("name").value,idno:$("idno").value,pf:$("pf").value,phone:$("phone").value,email:$("semail").value,pin:$("regPin").value});$("regMsg").className="msg ok";$("regMsg").textContent=d.message;show("login")}
  else {let d=await send("auth/register-student",{name:$("sn").value,adm:$("sa").value,dept:$("sdept").value,course:$("sco").value,intake:$("sin").value,cls:$("scs").hidden?"":$("scs").value,gender:$("sg").value,idno:$("sid").value,phone:$("st").value,email:$("stemail").value,pin:$("sp").value,nokName:$("nokn").value,nokRel:$("nokr").value,nokTel:$("nokt").value,emName:$("emn").value,emTel:$("emt").value,consent:$("consent").checked});$("regMsg").className="msg ok";$("regMsg").textContent=(d.updated?"Your account was updated. ":"Registration complete. ")+(d.classPending?"Your class code will be added once the administrator assigns it. ":"Your class is "+d.cls+". ")+"You can now sign in. Your details are saved, so you will not need to type them again.";show("login")}
 }catch(e){$("regMsg").className="msg err";$("regMsg").textContent=e.message}b.disabled=false};
 

@@ -8,7 +8,7 @@
   U.key = function (v) { return String(v == null ? "" : v).toUpperCase().replace(/[^A-Z0-9]/g, ""); };
   U.digits = function (v) { return String(v || "").replace(/\D/g, ""); };
   U.plural = function (n, one, many) { return n + " " + (n === 1 ? one : (many || one + "s")); };
-  U.tel = function (v) { return v ? '<a class="tel" href="tel:' + U.esc(v) + '">' + U.esc(v) + "</a>" : ""; };
+  U.tel = function (v) { if (!v) return ""; var h = String(v).replace(/[^\d+]/g, ""); if (h.charAt(0) !== "+") h = h.indexOf("254") === 0 ? "+" + h : h.charAt(0) === "0" ? "+254" + h.slice(1) : "+254" + h; return '<a class="tel" href="tel:' + U.esc(h) + '" style="text-decoration:underline">' + U.esc(v) + "</a>"; };
   U.debounce = function (fn, ms) { var t; return function () { var a = arguments, c = this; clearTimeout(t); t = setTimeout(function () { fn.apply(c, a); }, ms || 160); }; };
 
   /* API caller: api(method, path, body) */

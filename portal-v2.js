@@ -28,6 +28,10 @@
       sec("pr", "Reset a student's PIN", '<div class="hint">Use this when a student forgets their PIN. Give the new PIN to the student in person.</div><div class="grid"><div><label>Admission number</label><input data-ra autocomplete="off"></div><div><label>New PIN (6-12 digits)</label><input data-rp inputmode="numeric" autocomplete="off"></div></div><div class="actions"><button class="btn" data-rgo>Reset PIN</button></div>') +
       (isHod ? sec("au", "Unlock a mark and audit log", (role !== "admin" ? '<div class="hint">Unlock one student\'s mark so the ILO Rep can correct it. The old value and your reason are kept in the audit log.</div><div class="grid"><div><label>Admission number</label><input data-ua autocomplete="off"></div><div class="full"><label>Reason for the correction</label><input data-ur autocomplete="off"></div></div><div class="actions"><button class="btn" data-ugo>Unlock mark</button></div><div class="grid" style="margin-top:12px"><div><label>Or unlock a whole class</label><input data-uc placeholder="Class, e.g. EPL6" autocomplete="off"></div><div><label>Reason</label><input data-ucr autocomplete="off"></div></div><div class="actions"><button class="btn" data-ucgo>Unlock class</button></div>' : '<div class="hint">Only the HOD or Deputy HOD can unlock a mark. You can read the audit log.</div>') + '<div class="actions"><button class="btn sec" data-ald>Show audit log</button></div><div data-al></div>') : "");
     box.innerHTML = html;
+    var only = Array.isArray(o.only) ? o.only : null, has = function (id) { return !only || only.indexOf(id) >= 0; };
+    if (only) Array.prototype.forEach.call(box.querySelectorAll("details[data-sec]"), function (d) {
+      if (!has(d.getAttribute("data-sec"))) d.hidden = true; else if (o.flat) { d.open = true; d.classList.add("v2flat"); }
+    });
     function S(id) { return box.querySelector('[data-s="' + id + '"]'); }
     function Q(sel) { return box.querySelector(sel); }
 
@@ -168,8 +172,9 @@
       else if (t.getAttribute("data-dok")) decide(t.getAttribute("data-dok"), true);
       else if (t.getAttribute("data-dno")) decide(t.getAttribute("data-dno"), false);
     });
-    loadPg(); loadMemos(); loadDrop();
-    return { reload: function () { loadPg(); loadMemos(); loadDrop(); } };
+    function all() { if (has("pg")) loadPg(); if (has("mm")) loadMemos(); if (has("dr")) loadDrop(); }
+    all();
+    return { reload: all };
   }
   window.RVV2 = { mount: mount };
 })();

@@ -26,6 +26,20 @@
 
 **Please test on a staging site before using it for real:** the logic and both pages were tested with simulated email and WhatsApp services. A real send depends on your Resend, Meta and (later) SMS accounts, so send a first message to your own phone and email.
 
+## Version 4.2: admin account control, student dashboard, clickable numbers
+
+- **Admin > Accounts** now lists ILO members only (HOD, Deputy HOD, ILO Representatives) with Pending / Approved / Rejected / All filters and a search box. Actions: **Approve**, **Reject**, **Suspend** (an active account), **Approve again** (a rejected one) and **Delete** (asks to confirm). New API: `POST admin/accounts/delete` (refuses student accounts).
+- **Student page** is rearranged into three tabs: **Home** (welcome, saved details, latest updates, attachment), **Dashboard** (every service as a tile: letter, insurance, placement, feedback, marks, NITA form, my profile) and **Notifications** (full list with an unread badge). On phones the tabs sit at the bottom of the screen.
+- **Phone numbers** (primary and alternative) on the student page, and everywhere staff see them, are now tap-to-call links.
+- Changed: `student.html`, `admin.html`, `api.mjs`, `rvu.js`, `sw.js` (cache v24). Redeploy all files together.
+
+## Version 4.1: three-icon homepage, role chosen at ILO sign-up
+
+- The homepage now has only three cards: **Admin**, **ILO** and **Student**.
+- The ILO card opens `/auth.html?role=staff`. On **Create account**, the member picks a role from a dropdown: **HOD**, **Deputy HOD** or **ILO Representative**. The Department dropdown appears only for ILO Representatives and is required for them.
+- Sign-in no longer needs a separate door: the account's own role sends the person to `/hod.html`, `/deputy.html` or `/ilo.html`. Old `?as=` links still work.
+- Changed: `index.html`, `auth.html`, `sw.js` (cache v23). No API or data changes. Redeploy all files together.
+
 ## Version 4: separate HOD and Deputy HOD accounts, student directory, easier placements (newest)
 
 - **HOD and Deputy HOD are now separate.** The gateway has its own card for ILO HOD, Deputy HOD, ILO Representative, Admin and Student. HOD signs in at `/hod.html` (via `/auth.html?role=staff&as=hod`), Deputy at `/deputy.html` (`&as=deputy`). An account only opens through its own door (the server refuses a mismatch), each has its own title, app name and installable icon, and trainer assignments are recorded with the role that made them (audit log and "assigned by" on the student). Both have the same powers.

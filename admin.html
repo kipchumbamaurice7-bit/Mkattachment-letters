@@ -66,6 +66,25 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 .panel h2{display:inline-block;border-bottom:3px solid var(--or);padding-bottom:2px}
 .msg.info{background:var(--orb);color:var(--ord)}
 :focus-visible{outline-color:var(--or)!important}
+.dwel{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.st{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;border-top:4px solid var(--ac);text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.st:hover{border-color:var(--or)}.st small{display:block;color:var(--mut);font-weight:600;font-size:13px}
+.st b{display:block;font-size:30px;line-height:1.2}.st span{font-size:12px;color:var(--mut)}
+.st.or{border-top-color:var(--or)}
+.dcols{display:grid;grid-template-columns:3fr 2fr;gap:16px}@media(max-width:860px){.dcols{grid-template-columns:1fr}}
+.bar{height:10px;border-radius:6px;background:var(--soft);overflow:hidden;margin:3px 0 8px}.bar i{display:block;height:100%;background:var(--ac)}.bar.o i{background:var(--or)}
+.dd1{margin-bottom:14px}.dd1 b{font-size:14px}.dd1 small{color:var(--mut);display:block;font-size:12px}
+.recent div{padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px}.recent small{display:block;color:var(--mut);font-size:12px}
+.qa{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.qi{display:block;text-align:left;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;cursor:pointer;min-height:44px}
+.qi:hover{border-color:var(--or);background:var(--orb)}.qi b{display:block}.qi span{font-size:13px;color:var(--mut)}
+.subtabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.subtabs button{font:inherit;font-weight:600;padding:9px 16px;border:2px solid var(--bd);border-radius:99px;background:var(--card);color:var(--ink);cursor:pointer;min-height:44px}.subtabs button[aria-selected="true"]{border-color:var(--or);background:var(--orb);color:var(--ord)}
+.v2flat>summary{display:none}.v2flat{border:0!important;padding:0!important;background:none!important}
+.dwel{background:linear-gradient(135deg,#0f3a28,#17803f);color:#fff;border-radius:16px;padding:20px 22px;border-bottom:4px solid var(--or)}
+.dwel h1{color:#fff;font-size:24px}.dwel .lead{color:#d6e9dd}.dwel .btn.sec{background:#fff;color:#0f3a28}
+.st{box-shadow:0 2px 10px rgba(23,128,63,.08);transition:transform .15s,box-shadow .15s}.st:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(23,128,63,.18)}
+.card h2{margin-bottom:6px}
 </style>
 <link rel="stylesheet" href="/portal-theme.css"><link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#12304a">
@@ -93,25 +112,59 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div class="row" style="margin:0"><a class="btn sec" href="/student.html" target="_blank" rel="noopener">Open student page</a><button class="btn sec" id="out">Sign out</button></div>
 </div>
 <div class="tabs" role="tablist">
-<button class="tab" id="t-ac" role="tab" aria-selected="false">Accounts <span class="badge" id="acnt">0</span></button>
-<button class="tab" id="t-ins" role="tab" aria-selected="true">Insurance covers</button>
-<button class="tab" id="t-req" role="tab" aria-selected="false">Cover requests <span class="badge" id="rcnt">0</span></button>
-<button class="tab" id="t-let" role="tab" aria-selected="false">Attachment letters</button>
-<button class="tab" id="t-cc" role="tab" aria-selected="false">Class codes <span class="badge" id="cccnt">0</span></button>
-<button class="tab" id="t-ilo" role="tab" aria-selected="false">ILO units <span class="badge" id="icnt">0</span></button>
-<button class="tab" id="t-reg" role="tab" aria-selected="false">Student database <span class="badge" id="gcnt">0</span></button>
-<button class="tab" id="t-pm" role="tab" aria-selected="false">Placements <span class="badge" id="pmcnt">0</span></button>
-<button class="tab" id="t-mk" role="tab" aria-selected="false">Marks</button>
+<button class="tab" id="t-dash" role="tab" aria-selected="true">Dashboard</button>
+<button class="tab" id="t-stu" role="tab" aria-selected="false">Student Management <span class="badge" id="gcnt">0</span></button>
+<button class="tab" id="t-ac" role="tab" aria-selected="false">ILO Accounts <span class="badge" id="acnt">0</span></button>
+<button class="tab" id="t-pm" role="tab" aria-selected="false">Placement Management <span class="badge" id="pmcnt">0</span></button>
+<button class="tab" id="t-mk" role="tab" aria-selected="false">Marks Management</button>
+<button class="tab" id="t-ins" role="tab" aria-selected="false">Insurance <span class="badge" id="rcnt">0</span></button>
+<button class="tab" id="t-memo" role="tab" aria-selected="false">Memos</button>
+<button class="tab" id="t-con" role="tab" aria-selected="false">Student Contacts</button>
+<button class="tab" id="t-tr" role="tab" aria-selected="false">Trainers</button>
+<button class="tab" id="t-rep" role="tab" aria-selected="false">Reports</button>
+<button class="tab" id="t-set" role="tab" aria-selected="false">Settings <span class="badge" id="icnt">0</span></button>
+<span hidden id="cccnt">0</span>
 </div>
+<div id="sub" class="subtabs" hidden></div>
+
+<!-- DASHBOARD -->
+<div id="s-dash">
+<div class="dwel"><div><h1 id="dwt">Welcome, Administrator</h1><p class="lead" id="dwd" style="margin:0"></p></div><button class="btn sec" id="dref">Refresh</button></div>
+<div class="msg" id="dmsg"></div>
+<div class="stats" id="dstats"></div>
+<div class="dcols">
+<div class="card"><h2>Progress by department</h2><p class="lead">Placement responses and marks entered, compared with registered students.</p><div id="ddept"></div></div>
+<div class="card"><h2>Recent system activity</h2><div id="drec" class="recent"></div></div>
+</div>
+<div class="card"><h2>Quick access</h2><div class="qa" id="dqa"></div></div>
+</div>
+
+<!-- MEMOS -->
+<div id="s-memo" hidden><div class="card"><h2>Official memos</h2><p class="lead">Write memos to ILO staff and read their replies.</p><div id="memobox"></div></div></div>
+<!-- MARKS: progress and audit -->
+<div id="s-pg" hidden><div class="card"><h2>Marks progress</h2><p class="lead">See how many placed students have a mark, per department, course or class, and save the graph as a PDF.</p><div id="pgbox"></div></div></div>
+<div id="s-au" hidden><div class="card"><h2>Mark changes and audit log</h2><p class="lead">Every mark entered, changed, unlocked or removed, with who did it and when.</p><div id="aubox"></div></div></div>
+<!-- STUDENT: PIN reset -->
+<div id="s-pr" hidden><div class="card"><h2>Reset a student's PIN</h2><p class="lead">Use this when a student forgets their PIN. Give the new PIN to the student in person.</p><div id="prbox"></div></div></div>
+
+<!-- STUDENT CONTACTS -->
+<div id="s-con" hidden><div class="card"><h2>Student contacts <span class="badge" id="concnt">0</span></h2><p class="lead">Next of kin and emergency contacts given by students when they registered.</p>
+<div class="row" style="margin-top:0"><input id="conq" placeholder="Search name, admission number, class or contact" style="max-width:360px"><button class="btn sec" id="conrf">Refresh</button><button class="btn sec" id="concsv">Download (CSV)</button></div>
+<div class="msg" id="conm"></div>
+<div class="scroll"><table><thead><tr><th>Student</th><th>Admission no.</th><th>Class</th><th>Phone</th><th>Next of kin</th><th>Emergency contact</th></tr></thead><tbody id="contb"></tbody></table></div></div></div>
+
+<!-- REPORTS -->
+<div id="s-rep" hidden><div class="card"><h2>Reports and downloads</h2><p class="lead">Spreadsheet files you can open in Excel. Marks reports (PDF, by class, course or department) are under <b>Marks Management</b>.</p>
+<div class="qa"><button class="qi" id="rp1"><b>Department summary</b><span>Students, placement responses and marks per department</span></button><button class="qi" id="rp2"><b>Student contacts</b><span>Next of kin and emergency contacts</span></button><button class="qi" id="rp3"><b>Student accounts</b><span>Every registered student with class and phone</span></button><button class="qi" id="rp4"><b>ILO accounts</b><span>HOD, Deputy HOD and representatives with status</span></button></div><div class="msg" id="repm"></div></div></div>
 
 <!-- ACCOUNTS -->
 <div id="s-ac" hidden>
 <div class="card">
-<h2>Portal accounts <span class="badge" id="acall">0</span></h2>
-<p class="lead">All HOD, Deputy HOD and ILO representative accounts are created here through registration. Nothing becomes active until you approve it. Students register immediately and use their admission number + PIN.</p>
-<div class="row"><button class="btn sec" id="acrf">Refresh</button></div>
+<h2>ILO member accounts <span class="badge" id="acall">0</span></h2>
+<p class="lead">HOD, Deputy HOD and ILO Representatives register themselves. Nothing becomes active until you approve it. You can also reject, re-approve or delete an account here.</p>
+<div class="row" id="acfilt" style="flex-wrap:wrap;gap:8px"><button class="btn sec" data-f="pending">Pending <span class="badge" id="acp">0</span></button><button class="btn sec" data-f="approved">Approved</button><button class="btn sec" data-f="rejected">Rejected</button><button class="btn sec" data-f="all">All</button><input id="acq" type="search" placeholder="Search name, ID, PF, department" style="max-width:260px" aria-label="Search accounts"><button class="btn sec" id="acrf">Refresh</button></div>
 <div class="msg" id="acm"></div>
-<div class="scroll"><table><thead><tr><th>Status</th><th>Role</th><th>Name</th><th>ID / Admission</th><th>PF</th><th>Department</th><th>Phone</th><th>Action</th></tr></thead><tbody id="actb"></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>Status</th><th>Role</th><th>Name</th><th>ID number</th><th>PF</th><th>Department</th><th>Phone</th><th>Action</th></tr></thead><tbody id="actb"></tbody></table></div>
 </div></div>
 
 <!-- INSURANCE -->
@@ -253,7 +306,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div id="s-reg" hidden><div id="dirbox"></div></div>
 
 <!-- PLACEMENTS -->
-<div id="s-mk" hidden><section class="panel" style="margin-top:14px"><h2>Marks</h2><p class="lead">See marks for every department. Download one class, a whole department, or everything.</p><div id="mkbox"></div></section></div>
+<div id="s-mk" hidden><section class="panel" style="margin-top:14px"><h2>Entered marks</h2><p class="lead">See marks for every department. Download one class, a whole department, or everything.</p><div id="mkbox"></div></section></div>
 <div id="s-pm" hidden><div id="plbox"></div></div>
 
 <dialog id="pdlg">
@@ -308,24 +361,89 @@ $("out").onclick=signOut;
 async function start(){
  D=await call("GET","admin/data");$("login").hidden=true;$("app").hidden=false;
  var s=D.settings;$("pn").value=s.policyNumber;$("pi").value=s.insurer;$("ps").value=s.policyStart;$("pe").value=s.policyEnd;$("pd").value=s.issueDate;
- fillDepts();drawStudents();drawCourses();drawReqs();drawIlo();drawNita();mountLists()}
+ fillDepts();drawStudents();drawCourses();drawReqs();drawIlo();drawNita();mountLists();tab("dash")}
 if(TOKEN)start().catch(function(){signOut()});
 
 /* tabs */
-var MK=null;function tab(w){["a","i","r","l","c","o","g","m","k"].forEach(function(k){var id={a:"ac",i:"ins",r:"req",l:"let",c:"cc",o:"ilo",g:"reg",m:"pm",k:"mk"}[k];$("t-"+id).setAttribute("aria-selected",k===w);$("s-"+id).hidden=k!==w});if(w==="a")loadAccounts();if(w==="c")drawCC();if(w==="k"&&!MK){MK=RVMarks.mount($("mkbox"),{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut});var v2=document.createElement("div");v2.style.marginTop="14px";$("mkbox").parentNode.appendChild(v2);RVV2.mount(v2,{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut})}}
-$("t-ac").onclick=function(){tab("a")};$("t-ins").onclick=function(){tab("i")};$("t-req").onclick=function(){tab("r")};$("t-let").onclick=function(){tab("l")};$("t-cc").onclick=function(){tab("c")};$("t-ilo").onclick=function(){tab("o")};$("t-reg").onclick=function(){tab("g")};$("t-pm").onclick=function(){tab("m")};$("t-mk").onclick=function(){tab("k")};
+var MK=null,CUR="dash",SUB=0;
+var SECS={dash:["dash"],stu:["reg","pr"],ac:["ac"],pm:["pm"],tr:["pm"],mk:["mk","pg","au"],ins:["ins","req"],memo:["memo"],con:["con"],rep:["rep"],set:["cc","let","ilo"]};
+var SUBL={stu:["Student directory","Reset a PIN"],mk:["Entered marks","Progress graph and PDF","Audit log"],ins:["Policy and covers","Cover requests"],set:["Class codes","Letters and forms","ILO unit submissions"]};
+var ALLS=["dash","pg","au","pr","reg","ac","pm","mk","ins","req","memo","con","rep","cc","let","ilo"];
+function tab(w,sub){CUR=w;SUB=sub||0;
+ Object.keys(SECS).forEach(function(k){var t=$("t-"+k);if(t)t.setAttribute("aria-selected",k===w)});
+ var on=SECS[w][SUB]||SECS[w][0];ALLS.forEach(function(s){$("s-"+s).hidden=s!==on});
+ var sb=$("sub"),L=SUBL[w];sb.hidden=!L;sb.innerHTML=L?L.map(function(n,x){return'<button type="button" data-s="'+x+'" aria-selected="'+(x===SUB)+'">'+n+(w==="ins"&&x===1?' <span class="badge">'+$("rcnt").textContent+'</span>':"")+'</button>'}).join(""):"";
+ window.scrollTo(0,0);
+ if(w==="dash")loadDash();if(w==="ac")loadAccounts();if(w==="con"||w==="rep")loadCon();if(on==="cc")drawCC();
+ if(w==="pm"||w==="tr"){var b=document.querySelector('#plbox [data-tab="'+(w==="tr"?"t":"a")+'"]');if(b)b.click()}
+ if(on==="mk"&&!MK)MK=RVMarks.mount($("mkbox"),{role:"admin",headers:hd,onAuthFail:signOut});
+ if(on==="pg")v2("pgbox",["pg"]);if(on==="au")v2("aubox",["au"]);if(on==="pr")v2("prbox",["pr"]);if(on==="memo")v2("memobox",["mm"])}
+var V2={};function hd(){return{Authorization:"Bearer "+(TOKEN||"")}}
+function v2(id,only){if(!V2[id])V2[id]=RVV2.mount($(id),{role:"admin",headers:hd,onAuthFail:signOut,only:only,flat:true})}
+Object.keys(SECS).forEach(function(k){$("t-"+k).onclick=function(){tab(k)}});
+$("sub").onclick=function(e){var b=e.target.closest("[data-s]");if(b)tab(CUR,+b.getAttribute("data-s"))};
+
+/* dashboard */
+var OV=null;
+function fmt(n){return Number(n||0).toLocaleString()}
+function pct(a,b){return b?Math.round(100*a/b):0}
+async function loadDash(){say("dmsg","");
+ $("dwd").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" - Rift Valley National Polytechnic, Industrial Liaison Office";
+ try{OV=await call("GET","admin/overview");drawDash()}catch(e){say("dmsg","err",e.message)}}
+function drawDash(){var o=OV;if(!o)return;
+ var S=function(k,l,v,sub,cls){return'<button class="st '+(cls||"")+'" data-go="'+k+'"><small>'+l+'</small><b>'+fmt(v)+'</b><span>'+sub+'</span></button>'};
+ $("dstats").innerHTML=S("stu","Registered students",o.registered,fmt(o.database)+" in the student database")+
+  S("pm","Responded to placement",o.responded,pct(o.responded,o.registered)+"% of registered students")+
+  S("pm","Awaiting placement",o.awaiting,"have not submitted placement","or")+
+  S("ac","Approved ILO accounts",o.ilo.approved,o.ilo.hod+" HOD, "+o.ilo.deputy+" Deputy, "+o.ilo.rep+" reps")+
+  S("ac","Accounts awaiting approval",o.ilo.pending,"ILO members pending","or")+
+  S("mk","Marks entered",o.marks,pct(o.marks,o.responded)+"% of placed students")+
+  S("ins","Cover requests",o.requests,fmt(o.covers)+" students hold a cover","or")+
+  S("tr","Trainers",o.trainers,o.unassigned+" placed students not yet assigned");
+ $("ddept").innerHTML=o.depts.length?o.depts.map(function(d){return'<div class="dd1"><b>'+esc(d.d)+'</b><small>'+fmt(d.students)+' students - '+fmt(d.placed)+' placed ('+pct(d.placed,d.students)+'%) - '+fmt(d.marked)+' marks ('+pct(d.marked,d.placed)+'%)</small><div class="bar" title="Placement"><i style="width:'+pct(d.placed,d.students)+'%"></i></div><div class="bar o" title="Marks"><i style="width:'+pct(d.marked,d.placed)+'%"></i></div></div>'}).join("")+'<div class="hint">Green: placement responses. Orange: marks entered.</div>':'<p class="lead">No students registered yet.</p>';
+ $("drec").innerHTML=o.recent.length?o.recent.map(function(r){return'<div>'+esc(r.text)+'<small>'+new Date(r.t).toLocaleString()+(r.by?" - "+esc(r.by):"")+'</small></div>'}).join(""):'<p class="lead">No activity recorded yet.</p>';
+ $("dqa").innerHTML=[["stu","Student Management","Directory, records, PIN resets"],["ac","ILO Accounts","Approve, reject, manage"],["pm","Placement Management","Responses and assignments"],["mk","Marks Management","Marks, graphs, PDF reports"],["ins","Insurance","Policies, requests, records"],["memo","Memos","Official communication"],["con","Student Contacts","Next of kin, emergency"],["tr","Trainers","Details and supervision lists"],["rep","Reports","Downloads and summaries"],["set","Settings","Classes, letters, ILO units"]].map(function(q){return'<button class="qi" data-go="'+q[0]+'"><b>'+q[1]+'</b><span>'+q[2]+'</span></button>'}).join("")}
+$("s-dash").onclick=function(e){var g=e.target.closest("[data-go]");if(g)tab(g.getAttribute("data-go"))};
+$("dref").onclick=loadDash;
+
+/* student contacts and reports */
+function stuList(){return(ACC||[]).filter(function(a){return a.role==="student"})}
+async function loadCon(){if(ACC)return drawCon();say("conm","");try{var d=await call("GET","admin/accounts");ACC=d.list||[];drawAccounts();drawCon()}catch(e){say("conm","err",e.message)}}
+function drawCon(){var q=($("conq").value||"").toLowerCase(),L=stuList().filter(function(a){return!q||[a.name,a.adm,a.cls,a.phone,a.nokName,a.nokTel,a.emName,a.emTel].join(" ").toLowerCase().indexOf(q)>=0});
+ $("concnt").textContent=L.length;
+ $("contb").innerHTML=L.slice(0,400).map(function(a){return"<tr><td>"+esc(a.name||"")+"</td><td>"+esc(a.adm||"")+"</td><td>"+esc(a.cls||"")+"</td><td>"+(a.phone?'<a href="tel:'+esc(a.phone)+'">'+esc(a.phone)+"</a>":"-")+"</td><td>"+esc([a.nokName,a.nokRel&&"("+a.nokRel+")",a.nokTel].filter(Boolean).join(" ")||"-")+"</td><td>"+esc([a.emName,a.emTel].filter(Boolean).join(" ")||"-")+"</td></tr>"}).join("")||"<tr><td colspan=6>No students found.</td></tr>"}
+$("conq").oninput=function(){drawCon()};$("conrf").onclick=function(){ACC=null;loadCon()};
+function csv(name,rows){var t=rows.map(function(r){return r.map(function(c){c=String(c==null?"":c);return/[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(",")}).join("\r\n");var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+t],{type:"text/csv"}));a.download=name+".csv";a.click()}
+var CH={nokName:1};
+function contactRows(){return[["Name","Admission no.","Class","Phone","Next of kin","Relationship","Next of kin phone","Emergency contact","Emergency phone"]].concat(stuList().map(function(a){return[a.name,a.adm,a.cls,a.phone,a.nokName,a.nokRel,a.nokTel,a.emName,a.emTel]}))}
+$("concsv").onclick=function(){contactRows().length>1?csv("student-contacts",contactRows()):say("conm","err","Nothing to download yet.")};
+async function rep(f){say("repm","");try{if(!ACC){var d=await call("GET","admin/accounts");ACC=d.list||[]}f()}catch(e){say("repm","err",e.message)}}
+$("rp1").onclick=async function(){say("repm","");try{OV=await call("GET","admin/overview");csv("department-summary",[["Department","Students","Placement responses","Marks entered"]].concat(OV.depts.map(function(d){return[d.d,d.students,d.placed,d.marked]})))}catch(e){say("repm","err",e.message)}};
+$("rp2").onclick=function(){rep(function(){csv("student-contacts",contactRows())})};
+$("rp3").onclick=function(){rep(function(){csv("student-accounts",[["Name","Admission no.","Class","Department","Course","Phone","Email","Gender"]].concat(stuList().map(function(a){return[a.name,a.adm,a.cls,a.dept,a.course,a.phone,a.email,a.gender]})))})};
+$("rp4").onclick=function(){rep(function(){csv("ilo-accounts",[["Name","Role","Status","Department","Phone"]].concat(accList().map(function(a){return[a.name,a.role,a.status,a.dept,a.phone]})))})};
 
 /* accounts */
-var ACC=null;
+var ACC=null,ACF="pending";
+function accList(){return(ACC||[]).filter(function(a){return a.role!=="student"})}
 async function loadAccounts(){say("acm","");try{var d=await call("GET","admin/accounts");ACC=d.list||[];drawAccounts()}catch(e){say("acm","err",e.message)}}
-function drawAccounts(){if(!ACC)return;$("acall").textContent=ACC.length;$("acnt").textContent=ACC.filter(function(a){return a.status==="pending"}).length;
- $("actb").innerHTML=ACC.map(function(a){
-  var who=a.role==="student"?a.adm:a.idno,action=a.status==="pending"?'<button class="btn ok" data-acc-ap="'+a.id+'">Approve</button> <button class="btn del" data-acc-rj="'+a.id+'">Reject</button>':a.status==="approved"?"<span class=\"tag\">Active</span>":"<span class=\"tag\">Rejected</span>";
-  return "<tr><td>"+esc(a.status)+"</td><td>"+esc(a.role==="rep"?"ILO Representative":a.role==="hod"?"HOD":a.role==="deputy"?"Deputy HOD":"Student")+"</td><td>"+esc(a.name)+"</td><td>"+esc(who)+"</td><td>"+esc(a.pf||"—")+"</td><td>"+esc(a.dept||"—")+"</td><td>"+esc(a.phone||"")+"</td><td>"+action+"</td></tr>";
- }).join("")||"<tr><td colspan=8>No accounts yet.</td></tr>"}
-$("acrf").onclick=loadAccounts;
-$("actb").onclick=async function(e){var ap=e.target.getAttribute("data-acc-ap"),rj=e.target.getAttribute("data-acc-rj");if(!ap&&!rj)return;var id=ap||rj;
- try{await call("POST","admin/accounts/"+(ap?"approve":"reject"),{id:id});await loadAccounts();say("acm","ok",ap?"Account approved.":"Account rejected.")}catch(x){say("acm","err",x.message)}};
+function drawAccounts(){if(!ACC)return;var all=accList(),pend=all.filter(function(a){return a.status==="pending"}).length;
+ $("acall").textContent=all.length;$("acnt").textContent=pend;$("acp").textContent=pend;
+ Array.prototype.forEach.call(document.querySelectorAll("#acfilt [data-f]"),function(b){b.style.outline=b.getAttribute("data-f")===ACF?"3px solid #f28a1d":""});
+ var q=($("acq").value||"").trim().toLowerCase(),rows=all.filter(function(a){return(ACF==="all"||a.status===ACF)&&(!q||[a.name,a.idno,a.pf,a.dept,a.phone].join(" ").toLowerCase().indexOf(q)>=0)});
+ var RN={rep:"ILO Representative",hod:"HOD",deputy:"Deputy HOD"};
+ $("actb").innerHTML=rows.map(function(a){
+  var btn=function(k,cls,t){return'<button class="btn '+cls+'" data-acc-'+k+'="'+esc(a.id)+'">'+t+'</button> '};
+  var act=(a.status!=="approved"?btn("ap","ok",a.status==="rejected"?"Approve again":"Approve"):"")+(a.status!=="rejected"?btn("rj","del",a.status==="approved"?"Suspend":"Reject"):"")+btn("dl","del","Delete");
+  return"<tr><td><span class=\"tag\">"+esc(a.status==="approved"?"Active":a.status==="pending"?"Pending":"Rejected")+"</span></td><td>"+esc(RN[a.role]||a.role)+"</td><td>"+esc(a.name)+"</td><td>"+esc(a.idno||"")+"</td><td>"+esc(a.pf||"—")+"</td><td>"+esc(a.dept||"—")+"</td><td>"+esc(a.phone||"")+"</td><td>"+act+"</td></tr>"
+ }).join("")||"<tr><td colspan=8>No "+(ACF==="all"?"":ACF+" ")+"ILO accounts.</td></tr>"}
+$("acrf").onclick=loadAccounts;$("acq").oninput=drawAccounts;
+$("acfilt").onclick=function(e){var f=e.target.closest("[data-f]");if(!f)return;ACF=f.getAttribute("data-f");drawAccounts()};
+$("actb").onclick=async function(e){var el=e.target.closest("button");if(!el)return;var ap=el.getAttribute("data-acc-ap"),rj=el.getAttribute("data-acc-rj"),dl=el.getAttribute("data-acc-dl"),id=ap||rj||dl;if(!id)return;
+ var a=(ACC||[]).filter(function(x){return x.id===id})[0]||{};
+ if(dl&&!confirm("Delete the account of "+(a.name||"this member")+"? They will no longer be able to sign in, and this cannot be undone."))return;
+ if(rj&&a.status==="approved"&&!confirm("Suspend "+(a.name||"this member")+"? They will not be able to sign in until you approve again."))return;
+ try{await call("POST","admin/accounts/"+(ap?"approve":rj?"reject":"delete"),{id:id});await loadAccounts();say("acm","ok",ap?"Account approved.":rj?"Account rejected.":"Account deleted.")}catch(x){say("acm","err",x.message)}};
 
 /* policy */
 $("sp").onclick=async function(){say("mp","");try{
@@ -567,10 +685,10 @@ RVShell.mount({root:document.querySelector(".wrap"),brand:{letter:"A",name:"Port
  top:[{href:"/feedback.html",icon:"inbox",label:"Student feedback"},{href:"/student.html",icon:"eye",label:"Open student page",newtab:true}],
  signOut:function(){$("out").click()},
  groups:[
-  {label:"People",items:[{tab:$("t-ac"),icon:"users",label:"Accounts"},{tab:$("t-ilo"),icon:"wrench",label:"ILO units"}]},
-  {label:"Students",items:[{tab:$("t-reg"),icon:"db",label:"Student database"},{tab:$("t-cc"),icon:"tag",label:"Class codes"},{tab:$("t-pm"),icon:"pin",label:"Placements"},{tab:$("t-mk"),icon:"chart",label:"Marks"}]},
-  {label:"Insurance",items:[{tab:$("t-ins"),icon:"shield",label:"Insurance covers"},{tab:$("t-req"),icon:"inbox",label:"Cover requests"}]},
-  {label:"Letters and forms",items:[{tab:$("t-let"),icon:"file",label:"Attachment letters"}]}
+  {label:"Overview",items:[{tab:$("t-dash"),icon:"grid",label:"Dashboard"}]},
+  {label:"Management",items:[{tab:$("t-stu"),icon:"db",label:"Student Management"},{tab:$("t-ac"),icon:"users",label:"ILO Accounts"},{tab:$("t-pm"),icon:"pin",label:"Placement Management"},{tab:$("t-mk"),icon:"chart",label:"Marks Management"},{tab:$("t-ins"),icon:"shield",label:"Insurance"}]},
+  {label:"Communication",items:[{tab:$("t-memo"),icon:"file",label:"Memos"},{tab:$("t-con"),icon:"list",label:"Student Contacts"},{tab:$("t-tr"),icon:"wrench",label:"Trainers"}]},
+  {label:"System",items:[{tab:$("t-rep"),icon:"inbox",label:"Reports"},{tab:$("t-set"),icon:"tag",label:"Settings"}]}
  ]});})();
 </script>
 </body></html>
