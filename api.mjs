@@ -88,18 +88,19 @@ function accountId(role, identifier) {
 
 /* ----- email (forgot-PIN links). Needs RESEND_API_KEY; optional MAIL_FROM and SITE_URL ----- */
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
-async function sendMail(to, subject, text) {
+async function mailTo(to, subject, text, html) {
   const key = process.env.RESEND_API_KEY;
-  if (!key) return false;
+  if (!key) return { ok: false, err: "off" };
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: process.env.MAIL_FROM || "RVNP Portal <onboarding@resend.dev>", to: [to], subject, text }),
+      body: JSON.stringify({ from: process.env.MAIL_FROM || "RVNP Portal <onboarding@resend.dev>", to: [to], subject, text, ...(html && { html }) }),
     });
-    return r.ok;
-  } catch { return false; }
+    return r.ok ? { ok: true } : { ok: false, err: "email service said " + r.status };
+  } catch (e) { return { ok: false, err: "could not reach the email service" }; }
 }
+async function sendMail(to, subject, text) { return (await mailTo(to, subject, text)).ok; }
 const tokHash = (t) => createHash("sha256").update("rvnp-reset|" + t).digest("hex");
 
 function pinHash(pin, salt) {
@@ -132,7 +133,100 @@ function requireRole(a, roles) {
 }
 
 const iloHash = (c) => createHash("sha256").update("rvnp-ilo|" + String(c)).digest("hex");
+/* one spelling per town, so the HOD's town and place filters do not split "Nakuru", "NAKURU TOWN" and "nakuru " */
+const cleanTown = (v) => { let t = String(v || "").replace(/\s+/g, " ").trim().slice(0, 60); const u = t.replace(/\s+TOWN$/i, ""); return u.length >= 2 ? u : t; };
 const digits = (v) => String(v || "").replace(/[^\d+]/g, "").slice(0, 16);
+
+/* ---------- trainers: access code, messages by email / WhatsApp / SMS, and details ---------- */
+const CODE_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   /* 32 characters, no 0/O/1/I, so a code typed from a letter is hard to get wrong */
+const newCode = () => { let c = ""; for (const x of randomBytes(10)) c += CODE_ALPHA[x % 32]; return c; };
+const cleanAccess = (v) => String(v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+const showCode = (c) => String(c || "").slice(0, 5) + "-" + String(c || "").slice(5);
+const intl = (v) => { let d = String(v || "").replace(/\D/g, ""); if (d.startsWith("00")) d = d.slice(2); if (d.startsWith("254")) return d; if (d.startsWith("0")) return "254" + d.slice(1); if (d.length === 9) return "254" + d; return d; };
+const baseUrl = (req) => String(process.env.SITE_URL || new URL(req.url).origin).replace(/\/$/, "");
+/* SMS is parked: switched OFF for now. To add it later, change SMS_ENABLED to true and set AT_USERNAME and AT_API_KEY. */
+const SMS_ENABLED = false;
+const CHANNELS = SMS_ENABLED ? ["email", "whatsapp", "sms"] : ["email", "whatsapp"];
+const chanOn = () => ({
+  email: !!process.env.RESEND_API_KEY,
+  whatsapp: !!(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_ID),
+  sms: SMS_ENABLED && !!(process.env.AT_USERNAME && process.env.AT_API_KEY),
+});
+const within = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
+
+/* WhatsApp Business Cloud API. A first message to someone who has not written to you must use an approved template (WHATSAPP_TEMPLATE, 3 body variables: name, students, link). Without a template name a plain text is sent, which WhatsApp only delivers inside a 24-hour chat window. */
+async function sendWhatsApp(to, text, vars) {
+  const tpl = process.env.WHATSAPP_TEMPLATE;
+  const payload = tpl
+    ? { messaging_product: "whatsapp", to, type: "template", template: { name: tpl, language: { code: process.env.WHATSAPP_LANG || "en" }, components: [{ type: "body", parameters: vars.map((x) => ({ type: "text", text: String(x) })) }] } }
+    : { messaging_product: "whatsapp", to, type: "text", text: { body: text, preview_url: true } };
+  try {
+    const r = await fetch("https://graph.facebook.com/v21.0/" + process.env.WHATSAPP_PHONE_ID + "/messages", { method: "POST", headers: { Authorization: "Bearer " + process.env.WHATSAPP_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    if (r.ok) return { ok: true };
+    const d = await r.json().catch(() => ({}));
+    return { ok: false, err: "WhatsApp said " + r.status + (d && d.error && d.error.message ? ": " + String(d.error.message).slice(0, 120) : "") };
+  } catch (e) { return { ok: false, err: "could not reach WhatsApp" }; }
+}
+/* SMS through Africa's Talking (set AT_USERNAME and AT_API_KEY, optional AT_SENDER). Off until those are set. */
+async function sendSms(to, text) {
+  const host = process.env.AT_USERNAME === "sandbox" ? "api.sandbox.africastalking.com" : "api.africastalking.com";
+  const form = new URLSearchParams({ username: process.env.AT_USERNAME, to: "+" + to, message: text });
+  if (process.env.AT_SENDER) form.set("from", process.env.AT_SENDER);
+  try {
+    const r = await fetch("https://" + host + "/version1/messaging", { method: "POST", headers: { apiKey: process.env.AT_API_KEY, Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" }, body: form });
+    return r.ok ? { ok: true } : { ok: false, err: "SMS service said " + r.status };
+  } catch (e) { return { ok: false, err: "could not reach the SMS service" }; }
+}
+
+const studentsWord = (n) => (n === 1 ? "1 student" : n + " students");
+/* the words of the message. kind of situation: first contact (no details yet), update (details already given), or no students yet */
+function trainerMsg(t, count, link, code) {
+  const first = !t.det, who = t.det ? t.det.name : t.name;
+  let short, lead, body;
+  if (!count) {
+    short = first
+      ? "Hello " + who + ", RVNP Industrial Liaison Office needs your details for attachment supervision (name, PF number, ID number, bank and branch). Open " + link + " (access code " + showCode(code) + ")."
+      : "Hello " + who + ", you have no students assigned yet. Your RVNP page: " + link;
+    lead = first ? "Please give us your details for attachment supervision." : "You have no students assigned yet.";
+  } else {
+    short = first
+      ? "Hello " + who + ", RVNP Industrial Liaison Office has assigned you " + studentsWord(count) + " on industrial attachment. Open " + link + " to confirm your details (name, PF number, ID number, bank and branch) and download your list. Access code: " + showCode(code) + "."
+      : "Hello " + who + ", your RVNP attachment list now has " + studentsWord(count) + ". Download it here: " + link;
+    lead = first ? "You have been assigned " + studentsWord(count) + " on industrial attachment." : "Your attachment list has been updated. It now has " + studentsWord(count) + ".";
+  }
+  const ask = first ? "Please open the link below and reply by giving your name, PF number, ID number, bank and bank branch. You can then download your list of students (names, phone numbers and workplaces) as Excel." : "Open the link below to download your latest list. You can also check or correct your details there.";
+  const subject = first ? "RVNP: please confirm your details" + (count ? " and download your students list" : "") : "RVNP: your students list has been updated";
+  body = "Hello " + who + ",\n\n" + lead + "\n\n" + ask + "\n\n" + link + "\n\nAccess code (if the link does not open): " + showCode(code) + "\nPage: " + link.replace(/\?.*$/, "") + "\n\nThank you,\nRVNP Industrial Liaison Office";
+  return { short, subject, body, vars: [who, count ? studentsWord(count) : "no students yet", link] };
+}
+const escH = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function mailHtml(m, link, code) {
+  const paras = m.body.split("\n\n").slice(0, 3).map((x) => "<p style=\"margin:0 0 14px\">" + escH(x).replace(/\n/g, "<br>") + "</p>").join("");
+  return "<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#12301f;line-height:1.5\"><div style=\"background:#123b31;color:#fff;padding:14px 18px;border-radius:10px 10px 0 0;font-weight:bold\">Rift Valley National Polytechnic \u00b7 Industrial Liaison Office</div><div style=\"border:1px solid #cfe0d4;border-top:0;padding:18px;border-radius:0 0 10px 10px\">" + paras +
+    "<p style=\"margin:20px 0\"><a href=\"" + escH(link) + "\" style=\"background:#17803f;color:#fff;text-decoration:none;padding:13px 22px;border-radius:9px;font-weight:bold;display:inline-block\">Open my page</a></p><p style=\"margin:0;color:#51675a;font-size:13px\">Access code if the button does not work: <b>" + escH(showCode(code)) + "</b></p></div></div>";
+}
+
+/* send to one trainer on the chosen channels (default: every channel that is set up). Records what happened on the trainer. Returns {email, whatsapp, sms} = sent | failed | off | nocontact */
+async function deliver(req, t, count, only) {
+  const on = chanOn(), link = baseUrl(req) + "/trainer.html?t=" + t.tok, m = trainerMsg(t, count, link, t.tok), want = (only && only.length ? only : CHANNELS).filter((c) => CHANNELS.includes(c)), res = {}, jobs = [];
+  t.notif = t.notif || {};
+  for (const ch of want) {
+    if (!on[ch]) { res[ch] = "off"; continue; }
+    const to = ch === "email" ? t.email : intl(t.tel);
+    if (!to || (ch !== "email" && to.length < 11)) { res[ch] = "nocontact"; continue; }
+    jobs.push((async () => {
+      let r;
+      try { r = await within(ch === "email" ? mailTo(to, m.subject, m.body, mailHtml(m, link, t.tok)) : ch === "whatsapp" ? sendWhatsApp(to, m.short, m.vars) : sendSms(to, m.short), 9000); }
+      catch (e) { r = { ok: false, err: "took too long" }; }
+      res[ch] = r.ok ? "sent" : "failed";
+      t.notif[ch] = r.ok ? { ok: true, at: Date.now() } : { ok: false, at: Date.now(), err: r.err || "failed" };
+    })());
+  }
+  await Promise.all(jobs);
+  if (Object.values(res).includes("sent")) { t.sentAt = Date.now(); t.sentCount = count; }
+  return res;
+}
+const trainerCount = (all, tid) => Object.values(all).filter((r) => r.tid === tid).length;
 
 /* ---------- validation ---------- */
 /* departments and courses, from the RVNP courses brochure (2025) (units are added later by the ILO representatives) */
@@ -496,6 +590,9 @@ export default async (req) => {
       if(!a || !a.salt || pinHash(pin,a.salt)!==a.pinHash) { await new Promise(r=>setTimeout(r,500)); const e=lf[lfKey]||{n:0}; e.n++; if(e.n>=5){e.until=Date.now()+15*60000;e.n=0;} lf[lfKey]=e; await s.setJSON("loginfail",lf); return fail("Wrong login details.",401); }
       if(lf[lfKey]){ delete lf[lfKey]; await s.setJSON("loginfail",lf); }
       if(a.status!=="approved") return fail(a.status==="pending"?"Your account is waiting for administrator approval.":"Your account is not active.",403);
+      /* HOD, Deputy HOD and ILO Representative each have their own sign-in: an account only opens through its own door */
+      const want=clean(body.as,10).toLowerCase(), ROLE_NAME={hod:"an ILO HOD",deputy:"a Deputy HOD",rep:"an ILO Representative"};
+      if(want && ROLE_NAME[want] && a.role!==want) return fail("This is "+(ROLE_NAME[a.role]||"another kind of")+" account. Please use the "+(ROLE_NAME[a.role]||"correct").replace(/^an? /,"")+" sign-in.",403);
       return json({token:makeAccountToken(a),role:a.role,name:a.name,dept:a.dept||"",id:a.id});
     }
 
@@ -525,7 +622,7 @@ export default async (req) => {
       const acct = await currentAccount(req,s); if(!requireRole(acct,["student"])) return fail("Please sign in as a student.",401);
       const n = acct.name, a = acct.adm, cls = acct.cls, dept = acct.dept, tel1 = acct.phone,
         course = clean(body.course, 120).toUpperCase(), org = clean(body.org, 120),
-        loc = clean(body.loc, 200), sup = clean(body.sup, 100), supTel = digits(body.supTel), town = clean(body.town, 60), county = clean(body.county, 50),
+        loc = clean(body.loc, 200), sup = clean(body.sup, 100), supTel = digits(body.supTel), town = cleanTown(body.town), county = clean(body.county, 50),
         tel2 = digits(body.tel2 || acct.altPhone);
       if (n.length < 3) throw new Bad("Enter your full name.");
       if (a.length < 6) throw new Bad("Your account is missing a valid admission number.");
@@ -542,9 +639,14 @@ export default async (req) => {
       if (tel2 && tel2.replace(/\D/g, "").length < 9) throw new Bad("Phone number 2 must have at least 9 digits, or leave it empty.");
       const all = await getJSON(s, "placements", {}), id = sid(n, a), old = all[id];
       if (!old && Object.keys(all).length >= 20000) throw new Bad("The list is full. Please contact the Industrial Liaison Office.");
-      all[id] = { n, a, cls, dept, course, org, loc, sup, supTel, town: town.toUpperCase(), county, tel1, tel2, t: old ? old.t : Date.now(), u: Date.now(), ...(old && old.tid && { tid: old.tid }), ...(old && old.sd && { sd: old.sd }), ...(old && old.ed && { ed: old.ed }) };
+      all[id] = { n, a, cls, dept, course, org, loc, sup, supTel, town: town.toUpperCase(), county, tel1, tel2, t: old ? old.t : Date.now(), u: Date.now(), ...(old && old.tid && { tid: old.tid, tby: old.tby }), ...(old && old.sd && { sd: old.sd }), ...(old && old.ed && { ed: old.ed }) };
       await s.setJSON("placements", all);
       return json({ ok: true, updated: !!old });
+    }
+    if (method === "GET" && path === "placement-towns") {
+      const all = await getJSON(s, "placements", {}), by = {};
+      for (const r of Object.values(all)) if (r.county && r.town) (by[r.county] = by[r.county] || new Set()).add(r.town);
+      return json({ towns: Object.fromEntries(Object.entries(by).map(([k, v]) => [k, [...v].sort()])) });
     }
     if (method === "GET" && path === "placement-me") {
       const acct = await currentAccount(req,s); if(!requireRole(acct,["student"])) return fail("Please sign in as a student.",401);
@@ -944,29 +1046,126 @@ export default async (req) => {
       return fail("Not found", 404);
     }
 
+    /* ----- trainers (no account: they open the link or type the access code they were sent) ----- */
+    if (path === "trainer/me" || path === "trainer/details") {
+      const code = cleanAccess(method === "GET" ? url.searchParams.get("t") : body.t);
+      const trainers = await getJSON(s, "trainers", {});
+      const tid = code.length === 10 ? Object.keys(trainers).find((k) => trainers[k].tok === code) : "";
+      if (!tid) { await new Promise((r) => setTimeout(r, 800)); return fail("That link or access code is not valid. Ask the ILO office to send it again.", 404); }
+      const t = trainers[tid], all = await getJSON(s, "placements", {});
+      const mine = () => Object.values(all).filter((r) => r.tid === tid).map((r) => ({ n: r.n, a: r.a, cls: r.cls || "", dept: r.dept || "", course: r.course || "", org: r.org || "", loc: r.loc || "", town: cleanTown(r.town).toUpperCase(), county: r.county || "", sup: r.sup || "", supTel: r.supTel || "", tel1: r.tel1 || "", tel2: r.tel2 || "", sd: r.sd || "", ed: r.ed || "" })).sort((x, y) => (x.cls + x.n).localeCompare(y.cls + y.n));
+      const me = () => ({ name: t.name, tel: t.tel || "", email: t.email || "", code: showCode(t.tok), det: t.det || null, students: mine() });
+      if (method === "GET") {
+        if (!t.openedAt) { t.openedAt = Date.now(); await s.setJSON("trainers", trainers); }
+        return json(me());
+      }
+      if (method === "POST") {
+        const name = clean(body.name, 80).toUpperCase(), pf = clean(body.pf, 20).toUpperCase().replace(/\s+/g, ""), idno = clean(body.idno, 12).toUpperCase().replace(/[\s-]/g, "");
+        const bank = clean(body.bank, 60), branch = clean(body.branch, 60), acct = clean(body.acct, 24).replace(/[^0-9A-Za-z]/g, ""), email = clean(body.email, 200).toLowerCase(), tel = digits(body.tel);
+        if (name.length < 3 || name.split(" ").length < 2) throw new Bad("Enter your full name (at least two names).");
+        if (!/^[A-Z0-9\/-]{2,20}$/.test(pf)) throw new Bad("Enter your PF number (letters and digits only).");
+        if (!/^[A-Z0-9]{6,12}$/.test(idno)) throw new Bad("Enter your ID number (6 to 12 letters or digits).");
+        if (bank.length < 2) throw new Bad("Choose or type your bank.");
+        if (branch.length < 2) throw new Bad("Enter your bank branch.");
+        if (acct && (acct.length < 6 || acct.length > 20)) throw new Bad("The account number should be 6 to 20 characters. Leave it empty if you prefer not to give it.");
+        if (email && !EMAIL_RE.test(email)) throw new Bad("That email address does not look right.");
+        if (tel.replace(/\D/g, "").length < 9) throw new Bad("Enter your phone number (the one on WhatsApp if you can).");
+        for (const [k, o] of Object.entries(trainers)) if (k !== tid && o.det && (o.det.pf === pf || o.det.idno === idno)) throw new Bad("Those details match another trainer already on the list. Check the PF and ID numbers, or ask the ILO office for help.");
+        const first = !t.det;
+        t.det = { name, pf, idno, bank, branch, acct, at: Date.now(), v: ((t.det && t.det.v) || 0) + 1 };
+        if (email) t.email = email; t.tel = tel;
+        await s.setJSON("trainers", trainers);
+        await audit(s, { type: first ? "trainer details received" : "trainer details updated", trainer: t.name, by: name, role: "trainer" });
+        if (first && t.email) { try { await within(mailTo(t.email, "RVNP: your details were received", "Hello " + name + ",\n\nThank you. The ILO office has received your details. You can open your page again at any time to download your students list:\n" + baseUrl(req) + "/trainer.html?t=" + t.tok + "\n\nRVNP Industrial Liaison Office"), 6000); } catch (e) {} }
+        return json(me());
+      }
+      return fail("Not found", 404);
+    }
+
     /* ----- ILO HOD / deputy HOD (access code) ----- */
     if (path === "hod" || path.startsWith("hod/")) {
       const acct=await currentAccount(req,s), admTok=(req.headers.get("authorization")||"").replace(/^Bearer /,""); if (!(admTok && validToken(admTok)) && !requireRole(acct,["hod","deputy"])) { await new Promise((r) => setTimeout(r, 800)); return fail("Please sign in as an approved HOD or Deputy HOD.", 401); }
       const all = await getJSON(s, "placements", {}), trainers = await getJSON(s, "trainers", {});
+      { let fixed = false; for (const t of Object.values(trainers)) if (!t.tok) { t.tok = newCode(); fixed = true; } if (fixed) await s.setJSON("trainers", trainers); }   /* trainers added before access codes existed get one now */
+      const byRole = admTok && validToken(admTok) ? "admin" : acct.role, byName = admTok && validToken(admTok) ? "Administrator" : acct.name;
+      const base = baseUrl(req);
       const view = () => {
         const cnt = {};
         for (const r of Object.values(all)) if (r.tid && trainers[r.tid]) cnt[r.tid] = (cnt[r.tid] || 0) + 1;
         return {
-          placements: Object.entries(all).map(([id, r]) => ({ id, ...r, tid: r.tid && trainers[r.tid] ? r.tid : "" }))
+          placements: Object.entries(all).map(([id, r]) => ({ id, ...r, town: cleanTown(r.town).toUpperCase(), tid: r.tid && trainers[r.tid] ? r.tid : "" }))
             .sort((x, y) => (x.dept + x.course + x.n).localeCompare(y.dept + y.course + y.n)),
-          trainers: Object.entries(trainers).map(([id, t]) => ({ id, ...t, count: cnt[id] || 0 })).sort((x, y) => x.name.localeCompare(y.name)),
+          trainers: Object.entries(trainers).map(([id, t]) => {
+            const { tok, ...rest } = t, n = cnt[id] || 0, link = base + "/trainer.html?t=" + tok, m = trainerMsg(t, n, link, tok);
+            return { id, ...rest, count: n, code: showCode(tok), link, text: m.short, wnum: intl(t.tel) };
+          }).sort((x, y) => x.name.localeCompare(y.name)),
           departments: DEPTS.concat(OTHER),
+          channels: chanOn(),
         };
       };
       if (method === "GET" && path === "hod/data") return json(view());
+      /* every registered student, for the search and the department, course and class views (Admin, HOD, Deputy HOD).
+         The list is the student register (the same list the Admin removes students from), joined with each student's saved account details. */
+      if (method === "GET" && path === "hod/directory") {
+        const accts = await getJSON(s, "accounts", {}), reg = await getJSON(s, "register", {}), covers = await getJSON(s, "students", {}), byAdm = {}, out = [];
+        for (const a of Object.values(accts)) if (a.role === "student") byAdm[normAdm(a.adm)] = a;
+        const place = (n, a) => { const r = all[sid(n, a)]; if (!r) return {}; const t = r.tid && trainers[r.tid]; return { pl: 1, org: r.org || "", loc: r.loc || "", town: cleanTown(r.town).toUpperCase(), county: r.county || "", sup: r.sup || "", supTel: r.supTel || "", tr: t ? t.name : "", trTel: t ? t.tel : "", tby: r.tby || "" }; };
+        for (const [rid, r] of Object.entries(reg)) {
+          const a = (r.accountId && accts[r.accountId]) || byAdm[normAdm(r.a)];
+          if (a && a.status !== "approved") continue;
+          const n = (a && a.name) || r.n, adm = (a && a.adm) || r.a;
+          out.push({ rid, n, a: adm, c: (a && a.cls) || r.c || "", cp: !!(a && a.clsPending), d: (a && a.dept) || "", co: (a && a.course) || "", it: (a && a.intake) || "", g: (a && a.gender) || "", ph: (a && a.phone) || r.tel || "", ph2: (a && a.altPhone) || "", em: (a && a.email) || "", cv: !!covers[rid], ...place(n, adm) });
+        }
+        out.sort((x, y) => (x.c + "|" + x.n).localeCompare(y.c + "|" + y.n));
+        const cs = await loadCourses(s);
+        return json({ students: out, departments: DEPTS.concat(OTHER), courses: cs.map((c) => ({ dept: c.dept, title: c.title })) });
+      }
       if (method === "POST" && path === "hod/trainers") {
-        const name = clean(body.name, 80), tel = digits(body.tel);
+        const name = clean(body.name, 80), tel = digits(body.tel), email = clean(body.email, 200).toLowerCase();
         if (name.length < 3) throw new Bad("Enter the trainer's name.");
-        if (tel.replace(/\D/g, "").length < 9) throw new Bad("Enter the trainer's phone number (at least 9 digits).");
+        if (tel.replace(/\D/g, "").length < 9) throw new Bad("Enter the trainer's phone number (at least 9 digits). It is used for WhatsApp.");
+        if (email && !EMAIL_RE.test(email)) throw new Bad("That email address does not look right. Leave it empty if you do not have it.");
         if (Object.values(trainers).some((t) => t.name.toLowerCase() === name.toLowerCase())) throw new Bad("A trainer called \"" + name + "\" is already on the list.");
         if (Object.keys(trainers).length >= 300) throw new Bad("Too many trainers.");
-        trainers["T" + Date.now().toString(36) + Math.random().toString(36).slice(2, 4)] = { name, tel };
+        let tok = newCode(); while (Object.values(trainers).some((t) => t.tok === tok)) tok = newCode();
+        trainers["T" + Date.now().toString(36) + Math.random().toString(36).slice(2, 4)] = { name, tel, ...(email && { email }), tok, addedAt: Date.now() };
         await s.setJSON("trainers", trainers);
+        return json(view());
+      }
+      if (method === "PUT" && path.startsWith("hod/trainers/")) {
+        const id = path.split("/")[2], t = trainers[id];
+        if (!t) throw new Bad("That trainer is no longer on the list.");
+        const name = clean(body.name, 80), tel = digits(body.tel), email = clean(body.email, 200).toLowerCase();
+        if (name.length < 3) throw new Bad("Enter the trainer's name.");
+        if (tel.replace(/\D/g, "").length < 9) throw new Bad("Enter the trainer's phone number (at least 9 digits).");
+        if (email && !EMAIL_RE.test(email)) throw new Bad("That email address does not look right.");
+        if (Object.entries(trainers).some(([k, o]) => k !== id && o.name.toLowerCase() === name.toLowerCase())) throw new Bad("Another trainer already has that name.");
+        t.name = name; t.tel = tel; if (email) t.email = email; else delete t.email;
+        await s.setJSON("trainers", trainers);
+        await audit(s, { type: "trainer contact changed: " + name, by: byName, role: byRole });
+        return json(view());
+      }
+      /* send the link (message with the access code) to chosen trainers now: all channels that are set up, or just the ones named */
+      if (method === "POST" && path === "hod/trainers/notify") {
+        const ids = (Array.isArray(body.ids) ? body.ids : []).map((x) => clean(x, 30)).filter((x) => trainers[x]).slice(0, 15);
+        if (!ids.length) throw new Bad("Choose at least one trainer.");
+        const only = Array.isArray(body.channels) ? body.channels.filter((c) => CHANNELS.includes(c)) : [];
+        const results = [];
+        for (const id of ids) {
+          const t = trainers[id], res = await deliver(req, t, trainerCount(all, id), only);
+          results.push({ id, name: t.name, res });
+          await audit(s, { type: "trainer message", trainer: t.name, result: res, by: byName, role: byRole });
+        }
+        await s.setJSON("trainers", trainers);
+        return json({ results, ...view() });
+      }
+      /* the HOD printed or handed over a letter (so the page can show "Letter given") */
+      if (method === "POST" && path === "hod/trainers/letter") {
+        const id = clean(body.id, 30), t = trainers[id];
+        if (!t) throw new Bad("That trainer is no longer on the list.");
+        t.notif = t.notif || {}; t.notif.letter = { ok: true, at: Date.now() };
+        await s.setJSON("trainers", trainers);
+        await audit(s, { type: "trainer letter printed", trainer: t.name, by: byName, role: byRole });
         return json(view());
       }
       if (method === "DELETE" && path.startsWith("hod/trainers/")) {
@@ -982,10 +1181,21 @@ export default async (req) => {
         if (tid && !trainers[tid]) throw new Bad("That trainer is no longer on the list. Refresh and try again.");
         if (!ids.length) throw new Bad("Choose at least one student.");
         let n = 0;
-        for (const id of ids) if (all[id]) { if (tid) all[id].tid = tid; else delete all[id].tid; n++; }
+        for (const id of ids) if (all[id]) { if (tid) { all[id].tid = tid; all[id].tby = byRole; } else { delete all[id].tid; delete all[id].tby; } n++; }
         if (!n) throw new Bad("Those students were not found. Refresh and try again.");
         await s.setJSON("placements", all);
-        return json({ assigned: n, ...view() });
+        await audit(s, { type: tid ? "trainer assigned: " + trainers[tid].name : "trainer removed from students", count: n, by: byName, role: byRole });
+        /* tell the trainer by themselves: the first time always, later only if the last message is older than 15 minutes (the page they get is always the live list, so a burst of assignments sends one message) */
+        let notify = null;
+        if (tid) {
+          const t = trainers[tid];
+          if (!t.sentAt || Date.now() - t.sentAt > 15 * 60 * 1000) {
+            notify = { id: tid, name: t.name, res: await deliver(req, t, trainerCount(all, tid), null) };
+            await s.setJSON("trainers", trainers);
+            await audit(s, { type: "trainer message (automatic)", trainer: t.name, result: notify.res, by: byName, role: byRole });
+          } else notify = { id: tid, name: t.name, held: true };
+        }
+        return json({ assigned: n, notify, ...view() });
       }
       return fail("Not found", 404);
     }

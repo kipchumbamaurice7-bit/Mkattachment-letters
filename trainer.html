@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trainer page | RVNP Industrial Liaison Office</title>
+<meta name="theme-color" content="#123b31"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<style>
+:root{--bg:#f3f8f4;--card:#fff;--ink:#12301f;--mut:#51675a;--ac:#17803f;--acd:#0f6330;--soft:#e3f3e8;--bd:#cfe0d4;--in:#fff;--ok:#17703a;--okb:#e6f4ea;--er:#b3261e;--erb:#fdecea;--on:#fff;--or:#f28a1d;--orb:#fff1e0;--ord:#c2610a}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1a12;--card:#14261b;--ink:#e6f4ea;--mut:#9fb8a7;--ac:#4cc77a;--acd:#6fd99a;--soft:#1a3524;--bd:#2c4a38;--in:#0f1f16;--ok:#6fd08c;--okb:#14301f;--er:#ff8a80;--erb:#3a1916;--on:#08140d;--or:#ffa94d;--orb:#3a2610;--ord:#ffbf73}}
+*,*:before,*:after{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.top{background:#123b31;color:#fff;padding:14px 16px}.top div{max-width:980px;margin:0 auto;display:flex;gap:12px;align-items:center}.top b{font-size:16px}.top span{display:block;font-size:13px;opacity:.8}
+.wrap{max-width:980px;margin:0 auto;padding:22px 16px 60px}
+h1{font-size:25px;line-height:1.2;margin:0 0 6px}.lead{margin:0 0 18px;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--bd);border-top:3px solid var(--or);border-radius:14px;padding:20px;margin-bottom:18px}
+.card h2{font-size:18px;margin:0 0 4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}
+@media(max-width:620px){.grid{grid-template-columns:1fr}h1{font-size:22px}}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+input{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--in);color:var(--ink);font:inherit}
+.hint{font-size:13px;color:var(--mut);margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:11px 22px;border:0;border-radius:10px;background:var(--ac);color:var(--on);font:inherit;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:wait}.btn.sec{background:var(--soft);color:var(--ink);border:1px solid var(--bd)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.msg{margin-top:12px;padding:10px 13px;border-radius:9px;font-size:15px}.msg:empty{display:none}
+.msg.err{background:var(--erb);color:var(--er)}.msg.ok{background:var(--okb);color:var(--ok)}.msg.info{background:var(--orb);color:var(--ord)}
+.pill{display:inline-block;padding:3px 11px;border-radius:99px;font-size:13px;font-weight:700;background:var(--orb);color:var(--ord)}.pill.ok{background:var(--okb);color:var(--ok)}
+.sum{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;margin:12px 0 0;font-size:15px}.sum dt{color:var(--mut)}.sum dd{margin:0;font-weight:600;word-break:break-word}
+@media(max-width:480px){.sum{grid-template-columns:1fr}.sum dt{margin-top:6px}}
+.scroll{overflow-x:auto;margin-top:12px;border:1px solid var(--bd);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:760px}th,td{padding:9px 10px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}th{background:var(--soft);font-size:13px;white-space:nowrap}
+td small{color:var(--mut)}a{color:var(--ac)}
+.locked{text-align:center;padding:26px 10px;color:var(--mut)}
+.code{font:700 22px/1.2 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase}
+@media print{.top,.noprint,#c-form,#c-code,.btn,.msg{display:none!important}body{background:#fff}.card{border:0;padding:0}.scroll{border:0;overflow:visible}table{min-width:0;font-size:11px}}
+</style></head><body>
+<div class="top"><div><img src="/icon-192.png" alt="" width="38" height="38" style="border-radius:8px"><p style="margin:0"><b>Rift Valley National Polytechnic</b><span>Industrial Liaison Office · Trainer page</span></p></div></div>
+<div class="wrap">
+
+<div class="card" id="c-code" hidden>
+  <h2>Enter your access code</h2>
+  <p class="lead">Use the link you received on WhatsApp or email. If you were given a letter, type the access code printed on it.</p>
+  <label for="code">Access code</label><input id="code" class="code" maxlength="12" autocomplete="off" autocapitalize="characters" placeholder="ABCDE-FGHJK">
+  <div class="row"><button class="btn" id="go" type="button">Open my page</button></div>
+  <div class="msg" id="m-code" role="status"></div>
+</div>
+
+<div id="main" hidden>
+  <h1 id="hello">Hello</h1>
+  <p class="lead" id="intro"></p>
+
+  <div class="card" id="c-form">
+    <h2 id="f-title">Step 1: Give your details</h2>
+    <p class="lead" id="f-lead">The college needs these to pay and record your attachment supervision. Only the ILO office, HOD, Deputy HOD and Administrator can see them.</p>
+    <div class="grid">
+      <div class="full"><label for="f-name">Full name (as on your ID)</label><input id="f-name" autocomplete="name"></div>
+      <div><label for="f-pf">PF number</label><input id="f-pf" autocapitalize="characters" autocomplete="off"></div>
+      <div><label for="f-id">ID number</label><input id="f-id" inputmode="text" autocomplete="off"></div>
+      <div><label for="f-bank">Bank</label><input id="f-bank" list="banks" placeholder="Choose or type your bank" autocomplete="off"><datalist id="banks"></datalist></div>
+      <div><label for="f-branch">Bank branch</label><input id="f-branch" placeholder="e.g. Nakuru" autocomplete="off"></div>
+      <div><label for="f-acct">Account number <small style="font-weight:400;color:var(--mut)">(optional)</small></label><input id="f-acct" inputmode="numeric" autocomplete="off"></div>
+      <div><label for="f-tel">Phone number (WhatsApp)</label><input id="f-tel" type="tel" inputmode="tel" autocomplete="tel"></div>
+      <div class="full"><label for="f-email">Email <small style="font-weight:400;color:var(--mut)">(optional, so updates reach you there too)</small></label><input id="f-email" type="email" autocomplete="email"></div>
+    </div>
+    <div class="row"><button class="btn" id="save" type="button">Send my details</button><button class="btn sec" id="cancel" type="button" hidden>Cancel</button></div>
+    <div class="msg" id="m-form" role="status"></div>
+  </div>
+
+  <div class="card" id="c-done" hidden>
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><h2>Your details</h2><span class="pill ok">Received</span></div>
+    <dl class="sum" id="sum"></dl>
+    <div class="row noprint"><button class="btn sec" id="edit" type="button">Correct my details</button></div>
+  </div>
+
+  <div class="card" id="c-list">
+    <h2 id="l-title">Step 2: Your students</h2>
+    <div id="l-locked" class="locked">Give your details above to open your list of students.</div>
+    <div id="l-body" hidden>
+      <p class="lead" id="l-lead"></p>
+      <div class="row noprint" style="margin-top:0"><button class="btn" id="xl" type="button">Download my list (Excel)</button><button class="btn sec" id="csv" type="button">CSV</button><button class="btn sec" id="print" type="button">Print / Save as PDF</button><button class="btn sec" id="refresh" type="button">Refresh</button></div>
+      <div class="row noprint"><input id="q" type="search" placeholder="Search by student, admission number or workplace" style="max-width:420px"></div>
+      <div class="msg" id="m-list" role="status"></div>
+      <div class="scroll"><table><thead><tr><th>#</th><th>Student</th><th>Class</th><th>Workplace</th><th>Town</th><th>Supervisor at workplace</th><th>Student phone</th></tr></thead><tbody id="tb"></tbody></table></div>
+    </div>
+  </div>
+  <p class="hint noprint">Bookmark this page: it always shows your latest list. Do not share the link, it opens your details.</p>
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="/rvu.js"></script>
+<script>
+(function () {
+  "use strict";
+  var U = window.RVU, esc = U.esc, $ = function (i) { return document.getElementById(i); };
+  var CODE = "", ME = null, editing = false;
+  var BANKS = ["Equity Bank", "KCB Bank", "Co-operative Bank", "NCBA Bank", "Absa Bank Kenya", "Standard Chartered Bank", "Stanbic Bank", "I&M Bank", "Diamond Trust Bank (DTB)", "Family Bank", "National Bank of Kenya", "Postbank", "Sidian Bank", "HF Group", "Bank of Africa", "Gulf African Bank", "Credit Bank", "Consolidated Bank", "Prime Bank", "Kenya Women Microfinance Bank", "M-PESA / mobile wallet"];
+  $("banks").innerHTML = BANKS.map(function (b) { return '<option value="' + esc(b) + '">'; }).join("");
+
+  var api = U.api(function () { return {}; }, null);
+  function codeFromUrl() { var p = new URLSearchParams(location.search).get("t"); return p ? p.toUpperCase().replace(/[^A-Z0-9]/g, "") : ""; }
+  function when(t) { return t ? new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : ""; }
+
+  function showCode(msg) { $("main").hidden = true; $("c-code").hidden = false; U.say($("m-code"), msg ? "err" : "", msg || ""); }
+  async function load(code, quiet) {
+    try {
+      ME = await api("GET", "trainer/me?t=" + encodeURIComponent(code)); CODE = code;
+      try { history.replaceState(null, "", "/trainer.html?t=" + code); } catch (e) {}
+      $("c-code").hidden = true; $("main").hidden = false; draw();
+      if (quiet) U.say($("m-list"), "ok", "List refreshed.");
+    } catch (e) { if (quiet) U.say($("m-list"), "err", e.message); else showCode(e.message); }
+  }
+
+  function fill() {
+    var d = ME.det || {};
+    $("f-name").value = d.name || ME.name || ""; $("f-pf").value = d.pf || ""; $("f-id").value = d.idno || "";
+    $("f-bank").value = d.bank || ""; $("f-branch").value = d.branch || ""; $("f-acct").value = d.acct || "";
+    $("f-tel").value = ME.tel || ""; $("f-email").value = ME.email || "";
+  }
+  function draw() {
+    var first = (ME.name || "").split(" ")[0], n = ME.students.length;
+    $("hello").textContent = "Hello" + (first ? ", " + first : "");
+    $("intro").textContent = ME.det
+      ? (n ? "You have " + U.plural(n, "student") + " assigned to you." : "You have no students assigned yet. This page will show them as soon as they are assigned.")
+      : "The ILO office has " + (n ? "assigned you " + U.plural(n, "student") + ". " : "added you as a trainer. ") + "Please reply by giving your details below, then download your list.";
+    var have = !!ME.det;
+    $("c-form").hidden = have && !editing; $("c-done").hidden = !have || editing; $("cancel").hidden = !(have && editing);
+    $("f-title").textContent = have ? "Correct your details" : "Step 1: Give your details";
+    if (!have || editing) fill();
+    if (have) {
+      var d = ME.det;
+      $("sum").innerHTML = [["Name", d.name], ["PF number", d.pf], ["ID number", d.idno], ["Bank", d.bank], ["Bank branch", d.branch], ["Account number", d.acct || "Not given"], ["Phone", ME.tel], ["Email", ME.email || "Not given"], ["Received", when(d.at)]].map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+    }
+    $("l-locked").hidden = have; $("l-body").hidden = !have; $("l-title").textContent = have ? "Your students" : "Step 2: Your students";
+    if (have) { $("l-lead").textContent = n ? U.plural(n, "student") + ". Phone numbers are for supervision only. Please use them for that purpose." : "No students yet."; rows(); }
+  }
+  function rows() {
+    var q = U.key($("q").value), list = ME.students.filter(function (s) { return !q || U.key([s.n, s.a, s.org, s.town, s.sup].join(" ")).indexOf(q) >= 0; });
+    $("tb").innerHTML = list.map(function (s, i) {
+      var ph = [s.tel1, s.tel2].filter(Boolean).map(function (t) { return U.tel(t); }).join("<br>");
+      return "<tr><td>" + (i + 1) + "</td><td><b>" + esc(s.n) + "</b><br><small>" + esc(s.a) + "</small></td><td>" + esc(s.cls) + "<br><small>" + esc(s.course) + "</small></td><td>" + esc(s.org) + (s.loc ? "<br><small>" + esc(s.loc) + "</small>" : "") + "</td><td>" + esc(s.town) + (s.county ? "<br><small>" + esc(s.county) + "</small>" : "") + "</td><td>" + esc(s.sup) + (s.supTel ? "<br>" + U.tel(s.supTel) : "") + "</td><td>" + ph + "</td></tr>";
+    }).join("") || '<tr><td colspan="7" style="text-align:center;color:var(--mut)">' + (ME.students.length ? "No student matches that search." : "No students assigned yet.") + "</td></tr>";
+  }
+
+  var HEAD = ["#", "Student name", "Admission number", "Class", "Department", "Course", "Organization", "Where (landmark)", "Town", "County", "Supervisor at organization", "Supervisor phone", "Student phone 1", "Student phone 2", "Attachment start", "Attachment end"];
+  function sheetRows() { return ME.students.map(function (s, i) { return [i + 1, s.n, s.a, s.cls, s.dept, s.course, s.org, s.loc, s.town, s.county, s.sup, s.supTel, s.tel1, s.tel2, s.sd, s.ed]; }); }
+  function fname() { return "RVNP_my_students_" + (ME.det ? ME.det.name : ME.name).replace(/[^A-Za-z0-9]+/g, "_"); }
+  $("xl").onclick = function () {
+    if (!ME.students.length) { U.say($("m-list"), "err", "You have no students yet."); return; }
+    var r = U.xlsx(fname(), [{ name: "My students", head: HEAD, rows: sheetRows(), widths: [5, 30, 20, 18, 28, 34, 28, 36, 16, 16, 24, 14, 14, 14, 14, 14] }]);
+    U.say($("m-list"), r === "csv" ? "info" : "ok", r === "csv" ? "The Excel tool did not load, so a CSV file was downloaded instead." : "Downloaded.");
+  };
+  $("csv").onclick = function () { if (!ME.students.length) { U.say($("m-list"), "err", "You have no students yet."); return; } U.csv(fname(), HEAD, sheetRows()); };
+  $("print").onclick = function () { window.print(); };
+  $("refresh").onclick = function () { load(CODE, true); };
+  $("q").addEventListener("input", U.debounce(rows, 150));
+
+  $("save").onclick = async function () {
+    var b = $("save"); b.disabled = true; U.say($("m-form"), "info", "Sending\u2026");
+    try {
+      ME = await api("POST", "trainer/details", { t: CODE, name: $("f-name").value, pf: $("f-pf").value, idno: $("f-id").value, bank: $("f-bank").value, branch: $("f-branch").value, acct: $("f-acct").value, tel: $("f-tel").value, email: $("f-email").value });
+      editing = false; U.say($("m-form"), "", ""); draw(); U.say($("m-list"), "ok", "Thank you. Your details were received and your list is open below.");
+      $("c-list").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (e) { U.say($("m-form"), "err", e.message); }
+    b.disabled = false;
+  };
+  $("edit").onclick = function () { editing = true; draw(); window.scrollTo(0, 0); };
+  $("cancel").onclick = function () { editing = false; draw(); };
+  $("go").onclick = function () { var c = $("code").value.toUpperCase().replace(/[^A-Z0-9]/g, ""); if (c.length !== 10) { U.say($("m-code"), "err", "The access code has 10 letters and digits."); return; } load(c); };
+  $("code").addEventListener("keydown", function (e) { if (e.key === "Enter") $("go").onclick(); });
+
+  var c = codeFromUrl(); if (c) load(c); else showCode("");
+})();
+</script>
+</body></html>

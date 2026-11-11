@@ -75,7 +75,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="/icon-192.png">
-<link rel="stylesheet" href="/shell.css">
+<link rel="stylesheet" href="/shell.css"><link rel="stylesheet" href="/workspace.css">
 </head><body>
 <div class="wrap">
 
@@ -249,46 +249,12 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 </div>
 </div>
 
-<!-- STUDENT DATABASE -->
-<div id="s-reg" hidden>
-<div class="card">
-<h2>Totals</h2>
-<p style="font-size:20px;margin:0 0 4px"><b id="gtot">0</b> students in <b id="gnc">0</b> classes</p>
-<div class="hint" id="gcv"></div>
-<div class="row"><button class="btn" id="gxl">Download Excel (by class)</button><button class="btn sec" id="gcs">Download CSV</button><button class="btn sec" id="grf">Refresh</button></div>
-<div class="msg" id="gm"></div>
-<div class="scroll"><table><thead><tr><th>Class</th><th>Students</th><th>With cover</th></tr></thead><tbody id="gtb"></tbody></table></div>
-<div class="hint">Tap a class to see its students.</div>
-</div>
-<div class="card">
-<h2>Find students</h2>
-<label for="gq">Search by name, admission number, class or phone</label>
-<input id="gq" placeholder="Type at least 2 letters, or tap a class above">
-<div class="hint" id="gh" style="margin:8px 0"></div>
-<div class="scroll"><table><thead><tr><th>Class</th><th>Name</th><th>Admission no. and contact</th></tr></thead><tbody id="gls"></tbody></table></div>
-</div>
-</div>
+<!-- STUDENT DATABASE: the same searchable directory the HOD and Deputy HOD use (Admin can also remove a mistaken entry) -->
+<div id="s-reg" hidden><div id="dirbox"></div></div>
 
 <!-- PLACEMENTS -->
 <div id="s-mk" hidden><section class="panel" style="margin-top:14px"><h2>Marks</h2><p class="lead">See marks for every department. Download one class, a whole department, or everything.</p><div id="mkbox"></div></section></div>
-<div id="s-pm" hidden>
-<div class="card">
-<h2>Totals</h2>
-<p style="font-size:20px;margin:0 0 4px"><b id="pmt">0</b> students placed &middot; <b id="pma">0</b> assigned &middot; <b id="pmu">0</b> waiting for a trainer</p>
-<div class="row"><button class="btn" id="pmxl">Download Excel</button><button class="btn sec" id="pmrf">Refresh</button></div>
-<div class="scroll"><table><thead><tr><th>Department</th><th>Placed</th><th>Assigned</th></tr></thead><tbody id="pmd"></tbody></table></div>
-<div class="hint">Tap a department to see its students.</div>
-<h3 style="margin-top:16px">Trainers</h3>
-<div class="scroll"><table><thead><tr><th>Trainer</th><th>Phone</th><th>Students</th></tr></thead><tbody id="pmtr"></tbody></table></div>
-</div>
-<div class="card">
-<h2>Find placements</h2>
-<label for="pmq">Search by name, admission number, organization, town or trainer</label>
-<input id="pmq" placeholder="Type at least 2 letters, or tap a department above">
-<div class="hint" id="pmh" style="margin:8px 0"></div>
-<div id="pml2"></div>
-</div>
-</div>
+<div id="s-pm" hidden><div id="plbox"></div></div>
 
 <dialog id="pdlg">
 <h3 id="pdt">Policy</h3>
@@ -342,11 +308,11 @@ $("out").onclick=signOut;
 async function start(){
  D=await call("GET","admin/data");$("login").hidden=true;$("app").hidden=false;
  var s=D.settings;$("pn").value=s.policyNumber;$("pi").value=s.insurer;$("ps").value=s.policyStart;$("pe").value=s.policyEnd;$("pd").value=s.issueDate;
- fillDepts();drawStudents();drawCourses();drawReqs();drawIlo();drawNita();loadReg()}
+ fillDepts();drawStudents();drawCourses();drawReqs();drawIlo();drawNita();mountLists()}
 if(TOKEN)start().catch(function(){signOut()});
 
 /* tabs */
-var MK=null;function tab(w){["a","i","r","l","c","o","g","m","k"].forEach(function(k){var id={a:"ac",i:"ins",r:"req",l:"let",c:"cc",o:"ilo",g:"reg",m:"pm",k:"mk"}[k];$("t-"+id).setAttribute("aria-selected",k===w);$("s-"+id).hidden=k!==w});if(w==="a")loadAccounts();if(w==="c")drawCC();if(w==="g"&&!REG)loadReg();if(w==="m"&&!PM)loadPm();if(w==="k"&&!MK){MK=RVMarks.mount($("mkbox"),{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut});var v2=document.createElement("div");v2.style.marginTop="14px";$("mkbox").parentNode.appendChild(v2);RVV2.mount(v2,{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut})}}
+var MK=null;function tab(w){["a","i","r","l","c","o","g","m","k"].forEach(function(k){var id={a:"ac",i:"ins",r:"req",l:"let",c:"cc",o:"ilo",g:"reg",m:"pm",k:"mk"}[k];$("t-"+id).setAttribute("aria-selected",k===w);$("s-"+id).hidden=k!==w});if(w==="a")loadAccounts();if(w==="c")drawCC();if(w==="k"&&!MK){MK=RVMarks.mount($("mkbox"),{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut});var v2=document.createElement("div");v2.style.marginTop="14px";$("mkbox").parentNode.appendChild(v2);RVV2.mount(v2,{role:"admin",headers:function(){return{Authorization:"Bearer "+(TOKEN||"")}},onAuthFail:signOut})}}
 $("t-ac").onclick=function(){tab("a")};$("t-ins").onclick=function(){tab("i")};$("t-req").onclick=function(){tab("r")};$("t-let").onclick=function(){tab("l")};$("t-cc").onclick=function(){tab("c")};$("t-ilo").onclick=function(){tab("o")};$("t-reg").onclick=function(){tab("g")};$("t-pm").onclick=function(){tab("m")};$("t-mk").onclick=function(){tab("k")};
 
 /* accounts */
@@ -583,72 +549,15 @@ $("ilol").onclick=async function(e){var a=e.target.getAttribute("data-ia"),r=e.t
 
 $("irf").onclick=async function(){say("mil","");try{await reload();fillDepts();say("mil","ok","Updated.")}catch(e){say("mil","err",e.message)}};
 
-/* student database (registered through the portal registration page) */
-var REG=null,GCLASS="";
-async function loadReg(){say("gm","");try{var d=await call("GET","admin/register");REG=d.list;drawReg()}catch(e){say("gm","err",e.message)}}
-function drawReg(){if(!REG)return;var by={},cov={};REG.forEach(function(r){by[r.c]=(by[r.c]||0)+1;if(r.cover)cov[r.c]=(cov[r.c]||0)+1});
- var cl=Object.keys(by).sort(),n=REG.filter(function(r){return r.cover}).length;
- $("gtot").textContent=REG.length;$("gnc").textContent=cl.length;$("gcnt").textContent=REG.length;
- $("gcv").textContent=REG.length?n+" of them already have an insurance cover.":"No student has filled in their details yet.";
- $("gtb").innerHTML=cl.map(function(c){return '<tr data-gc="'+esc(c)+'" style="cursor:pointer"><td><b>'+esc(c)+'</b></td><td>'+by[c]+'</td><td>'+(cov[c]||0)+'</td></tr>'}).join("")||"<tr><td colspan=3>Nothing yet.</td></tr>";
- drawRegList()}
-function drawRegList(){if(!REG)return;var q=$("gq").value.trim().toUpperCase(),rows;
- if(GCLASS&&q.length<2){rows=REG.filter(function(r){return r.c===GCLASS});$("gh").textContent=GCLASS+": "+rows.length+" students."}
- else if(q.length>=2){rows=REG.filter(function(r){return (r.n+" "+r.a+" "+r.c+" "+r.tel).toUpperCase().indexOf(q)>=0});$("gh").textContent=rows.length+" found"+(rows.length>200?" (showing the first 200)":"")+"."}
- else{$("gls").innerHTML="";$("gh").textContent="Type at least 2 letters, or tap a class above, to see students.";return}
- $("gls").innerHTML=rows.slice(0,200).map(function(r){return "<tr><td>"+esc(r.c)+"</td><td>"+esc(r.n)+(r.cover?'<span class="tag">has cover</span>':"")+'<div style="margin-top:6px"><button class="btn del" data-gd="'+r.id+'" style="min-height:32px;padding:3px 10px;font-size:13px">Remove</button></div></td><td>'+esc(r.a)+'<div class="hint">'+esc(r.tel)+"</div></td></tr>"}).join("")||"<tr><td colspan=3>No students found.</td></tr>"}
-$("gq").oninput=function(){GCLASS=GCLASS&&this.value.trim().length<2?GCLASS:"";drawRegList()};
-$("gtb").onclick=function(e){var tr=e.target.closest("[data-gc]");if(!tr)return;GCLASS=tr.getAttribute("data-gc");$("gq").value="";drawRegList();$("gh").scrollIntoView({behavior:"smooth",block:"center"})};
-$("gls").onclick=async function(e){var id=e.target.getAttribute("data-gd");if(!id)return;if(!confirm("Remove this student from the database?"))return;
- try{await call("DELETE","admin/register/"+id);REG=REG.filter(function(r){return r.id!==id});drawReg()}catch(x){say("gm","err",x.message)}};
-$("grf").onclick=loadReg;
-function regSorted(){return REG.slice().sort(function(a,b){return (a.c+"|"+a.n).localeCompare(b.c+"|"+b.n)})}
-$("gcs").onclick=function(){if(!REG||!REG.length){say("gm","err","There is nothing to download yet.");return}
- var l=["Class,Student name,Admission number,Contact number,Has insurance cover"].concat(regSorted().map(function(r){return [r.c,r.n,r.a,r.tel,r.cover?"Yes":"No"].map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(",")}));
- var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+l.join("\n")],{type:"text/csv"}));a.download="RVNP_students_by_class.csv";a.click()};
-$("gxl").onclick=function(){if(!REG||!REG.length){say("gm","err","There is nothing to download yet.");return}
- if(!window.XLSX){say("gm","err","The spreadsheet tool did not load. Check your connection and try again.");return}
- var rows=regSorted(),by={};rows.forEach(function(r){(by[r.c]=by[r.c]||[]).push(r)});var cl=Object.keys(by).sort();
- var wb=XLSX.utils.book_new(),head=["Class","Student name","Admission number","Contact number","Has insurance cover"],line=function(r){return [r.c,r.n,r.a,r.tel,r.cover?"Yes":"No"]};
- var sum=[["Class","Students"]].concat(cl.map(function(c){return [c,by[c].length]}));sum.push(["TOTAL",rows.length]);
- var add=function(name,aoa,w){var ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=w.map(function(x){return{wch:x}});XLSX.utils.book_append_sheet(wb,ws,name)};
- add("Summary",sum,[26,12]);add("All students",[head].concat(rows.map(line)),[22,34,20,16,18]);
- var used={"Summary":1,"All students":1};
- cl.forEach(function(c){var nm=c.replace(/[\\\/\?\*\[\]:]/g,"-").slice(0,28)||"Class",k=nm,i=2;while(used[k])k=nm.slice(0,26)+"-"+i++;used[k]=1;add(k,[head.slice(1)].concat(by[c].map(function(r){return line(r).slice(1)})),[34,20,16,18])});
- XLSX.writeFile(wb,"RVNP_students_by_class.xlsx")};
-/* placements (students' attachment places) and trainers */
-var PM=null,PDEPT="";
-async function loadPm(){say("pmm","");try{PM=await call("GET","hod/data");drawPm()}catch(e){say("pmm","err",e.message)}}
-function trOf(id){return (PM.trainers||[]).find(function(t){return t.id===id})}
-function drawPm(){if(!PM)return;var P=PM.placements,as=P.filter(function(p){return p.tid}).length,by={},ba={};
- P.forEach(function(p){by[p.dept]=(by[p.dept]||0)+1;if(p.tid)ba[p.dept]=(ba[p.dept]||0)+1});
- $("pmt").textContent=P.length;$("pma").textContent=as;$("pmu").textContent=P.length-as;$("pmcnt").textContent=P.length;
- $("pmd").innerHTML=Object.keys(by).sort().map(function(d){return '<tr data-pd="'+esc(d)+'" style="cursor:pointer"><td><b>'+esc(d)+'</b></td><td>'+by[d]+'</td><td>'+(ba[d]||0)+'</td></tr>'}).join("")||"<tr><td colspan=3>No placements have been submitted yet.</td></tr>";
- $("pmtr").innerHTML=PM.trainers.map(function(t){return "<tr><td>"+esc(t.name)+"</td><td>"+esc(t.tel)+"</td><td><b>"+t.count+"</b></td></tr>"}).join("")||"<tr><td colspan=3>No trainers yet. The HOD adds them on the HOD link.</td></tr>";
- 
- drawPmList()}
-function drawPmList(){if(!PM)return;var q=$("pmq").value.trim().toUpperCase(),rows;
- if(PDEPT&&q.length<2){rows=PM.placements.filter(function(p){return p.dept===PDEPT});$("pmh").textContent=PDEPT+": "+rows.length+" students."}
- else if(q.length>=2){rows=PM.placements.filter(function(p){var t=trOf(p.tid);return (p.n+" "+p.a+" "+p.org+" "+p.town+" "+p.course+" "+(t?t.name:"")).toUpperCase().indexOf(q)>=0});$("pmh").textContent=rows.length+" found"+(rows.length>100?" (showing the first 100)":"")+"."}
- else{$("pml2").innerHTML="";$("pmh").textContent="Type at least 2 letters, or tap a department above, to see students.";return}
- $("pml2").innerHTML=rows.slice(0,100).map(function(p){var t=trOf(p.tid);return '<div class="course"><b>'+esc(p.n)+'</b> <span class="hint">'+esc(p.a)+'</span><div class="hint">'+esc(p.course)+'</div><div>'+esc(p.org)+', '+esc(p.town)+'</div><div class="hint">'+esc(p.loc)+' &middot; Supervisor: '+esc(p.sup)+' &middot; '+esc(p.tel1)+(p.tel2?' / '+esc(p.tel2):"")+'</div><p style="margin:6px 0">'+(t?'Trainer: <b>'+esc(t.name)+'</b> ('+esc(t.tel)+')':'<i>Waiting for a trainer</i>')+'</p><button class="btn del" data-pdx="'+p.id+'" style="min-height:32px;padding:3px 10px;font-size:13px">Remove</button></div>'}).join("")||'<p class="hint">No students found.</p>'}
-$("pmq").oninput=function(){if(this.value.trim().length>=2)PDEPT="";drawPmList()};
-$("pmd").onclick=function(e){var tr=e.target.closest("[data-pd]");if(!tr)return;PDEPT=tr.getAttribute("data-pd");$("pmq").value="";drawPmList();$("pmh").scrollIntoView({behavior:"smooth",block:"center"})};
-$("pml2").onclick=async function(e){var id=e.target.getAttribute("data-pdx");if(!id)return;if(!confirm("Remove this placement?"))return;
- try{await call("DELETE","admin/placements/"+id);PM.placements=PM.placements.filter(function(p){return p.id!==id});drawPm()}catch(x){say("pmm","err",x.message)}};
-$("pmrf").onclick=loadPm;
-
-function pmHead(){return ["Student name","Admission number","Class","Department","Course","Organization","Where (landmark)","Town","Supervisor at organization","Phone 1","Phone 2","College trainer","Trainer phone"]}
-function pmRow(p){var t=trOf(p.tid)||{name:"",tel:""};return [p.n,p.a,p.cls||"",p.dept,p.course,p.org,p.loc,p.town,p.sup,p.tel1,p.tel2||"",t.name,t.tel]}
-$("pmxl").onclick=function(){if(!PM||!PM.placements.length){say("pmm","err","Nothing to download yet.");return}
- if(!window.XLSX){say("pmm","err","The spreadsheet tool did not load. Check your connection and try again.");return}
- var P=PM.placements,by={},wb=XLSX.utils.book_new(),used={};P.forEach(function(p){(by[p.dept]=by[p.dept]||[]).push(p)});
- var add=function(nm,aoa){nm=nm.replace(/[\\\/\?\*\[\]:]/g,"-").slice(0,28)||"Sheet";var k=nm,i=2;while(used[k])k=nm.slice(0,26)+"-"+i++;used[k]=1;var ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=[30,20,18,28,34,28,36,14,24,14,14,24,14].map(function(x){return{wch:x}});XLSX.utils.book_append_sheet(wb,ws,k)};
- var sum=[["Department","Placed","Assigned to a trainer"]].concat(Object.keys(by).sort().map(function(d){return [d,by[d].length,by[d].filter(function(p){return p.tid}).length]}));sum.push(["TOTAL",P.length,P.filter(function(p){return p.tid}).length]);sum.push([]);sum.push(["Trainer","Phone","Students"]);PM.trainers.forEach(function(t){sum.push([t.name,t.tel,t.count])});
- add("Summary",sum);add("All placements",[pmHead()].concat(P.map(pmRow)));
- Object.keys(by).sort().forEach(function(d){add(d,[pmHead()].concat(by[d].map(pmRow)))});
- XLSX.writeFile(wb,"RVNP_placements.xlsx")};
+/* student directory and placements: shared with the HOD and Deputy HOD pages (directory.js, placements.js) */
+var DIR=null,PLC=null;
+function mountLists(){
+ var h=function(){return{Authorization:"Bearer "+(TOKEN||"")}};
+ DIR=RVDir.mount($("dirbox"),{headers:h,onAuthFail:signOut,canRemove:true,onData:function(d){$("gcnt").textContent=d.students.length}});
+ PLC=RVPlace.mount($("plbox"),{headers:h,onAuthFail:signOut,canAssign:false,canRemove:true,onData:function(d){$("pmcnt").textContent=d.placements.length}});
+}
 </script>
+<script src="/rvu.js"></script><script src="/directory.js"></script><script src="/placements.js"></script>
 <script src="/marks.js"></script><script src="/portal-v2.js"></script><script src="/pwa.js" defer></script>
 <script src="/shell.js"></script><script>
 (function(){var $=function(i){return document.getElementById(i)};

@@ -1,13 +1,13 @@
 {
-  "name": "RVNP ILO HOD and Deputy HOD",
+  "name": "RVNP ILO HOD",
   "short_name": "RVNP HOD",
-  "description": "Attachment letters, insurance covers, placement details and trainers for Rift Valley National Polytechnic students.",
+  "description": "Student directory, placements and trainers for the ILO HOD at Rift Valley National Polytechnic.",
   "start_url": "/hod.html?source=app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f3f8f4",
-  "theme_color": "#12304a",
+  "background_color": "#f4f7f4",
+  "theme_color": "#123b31",
   "lang": "en",
   "icons": [
     {

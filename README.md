@@ -1,5 +1,42 @@
 # RVNP Industrial Attachment Portal
 
+## Version 5: trainers give their details and get their list by WhatsApp and email (newest)
+
+**What happens now**
+
+1. HOD or Deputy adds a trainer (name, phone for WhatsApp, optional email) on the **Trainers** page and assigns students.
+2. The moment students are assigned, the trainer is **sent a message by themselves**: WhatsApp and email (SMS is not active; it can be added later). It says how many students they have and asks them to reply by giving their **name, PF number, ID number, bank and bank branch** (account number optional). The message holds a link, for example `your-site/trainer.html?t=ABCDEFGHJK`, and a 10 character access code.
+3. The trainer opens the link (no account or PIN), fills the form and presses **Send my details**. Their list then opens on the same page with **Download my list (Excel)**, CSV and Print. The list is always live, so later assignments appear without sending anything again.
+4. The details are saved at once and show on each trainer's card for the **HOD, Deputy HOD and Admin** (Admin sees them but cannot send or edit). The card shows: *Not yet contacted / Message sent, waiting / Opened the link, no details yet / Details received*, which channels went through and when, and a warning when the list changed since the last message.
+5. **Letter option:** the **Letter** button prints a letter on the RVNP letterhead with the page address and the access code, for trainers who have no phone or email. The card then shows "Letter given".
+6. **Remind everyone who has not given details** (Trainers page) sends the message again to every trainer still waiting. **Send now / Send again** sends to one trainer. **Open WhatsApp** opens WhatsApp with the message ready (works even before the automatic WhatsApp connection is set up). **Copy message** copies the text for any other channel.
+7. **Download trainer details (Excel)** gives name, phone, email, PF, ID, bank, branch, account number and the number of students. The "one sheet per trainer" file now has a Trainer details sheet too.
+
+**Rules built in:** a burst of assignments sends one message (the first always goes; later ones are held for 15 minutes because the link already shows the live list; the card says "Send again" if the list changed). Two trainers cannot have the same PF or ID number. A removed trainer's link stops working. Access codes use letters and digits that cannot be confused (no 0, O, 1, I). Trainers added before this update get a code automatically. Wrong codes wait 0.8 seconds before answering. Bank details are visible only to HOD, Deputy HOD and Admin; ILO Representatives and students never receive them. Sends and detail changes go to the audit log (bank details are not written to it).
+
+**Setup in Netlify (Site settings, Environment variables), then redeploy**
+
+- *Email (already used for PIN resets):* `RESEND_API_KEY`, `MAIL_FROM`, `SITE_URL` (your site address, so links in messages are correct).
+- *WhatsApp (automatic):* uses the WhatsApp Business Cloud API (Meta). Create a Meta business app with a WhatsApp number, then set `WHATSAPP_TOKEN` (a permanent access token), `WHATSAPP_PHONE_ID`, and for first messages to people who have not written to you, an approved **message template**: set `WHATSAPP_TEMPLATE` (its name) and `WHATSAPP_LANG` (for example `en`). Create the template (category Utility) with three variables in the body:
+  `Hello {{1}}, from RVNP Industrial Liaison Office. Your attachment supervision list: {{2}}. Please open {{3}} to confirm your details (name, PF number, ID number, bank and branch) and download your list.`
+  Meta must approve the template before it works. Without `WHATSAPP_TEMPLATE` a plain text is sent, which WhatsApp delivers only to people who messaged your number in the last 24 hours. Until WhatsApp is connected, use **Open WhatsApp** on the trainer's card.
+- *SMS (later, not active now):* the code is parked and switched off. Nothing about SMS shows on the pages or is sent. To add it later: set `SMS_ENABLED` to `true` near the top of `api.mjs`, set `AT_USERNAME` and `AT_API_KEY` (and optionally `AT_SENDER`) from an Africa's Talking account, test it, and redeploy. The pages then show SMS with the other channels.
+
+**Files.** New: `trainer.html`. Changed: `api.mjs` (new `trainer/me`, `trainer/details`, `hod/trainers/notify`, `hod/trainers/letter`, `PUT hod/trainers/:id`; `hod/assign` now messages the trainer; `hod/data` returns trainer details, message status and channels), `placements.js` (Trainers page), `workspace.css`, `leader.js` (overview chip), `sw.js` (cache v22), `netlify.toml` (no caching for the trainer page). Redeploy all files together. Existing data is kept.
+
+**Please test on a staging site before using it for real:** the logic and both pages were tested with simulated email and WhatsApp services. A real send depends on your Resend, Meta and (later) SMS accounts, so send a first message to your own phone and email.
+
+## Version 4: separate HOD and Deputy HOD accounts, student directory, easier placements (newest)
+
+- **HOD and Deputy HOD are now separate.** The gateway has its own card for ILO HOD, Deputy HOD, ILO Representative, Admin and Student. HOD signs in at `/hod.html` (via `/auth.html?role=staff&as=hod`), Deputy at `/deputy.html` (`&as=deputy`). An account only opens through its own door (the server refuses a mismatch), each has its own title, app name and installable icon, and trainer assignments are recorded with the role that made them (audit log and "assigned by" on the student). Both have the same powers.
+- **Student directory (Admin, HOD, Deputy HOD).** Search by name, admission number or phone (0712..., 712... and +254712... all work). Drop-downs go Department, then Course (all courses of the department are listed, with student counts), then Class, plus Intake and Status. Choosing a course shows the whole course grouped by class; choosing a class shows the whole class. Tap a student for the full profile, placement and trainer. Download what is on screen as Excel (one sheet per class) or CSV. Admin can also remove a mistaken register entry there.
+- **Placements.** Filters run Department, Region, County, Town, Place (organization), each list showing counts and narrowing the next. Students are grouped by town and place. Tick one student, a whole place or a whole town (or Select all shown), choose a trainer and press Assign. Each student, place and town also has a one-tap "Assign to..." drop-down. The default view is "Waiting for a trainer", so the list shrinks as you work. Trainers page shows each trainer's load and the towns they cover.
+- **Tidier towns.** Town names are saved in one spelling ("Nakuru Town" becomes NAKURU), and the student placement form suggests towns already used in the chosen county. Regions are the eight former provinces, worked out from the county.
+- **Less repetition.** The HOD page had two lists of the same placements, an unused access-code screen and about 100 lines of copied styling; the Admin Student database and Placements tabs had their own copies of the same search and Excel code. All now use the shared files `rvu.js`, `directory.js`, `placements.js` and `workspace.css`; `leader.js` drives both HOD pages.
+- New files: `deputy.html`, `leader.js`, `directory.js`, `placements.js`, `rvu.js`, `workspace.css`, `manifest-deputy.webmanifest`. Changed: `hod.html` (rewritten), `admin.html`, `auth.html`, `index.html`, `placement.html`, `api.mjs`, `sw.js` (cache v21). New API: `GET hod/directory`, `GET placement-towns`; sign-in accepts `as`. Admin's Placements tab stays view-and-remove (HOD and Deputy assign). Reps' pages (`ilo.html`) and the student dashboard were not changed.
+- Existing HOD and Deputy accounts keep working; no data is migrated. Redeploy all files together.
+
+
 ## Version 3.1: one consistent layout for every account
 
 - **Staff accounts (Admin, HOD / Deputy HOD, ILO Representative)** now share one app layout: a dark-green sidebar with grouped sections, a top bar showing where you are, and one section on screen at a time. On phones the sidebar opens from the menu button. Counts (for example pending accounts) show as badges, and zero counts are hidden.
@@ -57,6 +94,7 @@ The portal includes a unified responsive visual theme using RVNP navy, green and
 | admin.html | Admin page (open at `your-site/admin.html`) |
 | register.html | Page where students fill in their name, admission number, class and contact number (`your-site/register.html`) |
 | placement.html | Students tell the college where they were placed and see their trainer (`your-site/placement.html`) |
+| trainer.html | Trainer page: a trainer gives name, PF number, ID number, bank and branch, then downloads their list (`your-site/trainer.html?t=CODE`) |
 | hod.html | ILO HOD / deputy HOD page for adding trainers and assigning students (`your-site/hod.html`, needs an approved HOD / Deputy HOD account) |
 | marks.js | Marks panel (view, upload, download) used on the admin, HOD and ILO pages |
 | manifest.webmanifest, manifest-ilo.webmanifest, manifest-hod.webmanifest, sw.js, pwa.js, icon-192.png, icon-512.png, icon-maskable.png, apple-touch-icon.png | Make the portal installable as an app |

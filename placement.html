@@ -122,7 +122,7 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 <div class="full"><label for="lc">Where exactly is it?</label><input id="lc" placeholder="e.g. Njoro Road, near Naivas supermarket"><div class="hint">Give a clear description so a trainer can find it: the road or area and a landmark (near ...).</div></div>
 <div><label for="sp">Supervisor full name</label><input id="sp" placeholder="Name of your supervisor"></div>
 <div><label for="spt">Supervisor contact</label><input id="spt" type="tel" inputmode="tel" placeholder="07XX XXX XXX"></div>
-<div><label for="tw">Town</label><input id="tw" placeholder="e.g. Nakuru"></div>
+<div><label for="tw">Town</label><input id="tw" list="townlist" autocomplete="off" placeholder="e.g. Nakuru"><datalist id="townlist"></datalist><div class="hint">Pick your town from the suggestions when it is listed, so it is spelled the same for everyone.</div></div>
 <div><label for="county">County</label><select id="county"><option value="">Select county</option><option>Baringo</option><option>Bomet</option><option>Bungoma</option><option>Busia</option><option>Elgeyo-Marakwet</option><option>Embu</option><option>Garissa</option><option>Homa Bay</option><option>Isiolo</option><option>Kajiado</option><option>Kakamega</option><option>Kericho</option><option>Kiambu</option><option>Kilifi</option><option>Kirinyaga</option><option>Kisii</option><option>Kisumu</option><option>Kitui</option><option>Kwale</option><option>Laikipia</option><option>Lamu</option><option>Machakos</option><option>Makueni</option><option>Mandera</option><option>Marsabit</option><option>Meru</option><option>Migori</option><option>Mombasa</option><option>Murang’a</option><option>Nairobi</option><option>Nakuru</option><option>Nandi</option><option>Narok</option><option>Nyamira</option><option>Nyandarua</option><option>Nyeri</option><option>Samburu</option><option>Siaya</option><option>Taita-Taveta</option><option>Tana River</option><option>Tharaka-Nithi</option><option>Trans Nzoia</option><option>Turkana</option><option>Uasin Gishu</option><option>Vihiga</option><option>Wajir</option><option>West Pokot</option></select></div>
 </div>
 <div class="msg" id="m" role="status"></div>
@@ -162,4 +162,8 @@ async function loadTrainer(){var box=$("fr");try{var d=await api("placement-me")
 function esc(s){return String(s??"").replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
 setInterval(function(){if(typeof loadTrainer==="function"&&!document.hidden)loadTrainer()},45000);document.addEventListener("visibilitychange",function(){if(!document.hidden&&typeof loadTrainer==="function")loadTrainer()});
 </script><script src="/pwa.js" defer></script>
+<script>(function(){var m={},c=document.getElementById("county"),l=document.getElementById("townlist");
+function fill(){var t=m[c.value]||[];l.innerHTML=t.map(function(x){return '<option value="'+String(x).replace(/"/g,"&quot;")+'">'}).join("")}
+fetch("/api/placement-towns").then(function(r){return r.json()}).then(function(d){m=d.towns||{};fill()}).catch(function(){});
+c.addEventListener("change",fill)})();</script>
 </body></html>

@@ -1,0 +1,84 @@
+/* RVNP staff workspace: base form/button styles for the sidebar pages, plus the student directory, placements and trainers widgets.
+   Load after portal-theme.css and shell.css. */
+[hidden]{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+input,select,textarea{width:100%;padding:10px 12px;font:inherit;border:1px solid var(--bd);border-radius:9px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border:0;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;color:#fff;background:var(--ac)}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn.sec{background:var(--soft);color:var(--ink);border:1px solid var(--bd)}
+.btn.del{background:var(--erb);color:var(--er);min-height:36px;padding:4px 12px;font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.msg{margin-top:12px;padding:10px 13px;border-radius:9px;font-size:15px}.msg:empty{display:none}
+.msg.err{background:var(--erb);color:var(--er)}.msg.ok{background:var(--okb);color:var(--ok)}
+.hint{font-size:13px;color:var(--mut)}.lead{color:var(--mut);margin:0 0 14px}
+a.tel{color:inherit;font-weight:600;text-decoration:none}a.tel:hover{text-decoration:underline}
+.scroll{overflow:auto}table{width:100%;border-collapse:collapse}th{text-align:left}
+.lv-hello{margin:0 0 18px}.lv-hello h2{margin:0 0 4px;font-size:22px!important}.lv-hello p{margin:0;color:var(--mut)}
+.lv-quick{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px}
+.lv-bar{display:block;min-width:90px;height:8px;border-radius:99px;background:#e9efec;overflow:hidden}.lv-bar i{display:block;height:100%;background:linear-gradient(90deg,#176b4d,#e58a24)}
+.lv-act{display:flex;gap:6px;flex-wrap:wrap}.lv-act .btn{min-height:34px;padding:3px 11px;font-size:13px}
+
+/* ---- shared widgets ---- */
+.rv-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0 0 16px}
+.rv-chip{background:#fff;border:1px solid #e4eaf0;border-radius:14px;padding:14px 16px;box-shadow:0 4px 16px rgba(25,48,68,.04)}
+.rv-chip b{display:block;font-size:26px;line-height:1.1;color:#14382e}.rv-chip span{font-size:13px;color:#667789}
+.rv-chip.warn b{color:#b96512}.rv-chip.ok b{color:#176b45}
+.rv-fgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.rv-s3{grid-column:span 3}.rv-s2{grid-column:span 2}.rv-wide{grid-column:1/-1}
+@media(max-width:980px){.rv-fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.rv-s3,.rv-s2{grid-column:auto}}
+@media(max-width:520px){.rv-fgrid{grid-template-columns:1fr}}
+.rv-f label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#667789}
+.rv-crumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.rv-crumbs:empty{display:none}
+.rv-tag{border:1px solid #cfe0d4;background:#edf5ef;color:#14382e;border-radius:99px;padding:4px 11px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.rv-tag:hover{background:#fff1df;border-color:#e58a24}
+.rv-clear{border:0;background:none;color:#98500d;font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline}
+.rv-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.rv-count{font-weight:700;color:#14382e}.rv-btns{display:flex;gap:8px;flex-wrap:wrap}.rv-btns .btn{min-height:38px;padding:6px 14px;font-size:14px}
+.rv-list,.rp-list{background:#fff;border:1px solid #e4eaf0;border-radius:14px;overflow:hidden;margin-bottom:18px}
+.rv-empty{padding:26px 18px;text-align:center;color:#667789;margin:0}
+.rv-gh{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#eef5f1;color:#14382e;font-size:14px}.rv-gh span{color:#667789;font-size:13px}
+.rv-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.6fr) 120px minmax(0,1.3fr);gap:12px;align-items:center;width:100%;text-align:left;padding:12px 14px;background:#fff;border:0;border-bottom:1px solid #edf1f4;font:inherit;color:inherit;cursor:pointer}
+.rv-row:hover{background:#f6faf7}.rv-nm b{display:block}.rv-nm small,.rv-mid small{display:block;color:#718092}.rv-ph{font-size:14px;color:#425b72}
+@media(max-width:760px){.rv-row{grid-template-columns:1fr}.rv-ph{font-size:13px}}
+.rv-pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;background:#eef2f5;color:#51657a;margin:2px 4px 2px 0}
+.rv-pill.ok{background:#e4f3ea;color:#176b45}.rv-pill.warn{background:#fff1de;color:#98500d}
+.rv-more{padding:16px;text-align:center}.rv-more .hint{display:block;margin-top:8px}
+.rv-dlg{width:min(580px,calc(100% - 24px));max-height:88vh;padding:20px}.rv-dlg::backdrop{background:rgba(10,25,18,.5)}
+.rv-dh{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}.rv-dh h3{margin:0}
+.rv-dsec{margin-top:14px}.rv-dsec h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#667789}
+.rv-kv{display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px dashed #e4eaf0;font-size:14px}.rv-kv span{color:#667789}.rv-kv b{text-align:right;font-weight:600}
+
+/* ---- placements: assign view ---- */
+.rp-tabs{display:inline-flex;gap:4px;padding:4px;background:#edf2ef;border-radius:12px;margin:0 0 16px}
+.rp-tabs button{border:0;background:none;padding:9px 18px;border-radius:9px;font:inherit;font-weight:650;color:#425b72;cursor:pointer}.rp-tabs button.on{background:#fff;color:#14382e;box-shadow:0 2px 8px rgba(25,48,68,.1)}
+.rp-gh{display:flex;align-items:center;gap:12px;padding:10px 14px}
+.rp-town{background:#123b31;color:#fff}.rp-town small{color:#b5d3c4}.rp-place{background:#eef5f1;padding-left:28px}
+.rp-gt{flex:1;min-width:0}.rp-gt b{display:block}.rp-gt small{display:block;font-size:12px;color:#667789}
+.rp-gs{width:auto;max-width:190px;min-height:36px!important;padding:4px 8px;font-size:13px}
+.rp-row{display:flex;gap:12px;padding:12px 14px 12px 28px;border-bottom:1px solid #edf1f4;align-items:flex-start}.rp-row.sel{background:#f1f8f4}
+.rp-main{flex:1;min-width:0}.rp-main small{color:#718092}.rp-sub{font-size:13px;color:#52667a;margin-top:2px}
+.rp-side{display:flex;flex-direction:column;gap:6px;align-items:flex-end;min-width:170px}.rp-one{min-height:36px!important;padding:4px 8px;font-size:13px}
+.sh-content .rp-ck input{width:20px!important;height:20px;min-height:20px!important;margin:2px 0 0;accent-color:#176b4d}.rp-ck{display:block;margin:0;flex:none}
+@media(max-width:700px){.rp-row{flex-wrap:wrap;padding-left:14px}.rp-side{flex-direction:row;align-items:center;min-width:0;width:100%;justify-content:space-between}.rp-place{padding-left:14px}.rp-gs{max-width:140px}}
+.rp-bar{position:sticky;bottom:10px;z-index:50;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 14px;background:#123b31;color:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(10,30,22,.35)}
+.rp-bar select{flex:1;min-width:180px;width:auto}.rp-bar .btn.sec{background:rgba(255,255,255,.12)!important;color:#fff!important;border-color:rgba(255,255,255,.25)!important}
+/* ---- trainers ---- */
+.rp-trs{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;margin-bottom:16px}.rp-trs .card{margin:0!important}
+.rp-th{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.rp-th b{font-size:16px}
+.rp-load{height:8px;background:#e9efec;border-radius:99px;overflow:hidden;margin:12px 0}.rp-load i{display:block;height:100%;background:linear-gradient(90deg,#176b4d,#e58a24)}
+.rp-towns{display:flex;flex-wrap:wrap;gap:6px}.rp-towns span{background:#f1f6f3;border-radius:99px;padding:2px 10px;font-size:12px;color:#425b72}
+/* classes used by the marks and memo panels */
+.actions{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.card2{border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-top:10px;background:var(--card)}.card2 b{display:block;font-size:16px}
+.mut{color:var(--mut);font-size:14px}.reqbox{margin-top:18px;padding-top:16px;border-top:1px solid var(--bd)}.full{grid-column:1/-1}
+textarea{min-height:120px;resize:vertical}
+@media(max-width:700px){.rp-bar{bottom:68px}}
+/* ---- trainer details and messages ---- */
+.rp-sm{min-height:36px!important;padding:4px 12px!important;font-size:14px!important;text-decoration:none}
+.rp-warn{color:#98500d;margin:6px 0}
+.rp-det{margin:8px 0;border:1px solid var(--bd);border-radius:9px;padding:6px 10px;background:var(--card)}
+.rp-det summary{cursor:pointer;font-weight:600;font-size:14px}
+.rp-det dl{display:grid;grid-template-columns:110px 1fr;gap:3px 10px;margin:8px 0 2px;font-size:14px}.rp-det dt{color:var(--mut)}.rp-det dd{margin:0;font-weight:600;word-break:break-word}
+.rp-tcard .row{gap:8px}
