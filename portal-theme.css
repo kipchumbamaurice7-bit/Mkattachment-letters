@@ -1,8 +1,8 @@
 /* RVNP Industrial Attachment Portal — unified visual refresh */
 :root{
-  --bg:#f7f8f6 !important;--card:#ffffff !important;--ink:#203247 !important;
-  --mut:#687789 !important;--ac:#176b45 !important;--acd:#105238 !important;
-  --soft:#edf5ef !important;--bd:#e2e6e2 !important;--in:#fff !important;
+  --bg:#f7f8f6 !important;--card:#ffffff !important;--ink:#16324b !important;
+  --mut:#5b6b7d !important;--ac:#176b45 !important;--acd:#105238 !important;
+  --soft:#edf5ef !important;--bd:#dbe3dd !important;--in:#fff !important;
   --ok:#176b45 !important;--okb:#edf5ef !important;--er:#a52b2b !important;
   --erb:#fff0ef !important;--on:#fff !important;--or:#e58a24 !important;
   --orb:#fff3e5 !important;--ord:#98500d !important;

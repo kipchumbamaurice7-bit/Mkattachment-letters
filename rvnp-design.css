@@ -1,0 +1,53 @@
+/* RVNP design system: see DESIGN.md. Loaded last on every portal page. */
+:root{--navy:#16324b}
+body{font-size:16px}
+h1,h2,h3{color:var(--navy)}
+.card,.panel{border-radius:16px!important;box-shadow:0 1px 3px rgba(22,50,75,.06),0 8px 24px rgba(22,50,75,.05)!important}
+.btn{background:var(--ac);color:#fff;border-radius:10px;font-weight:650;box-shadow:0 1px 2px rgba(22,50,75,.2);transition:background .15s,border-color .15s}
+.btn:hover{background:var(--acd)}
+.btn.sec{background:#fff;color:var(--navy);border:1px solid #c9d5cf;box-shadow:none}
+.btn.sec:hover{background:var(--soft);border-color:var(--ac)}
+.btn.del{background:#fff;color:var(--er);border:1px solid #efc9c6;box-shadow:none}.btn.del:hover{background:var(--erb)}
+.btn.ok{background:#fff;color:var(--ok);border:1px solid #bddac8;box-shadow:none}.btn.ok:hover{background:var(--okb)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #f3b977;outline-offset:2px}
+input,select,textarea{border:1px solid #c9d5cf;border-radius:10px;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(23,107,69,.18)}
+th{background:#f1f6f2!important;color:var(--navy)!important;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+tbody tr:hover td{background:#f8fbf8}
+td,th{padding:10px 12px}
+.badge{background:var(--or)!important;color:#16324b!important;font-weight:700}
+.subtabs button{border:1px solid #c9d5cf;background:#fff;color:var(--navy);transition:background .15s}
+.subtabs button:hover{background:var(--soft)}
+.subtabs button[aria-selected="true"]{background:var(--ac);border-color:var(--ac);color:#fff}
+.dwel{background:var(--navy)!important;border-bottom:4px solid var(--or)}
+.dwel h1{color:#fff!important}.dwel .lead{color:#c9d8e6!important}.dwel .btn.sec{background:#fff;color:var(--navy)}
+.st{border-top-color:var(--ac);box-shadow:0 1px 3px rgba(22,50,75,.06)}.st.or{border-top-color:var(--or)}
+.st:hover{box-shadow:0 6px 18px rgba(22,50,75,.12)}
+.qi:hover{border-color:var(--ac);background:var(--soft)}
+.bar i{background:var(--ac)}.bar.o i{background:var(--or)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* ---- Option B: dark green sidebar, orange selection, navy banner ---- */
+:root{--sh-side:#102f27;--sh-side2:#102f27;--sh-ac:#e58a24;--rv-bg:#f4f7fa}
+.sh-side{background:#102f27!important;box-shadow:none!important}
+.sh-mark{background:#e58a24!important;color:#16324b!important;box-shadow:none!important}
+.sh-brand b{color:#fff}.sh-brand small{color:#a9c9b7!important}
+.sh-user{background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.1)!important}
+.sh-grp{color:#8fb3a2!important}
+.sh-item,.sh-nav .tab{color:#d7e6df!important}
+.sh-item:hover,.sh-nav .tab:hover{background:rgba(255,255,255,.1)!important;color:#fff!important}
+.sh-item[aria-selected="true"],.sh-nav .tab[aria-selected="true"]{background:#e58a24!important;color:#16324b!important;box-shadow:none!important;font-weight:700!important}
+.sh-nav .badge,.sh-item .badge{background:#e58a24!important;color:#16324b!important}
+.sh-nav .tab[aria-selected="true"] .badge{background:#16324b!important;color:#fff!important}
+.sh-top{background:#fff!important;border-bottom:1px solid #dbe3dd!important;box-shadow:none!important;backdrop-filter:none}
+.sh-title b{color:var(--navy)!important}
+body.sh-on{background:#f4f7fa!important}
+/* student and placement pages use a top bar instead of a sidebar: same identity */
+.tb{background:#102f27!important;border-bottom:3px solid #e58a24!important;box-shadow:none!important}
+.tb-brand b{color:#fff}.tb-brand small{color:#a9c9b7!important}
+.tb-mark{background:#e58a24!important;color:#16324b!important}
+/* statistic cards: coloured top edge, white body */
+.st{background:#fff;border:0;border-top:3px solid var(--ac);border-radius:10px}
+.st.or{border-top-color:var(--or)}
+.dwel{border-radius:12px}
