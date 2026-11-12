@@ -157,8 +157,9 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 </section>
 <div class="actions" style="justify-content:center"><button class="btn sec" id="signout" type="button">Sign out</button></div><footer>Your submission goes to the Industrial Liaison Office for approval. It does not change student letters until approved.</footer>
 </div>
+<script src="/guard.js"></script>
 <script>
-var USER_TOKEN=sessionStorage.getItem("rvnp_user");
+var USER_TOKEN=RVGuard.token(["rep"]);
 if(!USER_TOKEN){location.replace("/auth.html?role=staff");throw new Error("Staff sign-in required");}
 var _fetch=window.fetch;window.fetch=function(url,opt){opt=opt||{};if(String(url).indexOf("/api/")===0){opt.headers=Object.assign({"Authorization":"Bearer "+USER_TOKEN},opt.headers||{})}return _fetch(url,opt)};
 var $=function(i){return document.getElementById(i)},ALL=[];
@@ -239,7 +240,7 @@ $("signout").onclick=function(){sessionStorage.removeItem("rvnp_user");sessionSt
 RVShell.mount({root:root,brand:{letter:"I",name:"ILO Representative",sub:"Industrial Liaison Office"},title:"Units covered",
  hide:["header",".rolebar",".dashboard-subtitle",".wrap > .actions"],
  userLine:"<b>ILO Representative</b>"+(t.dept||"Your department"),
- top:[{href:"/feedback.html",icon:"inbox",label:"Student feedback"}],
+ top:[{href:"/staff-feedback.html",icon:"inbox",label:"Student feedback"}],
  signOut:function(){document.getElementById("signout").click()},
  groups:[
   {label:"Attachment",items:[{view:secs[0],key:"units",icon:"list",label:"Units covered"}]},

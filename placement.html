@@ -137,8 +137,9 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 </section>
 <footer>Questions? See the Industrial Liaison Office.</footer>
 </div>
+<script src="/guard.js"></script>
 <script>
-var $=function(i){return document.getElementById(i)},ALL=[],USER_TOKEN=sessionStorage.getItem("rvnp_user")||localStorage.getItem("rvnp_student");
+var $=function(i){return document.getElementById(i)},ALL=[],USER_TOKEN=RVGuard.token(["student"]);
 function say(c,t){var m=$("m");m.className="msg"+(c?" "+c:"");m.textContent=t||""}
 function api(path,opt){opt=opt||{};opt.headers=Object.assign({"Authorization":"Bearer "+USER_TOKEN},opt.headers||{});return fetch("/api/"+path,opt).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||"Request failed");return d})})}
 if(!USER_TOKEN){location.replace("/auth.html?role=student")}

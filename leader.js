@@ -6,6 +6,7 @@
   var ROLE = window.LEADER_ROLE === "deputy" ? "deputy" : "hod", U = window.RVU, esc = U.esc;
   var ME = { hod: { full: "ILO HOD", letter: "H", other: "/deputy.html" }, deputy: { full: "Deputy HOD", letter: "D", other: "/hod.html" } }[ROLE];
   var TOKEN = sessionStorage.getItem("rvnp_user"), info = RVShell.tokenInfo();
+  if (window.RVGuard && TOKEN && !RVGuard.token(["hod", "deputy", "rep", "student"])) TOKEN = "";
   var back = function () { try { sessionStorage.removeItem("rvnp_user"); sessionStorage.removeItem("rvnp_user_role"); } catch (e) {} location.replace("/auth.html?role=staff&as=" + ROLE); };
 
   if (!TOKEN) { back(); return; }

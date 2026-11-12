@@ -295,12 +295,13 @@ header h1:after{content:"";display:block;width:64px;height:4px;border-radius:3px
 
 <form name="attachment-log" data-netlify="true" hidden><input name="document"><input name="insurance"><input name="name"><input name="admission"><input name="course"><input name="tel"><input name="email"></form>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="/guard.js"></script>
 <script>
 /* course key: [course title, % of coursework covered, units] -- loaded from the admin site */
 var C={};
 var SETTINGS={policyNumber:"",insurer:"",policyStart:"2000-01-01",policyEnd:"2000-01-01",issueDate:"2000-01-01"};
 var COVER_BG="cover_bg.jpg";
-var USER_TOKEN=sessionStorage.getItem("rvnp_user")||localStorage.getItem("rvnp_student");
+var USER_TOKEN=RVGuard.token(["student"]);
 try{var up=JSON.parse(atob(USER_TOKEN.split(".")[0].replace(/-/g,"+").replace(/_/g,"/")));document.getElementById("who").textContent="Signed in securely";}catch(e){}
 if(!USER_TOKEN){location.replace("/auth.html?role=student");throw new Error("Student sign-in required");}
 function api(path,opt){opt=opt||{};opt.headers=Object.assign({"Authorization":"Bearer "+USER_TOKEN},opt.headers||{});return fetch("/api/"+path,opt).then(function(r){return r.json()})}
